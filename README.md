@@ -1,5 +1,3 @@
-# Bienvenida al curso
+# Francisco Agüero (elpanxo)
 
-hola Soy andy
-
-Hola soy Cami!
+holaa
