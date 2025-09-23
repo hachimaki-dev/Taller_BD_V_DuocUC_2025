@@ -1,5 +1,5 @@
-# PL/SQL
-## Aprende Procedimientos y Funciones
+# Tutorial de PL/SQL para Principiantes
+## Aprende Procedimientos y Funciones desde Cero
 
 ---
 
@@ -43,9 +43,22 @@ SELECT titulo FROM libros WHERE genero = 'Fantasía';
 
 Antes de cocinar, necesitamos ingredientes. Nuestra "cocina" será una base de datos simple de una biblioteca con libros de fantasía, ciencia ficción y otros géneros.
 
-### Nuestras 3 "cajas" de información:
+### Script completo para crear nuestra base de datos desde cero:
+
+**¡IMPORTANTE!** Copia y ejecuta este script completo. Primero limpia todo lo anterior y luego crea las tablas nuevas con datos frescos.
 
 ```sql
+-- =====================================================
+-- SCRIPT DE LIMPIEZA Y CREACIÓN DE BASE DE DATOS
+-- =====================================================
+
+-- Paso 1: Eliminar tablas si ya existen (en orden correcto por las relaciones)
+DROP TABLE PRESTAMOS CASCADE CONSTRAINTS;
+DROP TABLE LIBROS CASCADE CONSTRAINTS;
+DROP TABLE GENEROS CASCADE CONSTRAINTS;
+
+-- Paso 2: Crear nuestras 3 "cajas" de información
+
 -- Caja 1: GENEROS (tipos de libros)
 CREATE TABLE GENEROS (
     id_genero NUMBER PRIMARY KEY,
@@ -73,26 +86,43 @@ CREATE TABLE PRESTAMOS (
     devuelto CHAR(1) DEFAULT 'N',
     CONSTRAINT fk_prestamo_libro FOREIGN KEY (id_libro) REFERENCES LIBROS(id_libro)
 );
-```
 
-### Llenamos nuestras cajas con información:
+-- Paso 3: Llenar las tablas con información (¡EN EL ORDEN CORRECTO!)
 
-```sql
--- Géneros de libros
+-- PRIMERO: Géneros de libros (deben existir antes que los libros)
 INSERT INTO GENEROS VALUES (1, 'Fantasía', 'Mundos mágicos y criaturas extraordinarias');
 INSERT INTO GENEROS VALUES (2, 'Ciencia Ficción', 'Tecnología y futuros posibles');
 INSERT INTO GENEROS VALUES (3, 'Terror', 'Historias que dan miedo');
 
--- Algunos libros famosos
+-- SEGUNDO: Algunos libros famosos (ahora sí pueden referenciar géneros existentes)
 INSERT INTO LIBROS VALUES (1, 'El Hobbit', 'J.R.R. Tolkien', 1, 1937, 'S');
 INSERT INTO LIBROS VALUES (2, 'Dune', 'Frank Herbert', 2, 1965, 'S');
 INSERT INTO LIBROS VALUES (3, 'El Resplandor', 'Stephen King', 3, 1977, 'S');
 INSERT INTO LIBROS VALUES (4, 'Fundación', 'Isaac Asimov', 2, 1951, 'N');
 
--- Algunos préstamos
+-- TERCERO: Algunos préstamos (ahora sí pueden referenciar libros existentes)
 INSERT INTO PRESTAMOS VALUES (1, 4, 'Ana García', TO_DATE('2024-01-15', 'YYYY-MM-DD'), 'N');
 INSERT INTO PRESTAMOS VALUES (2, 1, 'Carlos López', TO_DATE('2024-02-01', 'YYYY-MM-DD'), 'N');
+
+-- Paso 4: Verificar que todo se creó correctamente
+SELECT 'Géneros creados: ' || COUNT(*) as resultado FROM GENEROS;
+SELECT 'Libros creados: ' || COUNT(*) as resultado FROM LIBROS;
+SELECT 'Préstamos creados: ' || COUNT(*) as resultado FROM PRESTAMOS;
+
+-- ¡Listo! Ya tienes tu base de datos limpia y funcionando
 ```
+
+### ¿Por qué ocurrieron esos errores?
+
+Los errores que viste son muy comunes y educativos:
+
+1. **ORA-02291 (parent key not found)**: Ocurrió porque trataste de insertar libros que referencian géneros que no existían aún. Es como tratar de poner un libro en un estante que no has construido.
+
+2. **ORA-00001 (unique constraint violated)**: Ocurrió porque trataste de insertar registros con IDs que ya existían en las tablas. Es como tratar de usar el mismo número de cédula para dos personas diferentes.
+
+### Lección importante:
+**Siempre insertar datos en el orden correcto**: Padres primero, luego hijos.
+- GENEROS (padres) → LIBROS (hijos) → PRESTAMOS (nietos)
 
 ---
 
@@ -378,13 +408,29 @@ END mostrar_info_libro;
 
 ### Usando el procedimiento:
 
+**¡IMPORTANTE!** Después de crear el procedimiento, debes ejecutarlo en un bloque separado:
+
 ```sql
+-- PASO 1: Primero ejecuta solo la creación del procedimiento
+-- (El código del CREATE OR REPLACE PROCEDURE... va solo)
+
+-- PASO 2: Después, en un bloque separado, ejecuta las llamadas:
 BEGIN
     mostrar_info_libro(1);  -- Mostrará "El Hobbit"
     mostrar_info_libro(2);  -- Mostrará "Dune"
     mostrar_info_libro(99); -- Mostrará error
 END;
 ```
+
+### ¿Por qué este error es común?
+
+- **CREATE PROCEDURE** es una instrucción DDL (Data Definition Language) que define/crea el procedimiento
+- **BEGIN...END** es una instrucción DML que ejecuta código
+- Oracle procesa estas instrucciones de forma diferente y no pueden ir juntas en el mismo bloque
+
+### La regla simple:
+1. Ejecuta el CREATE PROCEDURE completo (desde CREATE hasta el último END)
+2. Luego, por separado, ejecuta tus llamadas al procedimiento
 
 ### ¿Qué son IN, OUT y IN OUT?
 
@@ -799,3 +845,4 @@ END;
 5. **Parámetros**: Cómo enviar información a procedimientos y funciones
 6. **Interacción con BD**: SELECT INTO, INSERT, UPDATE
 7. **Manejo de errores**: Qué hacer cuando algo sale mal
+
