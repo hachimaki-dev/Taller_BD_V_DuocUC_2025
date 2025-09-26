@@ -1,4 +1,5 @@
 -- Excepciones predefinidas
+--NO DATA FOUND
 DECLARE
     v_precio NUMBER;
     e_precio_invalido EXCEPTION; -- (para otro ejemplo abajo)
@@ -11,6 +12,7 @@ EXCEPTION
 END;
 /
 
+--DUP_VAL_ON_INDEX (DUPLICADOS)
 BEGIN
     -- Intentar insertar un usuario con un ID que ya existe
     INSERT INTO USUARIOS (
@@ -27,6 +29,7 @@ EXCEPTION
 END;
 /
 
+--TOO_MANY_ROWS (SE DEVUELVEN MÁS DE UNA FILA)
 DECLARE
     v_nombre VARCHAR2(50);
 BEGIN

@@ -1,7 +1,3 @@
-/* =====================================================
-   4) PAQUETE CON FUNCIONES Y PROCEDIMIENTOS
-   ===================================================== */
--- Especificación del paquete: qué se expone al exterior
 CREATE OR REPLACE PACKAGE pkg_inicial AS
     -- Funciones
     FUNCTION fn_contar_ofertas(p_tipo VARCHAR2) RETURN NUMBER;

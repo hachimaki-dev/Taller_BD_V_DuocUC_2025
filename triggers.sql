@@ -1,6 +1,3 @@
-/* =====================================================
-   5) TRIGGERS (2 ejemplos sencillos)
-   ===================================================== */
 -- Trigger 1: antes de insertar un usuario
 -- Si no se asigna fecha de registro, se completa automáticamente
 CREATE OR REPLACE TRIGGER trg_usuarios_bi
