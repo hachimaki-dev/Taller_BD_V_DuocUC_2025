@@ -1,0 +1,25 @@
+-- Insertar un nuevo usuario sin fecha
+INSERT INTO USUARIOS (ID_USUARIO, NOMBRE_USUARIO, EMAIL, PASSWORD_HASH, CIUDAD, PAIS)
+VALUES (11, 'TEST_TRIGGER', 'trigger@test.com', 'hash999', 'VALENCIA', 'ESPANA');
+
+-- Revisar que la fecha se asignó automáticamente
+SELECT ID_USUARIO, NOMBRE_USUARIO, FECHA_REGISTRO 
+FROM USUARIOS 
+WHERE ID_USUARIO = 11;
+
+
+-- Intento válido: tipo TRUEQUE (precio puede ser NULL)
+INSERT INTO OFERTAS (ID_OFERTA, ID_COLECCION, TIPO_OFERTA, PRECIO, ESTADO_OFERTA, FECHA_CREACION)
+VALUES (11, 1, 'TRUEQUE', NULL, 'ACTIVA', SYSDATE);
+
+-- Intento inválido: tipo VENTA sin precio → debería disparar el trigger y dar error
+BEGIN
+    INSERT INTO OFERTAS (ID_OFERTA, ID_COLECCION, TIPO_OFERTA, PRECIO, ESTADO_OFERTA, FECHA_CREACION)
+    VALUES (12, 2, 'VENTA', NULL, 'ACTIVA', SYSDATE);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error capturado por trigger: ' || SQLERRM);
+END;
+/
+
+
