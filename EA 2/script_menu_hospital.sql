@@ -1,0 +1,115 @@
+--Dropeamos todas las tablas
+DROP TABLE MENUS;
+DROP TABLE PLATILLOS;
+DROP TABLE TIPO_INGREDIENTES;
+DROP TABLE INGREDIENTES;
+DROP TABLE MENU_PLATILLOS;
+DROP TABLE INGREDIENTES_PLATILLOS;
+DROP TABLE AUDITORIA_MENU;
+
+
+--Creamos tabla menu
+
+CREATE TABLE MENUS(
+    id NUMBER PRIMARY KEY,
+    nombre VARCHAR2(50) NOT NULL
+);
+
+--Creamos la tabla
+CREATE TABLE PLATILLOS(
+    id NUMBER PRIMARY KEY,
+    nombre VARCHAR2(50) NOT NULL
+);
+
+--CREAMOS LA TABLA TIPO_INGREDIENTES
+CREATE TABLE TIPO_INGREDIENTES(
+    id NUMBER PRIMARY KEY,
+    nombre VARCHAR2(50) NOT NULL
+);
+
+--Ahora vamos con las tablas pivotes o las relaciones 1 n
+
+--Vamos con la tabla que tiene relacion 1 n
+CREATE TABLE INGREDIENTES(
+    id NUMBER PRIMARY KEY,
+    nombre VARCHAR2(50) NOT NULL,
+    id_tipo_ingrediente NUMBER,
+    FOREIGN KEY (id_tipo_ingrediente) REFERENCES TIPO_INGREDIENTES(id)
+);
+
+--CREAMOS LA TABLA PIVOTE
+CREATE TABLE MENU_PLATILLOS(
+    id_menu NUMBER,
+    id_platillo NUMBER,
+    PRIMARY KEY (id_menu, id_platillo),
+    FOREIGN KEY (id_menu) REFERENCES MENUS(id),
+    FOREIGN KEY (id_platillo) REFERENCES PLATILLOS(id)
+);
+
+CREATE TABLE INGREDIENTES_PLATILLOS(
+    id_ingrediente NUMBER,
+    id_platillo NUMBER,
+    PRIMARY KEY (id_ingrediente, id_platillo),
+    FOREIGN KEY (id_ingrediente) REFERENCES INGREDIENTES(id),
+    FOREIGN KEY (id_platillo) REFERENCES PLATILLOS(id)
+);
+
+COMMIT;
+
+
+--CREAREMOS EL TRIGGER PARA AUDITAR LOS MENUS
+
+CREATE TABLE AUDITORIA_MENU(
+    id NUMBER PRIMARY KEY,
+    id_menu NUMBER,
+    tipo_accion VARCHAR2(20),
+    valor_antiguo VARCHAR2(50),
+    valor_nuevo VARCHAR2(50),
+    fecha DATE,
+    usuario VARCHAR(50),
+    FOREIGN KEY (id_menu) REFERENCES MENUS(id)
+);
+
+--CREEMOS EL TRIGGER PARA PODER AUDITAR LA INSERCION DE UN NUEVO MENU
+
+CREATE SEQUENCE seq_menus START WITH 1 INCREMENT by 1; 
+
+CREATE OR REPLACE TRIGGER trg_auditar_menu
+    AFTER INSERT ON MENUS
+        FOR EACH ROW
+            BEGIN
+                INSERT INTO AUDITORIA_MENU(id, ID_MENU, TIPO_ACCION, valor_antiguo, valor_nuevo, FECHA, USUARIO) VALUES(seq_menus.NEXTVAL, :NEW.id, 'INSERT', :OLD.nombre, :NEW.nombre, SYSDATE, USER);
+            END;
+            /
+
+
+--Simulemos que el trigger se dispara
+INSERT INTO MENUS(id, NOMBRE) VALUES(1, 'POLLO A LA PLANCHA');
+INSERT INTO MENUS(id, NOMBRE) VALUES(2, 'ESPAGUETI');
+INSERT INTO MENUS(id, NOMBRE) VALUES(3, 'CARNECITA');
+
+COMMIT;
+
+
+--CREEMOS UN TRIGGER QUE SE EJECUTE CUANDO UN MENU SE MODIFICA
+
+CREATE OR REPLACE TRIGGER trg_auditar_update_menu
+    AFTER UPDATE ON MENUS
+        FOR EACH ROW
+            BEGIN
+                INSERT INTO AUDITORIA_MENU(id, ID_MENU, TIPO_ACCION, valor_antiguo, valor_nuevo, FECHA, USUARIO)
+                VALUES (seq_menus.NEXTVAL, :NEW.id, 'UPDATE', :OLD.nombre, :NEW.nombre, SYSDATE, USER );
+            END;
+            /
+
+--SIMULAMOS LA ACTUALIZACIÖN
+UPDATE MENUS
+SET nombre = 'CHORILLANA' 
+WHERE id = 1;
+COMMIT;
+
+
+
+
+
+
