@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial PL/SQL - Sistema Hospitalario | Guía del Profesor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <style>
+        .section-card {
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .timer-bar {
+            transition: width 0.3s ease;
+        }
+        pre[class*="language-"] {
+            margin: 0;
+            border-radius: 0.5rem;
+        }
+        .copy-button {
+            transition: all 0.2s;
+        }
+        .copy-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-8">
+            <h1 class="text-4xl font-bold mb-2">🏥 Sistema de Gestión Hospitalaria</h1>
+            <p class="text-xl opacity-90">Tutorial PL/SQL: Paquetes y Triggers | Guía del Profesor</p>
+            <div class="mt-4 bg-white/20 rounded-lg p-4">
+                <p class="text-sm">⏱️ Duración: 30 minutos | 👥 Nivel: Intermedio | 📚 Tema: Paquetes y Triggers en Oracle</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Index -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="#intro" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">📋 Introducción</a>
+                <a href="#modificacion" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition">🔧 Modificación BD</a>
+                <a href="#paquete" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition">📦 Paquete Inventario</a>
+                <a href="#trigger" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition">⚡ Trigger Auditoría</a>
+                <a href="#avanzado" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition">🚀 Conceptos Avanzados</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-8">
+        
+        <!-- Introducción -->
+        <section id="intro" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">📋</span>
+                    Introducción al Sistema
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+                        <h3 class="font-bold text-lg text-blue-800 mb-3">🎯 Objetivos de la Sesión</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>✅ Modificar estructura de BD para mejorar funcionalidad</li>
+                            <li>✅ Crear un paquete completo con funciones y procedimientos</li>
+                            <li>✅ Implementar trigger de auditoría</li>
+                            <li>✅ Aplicar buenas prácticas en PL/SQL</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+                        <h3 class="font-bold text-lg text-green-800 mb-3">🏥 Contexto del Sistema</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>• Sistema de gestión de alimentación <strong>hospitalaria</strong></li>
+                            <li>• Menús asignados a pacientes según enfermedades</li>
+                            <li>• Control de inventario de ingredientes</li>
+                            <li>• <strong>NO hay ventas ni costos</strong> (no es restaurante)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
+                    <h3 class="font-bold text-lg text-yellow-800 mb-3">💡 Puntos Clave a Enfatizar</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong>1.</strong> La importancia de las cantidades específicas en recetas hospitalarias</li>
+                        <li><strong>2.</strong> Diferencia entre especificación y cuerpo de un paquete</li>
+                        <li><strong>3.</strong> Uso de cursores para iterar sobre relaciones muchos a muchos</li>
+                        <li><strong>4.</strong> :OLD y :NEW en triggers para auditoría</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 1: Modificación de BD -->
+        <section id="modificacion" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8 section-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">🔧</span>
+                        Parte 1: Modificación de Base de Datos
+                    </h2>
+                    <div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+                        ⏱️ 5 minutos
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-gray-700"><strong>🎯 Objetivo:</strong> Agregar columnas de cantidad y unidad de medida a la tabla pivote INGREDIENTES_PLATILLOS para especificar cuánto de cada ingrediente se usa en cada platillo.</p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">📚 Explicación</h3>
+                    <p class="text-gray-700 mb-4">
+                        Actualmente, la tabla <code class="bg-gray-100 px-2 py-1 rounded">INGREDIENTES_PLATILLOS</code> solo indica QUÉ ingredientes usa cada platillo, pero no CUÁNTO. 
+                        En un contexto hospitalario, esto es crítico porque necesitamos:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                        <li>Calcular cuántas porciones podemos preparar con el stock disponible</li>
+                        <li>Descontar cantidades exactas del inventario al preparar comidas</li>
+                        <li>Proyectar necesidades de reabastecimiento con precisión</li>
+                    </ul>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center justify-between">
+                        <span>💻 Código SQL</span>
+                        <button onclick="copyCode('code1')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600">
+                            📋 Copiar
+                        </button>
+                    </h3>
+                    <pre id="code1"><code class="language-sql">-- Paso 1: Agregar las columnas necesarias
+ALTER TABLE INGREDIENTES_PLATILLOS 
+ADD (
+    cantidad NUMBER(10,2),
+    unidad_medida VARCHAR2(10)
+);
+
+-- Paso 2: Actualizar los registros existentes con cantidades realistas
+-- Ensalada César (ID 10)
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 150, unidad_medida = 'g' 
+WHERE id_ingrediente = 2 AND id_platillo = 10; -- Lechuga
+
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 100, unidad_medida = 'g' 
+WHERE id_ingrediente = 1 AND id_platillo = 10; -- Tomate
+
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 50, unidad_medida = 'g' 
+WHERE id_ingrediente = 6 AND id_platillo = 10; -- Queso
+
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 20, unidad_medida = 'ml' 
+WHERE id_ingrediente = 11 AND id_platillo = 10; -- Aceite
+
+-- Pollo a la Plancha (ID 11)
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 200, unidad_medida = 'g' 
+WHERE id_ingrediente = 4 AND id_platillo = 11; -- Pollo
+
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 5, unidad_medida = 'g' 
+WHERE id_ingrediente = 10 AND id_platillo = 11; -- Sal
+
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 15, unidad_medida = 'ml' 
+WHERE id_ingrediente = 11 AND id_platillo = 11; -- Aceite
+
+-- Pasta Alfredo (ID 12)
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 150, unidad_medida = 'g' 
+WHERE id_ingrediente = 9 AND id_platillo = 12; -- Pasta
+
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 80, unidad_medida = 'g' 
+WHERE id_ingrediente = 6 AND id_platillo = 12; -- Queso
+
+UPDATE INGREDIENTES_PLATILLOS SET cantidad = 100, unidad_medida = 'ml' 
+WHERE id_ingrediente = 7 AND id_platillo = 12; -- Leche
+
+COMMIT;
+
+-- Verificar los cambios
+SELECT p.nombre AS platillo, i.nombre AS ingrediente, 
+       ip.cantidad, ip.unidad_medida
+FROM INGREDIENTES_PLATILLOS ip
+JOIN PLATILLOS p ON ip.id_platillo = p.id
+JOIN INGREDIENTES i ON ip.id_ingrediente = i.id
+ORDER BY p.nombre, i.nombre;</code></pre>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                    <h4 class="font-bold text-yellow-800 mb-2">⚠️ Importante mencionar a los estudiantes:</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        <li>• Las cantidades son por <strong>porción individual</strong></li>
+                        <li>• Las unidades deben ser consistentes con las del stock (kg, L, g, ml)</li>
+                        <li>• En un sistema real, esto vendría de un análisis nutricional</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 2: Paquete de Inventario -->
+        <section id="paquete" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8 section-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-purple-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">📦</span>
+                        Parte 2: Paquete de Gestión de Inventario
+                    </h2>
+                    <div class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-semibold">
+                        ⏱️ 20 minutos
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                    <p class="text-gray-700"><strong>🎯 Objetivo:</strong> Crear un paquete completo que gestione el inventario de ingredientes, verificando disponibilidad, calculando porciones posibles y consumiendo stock.</p>
+                </div>
+
+                <!-- Especificación del Paquete -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">📋 A) Especificación del Paquete</h3>
+                    <p class="text-gray-700 mb-4">
+                        La <strong>especificación</strong> es la "interfaz pública" del paquete. Define QUÉ funciones y procedimientos están disponibles para otros usuarios, 
+                        pero NO cómo funcionan internamente.
+                    </p>
+                    
+                    <div class="mb-4">
+                        <button onclick="copyCode('code2')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                            📋 Copiar
+                        </button>
+                        <pre id="code2"><code class="language-sql">CREATE OR REPLACE PACKAGE PKG_GESTION_INVENTARIO AS
+    
+    -- Función que verifica si hay stock suficiente para preparar un platillo
+    FUNCTION verificar_disponibilidad_platillo(
+        p_id_platillo NUMBER,
+        p_porciones NUMBER
+    ) RETURN BOOLEAN;
+    
+    -- Función que calcula cuántas porciones se pueden preparar con el stock actual
+    FUNCTION calcular_porciones_disponibles(
+        p_id_platillo NUMBER
+    ) RETURN NUMBER;
+    
+    -- Procedimiento que descuenta ingredientes del stock al preparar un platillo
+    PROCEDURE consumir_ingredientes_platillo(
+        p_id_platillo NUMBER,
+        p_cantidad_porciones NUMBER
+    );
+    
+    -- Procedimiento que genera lista de ingredientes que necesitan reabastecimiento
+    PROCEDURE generar_lista_reabastecimiento;
+    
+END PKG_GESTION_INVENTARIO;
+/</code></pre>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <p class="text-gray-700"><strong>💡 Tip:</strong> Enfatizar que la especificación es como un "contrato" - promete qué servicios ofrece el paquete sin revelar cómo los implementa.</p>
+                    </div>
+                </div>
+
+                <!-- Cuerpo del Paquete -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">⚙️ B) Cuerpo del Paquete</h3>
+                    <p class="text-gray-700 mb-4">
+                        El <strong>cuerpo</strong> contiene la implementación real de todas las funciones y procedimientos declarados en la especificación.
+                    </p>
+                    
+                    <div class="mb-4">
+                        <button onclick="copyCode('code3')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                            📋 Copiar
+                        </button>
+                        <pre id="code3"><code class="language-sql">CREATE OR REPLACE PACKAGE BODY PKG_GESTION_INVENTARIO AS
+    
+    -- Implementación: Verificar disponibilidad de platillo
+    FUNCTION verificar_disponibilidad_platillo(
+        p_id_platillo NUMBER,
+        p_porciones NUMBER
+    ) RETURN BOOLEAN IS
+        v_disponible BOOLEAN := TRUE;
+        v_stock_actual NUMBER;
+        v_cantidad_necesaria NUMBER;
+    BEGIN
+        -- Recorremos todos los ingredientes del platillo
+        FOR rec IN (
+            SELECT ip.id_ingrediente, ip.cantidad, ip.unidad_medida
+            FROM INGREDIENTES_PLATILLOS ip
+            WHERE ip.id_platillo = p_id_platillo
+        ) LOOP
+            -- Obtenemos el stock actual del ingrediente
+            SELECT cantidad INTO v_stock_actual
+            FROM STOCK_INGREDIENTES
+            WHERE id_ingrediente = rec.id_ingrediente;
+            
+            -- Calculamos cuánto necesitamos para las porciones solicitadas
+            -- Convertimos de g a kg o de ml a L si es necesario
+            IF rec.unidad_medida = 'g' THEN
+                v_cantidad_necesaria := (rec.cantidad / 1000) * p_porciones;
+            ELSIF rec.unidad_medida = 'ml' THEN
+                v_cantidad_necesaria := (rec.cantidad / 1000) * p_porciones;
+            ELSE
+                v_cantidad_necesaria := rec.cantidad * p_porciones;
+            END IF;
+            
+            -- Si no hay suficiente de algún ingrediente, retornamos FALSE
+            IF v_stock_actual < v_cantidad_necesaria THEN
+                v_disponible := FALSE;
+                DBMS_OUTPUT.PUT_LINE('Stock insuficiente del ingrediente ID: ' || rec.id_ingrediente);
+                EXIT; -- Salimos del loop
+            END IF;
+        END LOOP;
+        
+        RETURN v_disponible;
+    END verificar_disponibilidad_platillo;
+    
+    -- Implementación: Calcular porciones disponibles
+    FUNCTION calcular_porciones_disponibles(
+        p_id_platillo NUMBER
+    ) RETURN NUMBER IS
+        v_min_porciones NUMBER := 999999; -- Inicializamos con un número muy grande
+        v_porciones_posibles NUMBER;
+        v_stock_actual NUMBER;
+        v_cantidad_por_porcion NUMBER;
+    BEGIN
+        -- Recorremos cada ingrediente del platillo
+        FOR rec IN (
+            SELECT ip.id_ingrediente, ip.cantidad, ip.unidad_medida
+            FROM INGREDIENTES_PLATILLOS ip
+            WHERE ip.id_platillo = p_id_platillo
+        ) LOOP
+            -- Obtenemos el stock actual
+            SELECT cantidad INTO v_stock_actual
+            FROM STOCK_INGREDIENTES
+            WHERE id_ingrediente = rec.id_ingrediente;
+            
+            -- Convertimos la cantidad a la unidad del stock
+            IF rec.unidad_medida = 'g' THEN
+                v_cantidad_por_porcion := rec.cantidad / 1000; -- convertir g a kg
+            ELSIF rec.unidad_medida = 'ml' THEN
+                v_cantidad_por_porcion := rec.cantidad / 1000; -- convertir ml a L
+            ELSE
+                v_cantidad_por_porcion := rec.cantidad;
+            END IF;
+            
+            -- Calculamos cuántas porciones podemos hacer con este ingrediente
+            v_porciones_posibles := FLOOR(v_stock_actual / v_cantidad_por_porcion);
+            
+            -- El mínimo determina cuántas porciones realmente podemos hacer
+            IF v_porciones_posibles < v_min_porciones THEN
+                v_min_porciones := v_porciones_posibles;
+            END IF;
+        END LOOP;
+        
+        RETURN v_min_porciones;
+    END calcular_porciones_disponibles;
+    
+    -- Implementación: Consumir ingredientes al preparar platillo
+    PROCEDURE consumir_ingredientes_platillo(
+        p_id_platillo NUMBER,
+        p_cantidad_porciones NUMBER
+    ) IS
+        v_cantidad_a_descontar NUMBER;
+    BEGIN
+        -- Primero verificamos que haya disponibilidad
+        IF NOT verificar_disponibilidad_platillo(p_id_platillo, p_cantidad_porciones) THEN
+            DBMS_OUTPUT.PUT_LINE('ERROR: No hay stock suficiente para preparar ' || p_cantidad_porciones || ' porciones.');
+            RETURN;
+        END IF;
+        
+        -- Si hay disponibilidad, procedemos a descontar
+        FOR rec IN (
+            SELECT ip.id_ingrediente, ip.cantidad, ip.unidad_medida
+            FROM INGREDIENTES_PLATILLOS ip
+            WHERE ip.id_platillo = p_id_platillo
+        ) LOOP
+            -- Calculamos cuánto descontar según la unidad
+            IF rec.unidad_medida = 'g' THEN
+                v_cantidad_a_descontar := (rec.cantidad / 1000) * p_cantidad_porciones;
+            ELSIF rec.unidad_medida = 'ml' THEN
+                v_cantidad_a_descontar := (rec.cantidad / 1000) * p_cantidad_porciones;
+            ELSE
+                v_cantidad_a_descontar := rec.cantidad * p_cantidad_porciones;
+            END IF;
+            
+            -- Actualizamos el stock
+            UPDATE STOCK_INGREDIENTES
+            SET cantidad = cantidad - v_cantidad_a_descontar
+            WHERE id_ingrediente = rec.id_ingrediente;
+            
+            DBMS_OUTPUT.PUT_LINE('Descontado: ' || v_cantidad_a_descontar || ' del ingrediente ID: ' || rec.id_ingrediente);
+        END LOOP;
+        
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('✅ Ingredientes consumidos exitosamente para ' || p_cantidad_porciones || ' porciones.');
+    END consumir_ingredientes_platillo;
+    
+    -- Implementación: Generar lista de reabastecimiento
+    PROCEDURE generar_lista_reabastecimiento IS
+    BEGIN
+        DBMS_OUTPUT.PUT_LINE('=== INGREDIENTES QUE NECESITAN REABASTECIMIENTO ===');
+        DBMS_OUTPUT.PUT_LINE('');
+        
+        FOR rec IN (
+            SELECT i.id, i.nombre, s.cantidad, s.unidad_medida, s.stock_minimo,
+                   (s.stock_minimo - s.cantidad) AS cantidad_a_comprar
+            FROM INGREDIENTES i
+            JOIN STOCK_INGREDIENTES s ON i.id = s.id_ingrediente
+            WHERE s.cantidad < s.stock_minimo
+            ORDER BY (s.stock_minimo - s.cantidad) DESC
+        ) LOOP
+            DBMS_OUTPUT.PUT_LINE('⚠️  ' || rec.nombre);
+            DBMS_OUTPUT.PUT_LINE('    Stock actual: ' || rec.cantidad || ' ' || rec.unidad_medida);
+            DBMS_OUTPUT.PUT_LINE('    Stock mínimo: ' || rec.stock_minimo || ' ' || rec.unidad_medida);
+            DBMS_OUTPUT.PUT_LINE('    Cantidad sugerida a comprar: ' || CEIL(rec.cantidad_a_comprar) || ' ' || rec.unidad_medida);
+            DBMS_OUTPUT.PUT_LINE('');
+        END LOOP;
+    END generar_lista_reabastecimiento;
+    
+END PKG_GESTION_INVENTARIO;
+/</code></pre>
+                    </div>
+                </div>
+
+                <!-- Ejemplos de Uso -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">🧪 C) Ejemplos de Uso</h3>
+                    <p class="text-gray-700 mb-4">Demuestra cada función y procedimiento con casos reales:</p>
+                    
+                    <div class="mb-4">
+                        <button onclick="copyCode('code4')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                            📋 Copiar
+                        </button>
+                        <pre id="code4"><code class="language-sql">-- Activar salida de DBMS_OUTPUT
+SET SERVEROUTPUT ON;
+
+-- Ejemplo 1: Verificar disponibilidad
+DECLARE
+    v_disponible BOOLEAN;
+BEGIN
+    v_disponible := PKG_GESTION_INVENTARIO.verificar_disponibilidad_platillo(10, 50);
+    IF v_disponible THEN
+        DBMS_OUTPUT.PUT_LINE('✅ Hay stock suficiente para 50 porciones de Ensalada César');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('❌ No hay stock suficiente');
+    END IF;
+END;
+/
+
+-- Ejemplo 2: Calcular porciones disponibles
+DECLARE
+    v_porciones NUMBER;
+BEGIN
+    v_porciones := PKG_GESTION_INVENTARIO.calcular_porciones_disponibles(11);
+    DBMS_OUTPUT.PUT_LINE('Podemos preparar ' || v_porciones || ' porciones de Pollo a la Plancha');
+END;
+/
+
+-- Ejemplo 3: Consumir ingredientes
+BEGIN
+    PKG_GESTION_INVENTARIO.consumir_ingredientes_platillo(12, 10);
+END;
+/
+
+-- Ejemplo 4: Lista de reabastecimiento
+BEGIN
+    PKG_GESTION_INVENTARIO.generar_lista_reabastecimiento;
+END;
+/</code></pre>
+                    </div>
+                </div>
+
+                <!-- Puntos Clave -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <h4 class="font-bold text-blue-800 mb-2">💡 Puntos Clave a Enfatizar</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>• Separación entre especificación y cuerpo</li>
+                            <li>• Uso de cursores FOR para iterar sobre ingredientes</li>
+                            <li>• Conversión de unidades (g→kg, ml→L)</li>
+                            <li>• Validación antes de modificar datos</li>
+                            <li>• COMMIT después de operaciones críticas</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                        <h4 class="font-bold text-yellow-800 mb-2">⚠️ Errores Comunes a Mencionar</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>• Olvidar convertir unidades</li>
+                            <li>• No validar disponibilidad antes de consumir</li>
+                            <li>• No usar COMMIT (cambios no se guardan)</li>
+                            <li>• No activar SERVEROUTPUT para ver mensajes</li>
+                            <li>• Olvidar el "/" al final de bloques PL/SQL</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 3: Trigger de Auditoría -->
+        <section id="trigger" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8 section-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-orange-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">⚡</span>
+                        Parte 3: Trigger de Auditoría
+                    </h2>
+                    <div class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-semibold">
+                        ⏱️ 5 minutos
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                    <p class="text-gray-700"><strong>🎯 Objetivo:</strong> Implementar un trigger que registre automáticamente todos los cambios realizados en la tabla PLATILLOS para mantener un historial de auditoría.</p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">📚 Explicación</h3>
+                    <p class="text-gray-700 mb-4">
+                        Los <strong>triggers</strong> son procedimientos que se ejecutan automáticamente cuando ocurre un evento específico (INSERT, UPDATE, DELETE) en una tabla.
+                        En auditoría, son ideales porque:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                        <li>Se ejecutan automáticamente sin intervención manual</li>
+                        <li>No se pueden "olvidar" de registrar un cambio</li>
+                        <li>Capturan tanto el valor anterior (:OLD) como el nuevo (:NEW)</li>
+                        <li>Registran quién hizo el cambio (USER) y cuándo (SYSDATE)</li>
+                    </ul>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">💻 Implementación del Trigger</h3>
+                    <button onclick="copyCode('code5')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                        📋 Copiar
+                    </button>
+                    <pre id="code5"><code class="language-sql">CREATE OR REPLACE TRIGGER TRG_AUDITORIA_PLATILLO
+BEFORE UPDATE OR DELETE ON PLATILLOS
+FOR EACH ROW
+DECLARE
+    v_accion VARCHAR2(10);
+    v_id_auditoria NUMBER;
+BEGIN
+    -- Determinar qué acción se está realizando
+    IF UPDATING THEN
+        v_accion := 'UPDATE';
+    ELSIF DELETING THEN
+        v_accion := 'DELETE';
+    END IF;
+    
+    -- Generar ID para el registro de auditoría
+    SELECT NVL(MAX(id), 0) + 1 INTO v_id_auditoria FROM AUDITORIA_PLATILLO;
+    
+    -- Insertar registro en la tabla de auditoría
+    INSERT INTO AUDITORIA_PLATILLO (
+        id,
+        id_platillo,
+        nombre_antiguo,
+        nombre_nuevo,
+        accion,
+        fecha,
+        usuario
+    ) VALUES (
+        v_id_auditoria,
+        :OLD.id,                    -- ID del platillo modificado
+        :OLD.nombre,                -- Valor anterior
+        :NEW.nombre,                -- Valor nuevo (NULL si es DELETE)
+        v_accion,                   -- UPDATE o DELETE
+        SYSTIMESTAMP,               -- Fecha y hora exacta
+        USER                        -- Usuario de Oracle que ejecuta la acción
+    );
+    
+    -- Mensaje de confirmación (opcional, solo para demostración)
+    DBMS_OUTPUT.PUT_LINE('✅ Auditoría registrada: ' || v_accion || ' en platillo ID ' || :OLD.id);
+END;
+/</code></pre>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">🧪 Ejemplos de Prueba</h3>
+                    <button onclick="copyCode('code6')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                        📋 Copiar
+                    </button>
+                    <pre id="code6"><code class="language-sql">-- Activar salida
+SET SERVEROUTPUT ON;
+
+-- Prueba 1: Modificar un platillo
+UPDATE PLATILLOS 
+SET nombre = 'Ensalada César Premium'
+WHERE id = 10;
+
+-- Prueba 2: Ver el registro de auditoría
+SELECT id_platillo, nombre_antiguo, nombre_nuevo, accion, 
+       TO_CHAR(fecha, 'DD/MM/YYYY HH24:MI:SS') AS fecha_cambio, usuario
+FROM AUDITORIA_PLATILLO
+ORDER BY fecha DESC;
+
+-- Prueba 3: Revertir el cambio (también se auditará)
+UPDATE PLATILLOS 
+SET nombre = 'Ensalada César'
+WHERE id = 10;
+
+-- Prueba 4: Ver historial completo de un platillo
+SELECT nombre_antiguo, nombre_nuevo, accion, 
+       TO_CHAR(fecha, 'DD/MM/YYYY HH24:MI:SS') AS cuando,
+       usuario
+FROM AUDITORIA_PLATILLO
+WHERE id_platillo = 10
+ORDER BY fecha;
+
+-- Resultado esperado: Verás dos registros mostrando el cambio y su reversión</code></pre>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <h4 class="font-bold text-blue-800 mb-2">💡 Conceptos Clave del Trigger</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li><strong>:OLD</strong> - Valores antes del cambio</li>
+                            <li><strong>:NEW</strong> - Valores después del cambio</li>
+                            <li><strong>BEFORE</strong> - Se ejecuta antes de la operación</li>
+                            <li><strong>FOR EACH ROW</strong> - Se ejecuta por cada fila afectada</li>
+                            <li><strong>USER</strong> - Captura el usuario de Oracle</li>
+                            <li><strong>SYSTIMESTAMP</strong> - Fecha/hora con precisión</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                        <h4 class="font-bold text-purple-800 mb-2">🎯 Puntos a Enfatizar</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>• En DELETE, :NEW es NULL (no hay valor nuevo)</li>
+                            <li>• En INSERT, :OLD es NULL (no hay valor anterior)</li>
+                            <li>• UPDATING, DELETING, INSERTING son funciones booleanas</li>
+                            <li>• El trigger NO necesita COMMIT (es automático)</li>
+                            <li>• Los estudiantes replicarán esto para MENUS</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 4: Conceptos Avanzados -->
+        <section id="avanzado" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8 section-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">🚀</span>
+                        Conceptos Avanzados (Menciones Rápidas)
+                    </h2>
+                    <div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
+                        💎 Puntos Extra
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 p-6 rounded">
+                    <p class="text-gray-700 text-lg">
+                        <strong>📢 Mensaje para los estudiantes:</strong> Estos conceptos NO son obligatorios para hoy, pero implementarlos en sus ejercicios 
+                        les dará <strong>puntos adicionales</strong> y los destacará como administradores de BD de alto nivel.
+                    </p>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Excepciones Personalizadas -->
+                    <div class="border-l-4 border-blue-500 bg-blue-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-blue-800 mb-3">1️⃣ Excepciones Personalizadas</h3>
+                        <p class="text-gray-700 mb-4">
+                            En lugar de solo usar DBMS_OUTPUT, pueden lanzar errores formales que detienen la ejecución y son más fáciles de manejar.
+                        </p>
+                        <div class="bg-white p-4 rounded border border-blue-200">
+                            <p class="text-sm text-gray-600 mb-2"><strong>Dónde implementar:</strong></p>
+                            <pre class="text-sm"><code class="language-sql">-- En lugar de esto:
+IF NOT verificar_disponibilidad THEN
+    DBMS_OUTPUT.PUT_LINE('ERROR: No hay stock');
+    RETURN;
+END IF;
+
+-- Pueden hacer esto:
+IF NOT verificar_disponibilidad THEN
+    RAISE_APPLICATION_ERROR(-20001, 
+        'Stock insuficiente para preparar el platillo solicitado');
+END IF;
+
+-- El -20001 es un código de error personalizado (rango -20000 a -20999)</code></pre>
+                        </div>
+                        <div class="mt-3 bg-yellow-50 border border-yellow-300 p-3 rounded">
+                            <p class="text-sm text-gray-700">
+                                <strong>💡 Ventaja:</strong> El error detiene todo el proceso y se puede capturar desde aplicaciones externas. 
+                                Es más profesional que solo imprimir mensajes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- BULK COLLECT -->
+                    <div class="border-l-4 border-green-500 bg-green-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-green-800 mb-3">2️⃣ BULK COLLECT (para Reportes)</h3>
+                        <p class="text-gray-700 mb-4">
+                            Cuando necesitan procesar muchos registros (cientos o miles), BULK COLLECT mejora dramáticamente la performance.
+                        </p>
+                        <div class="bg-white p-4 rounded border border-green-200">
+                            <p class="text-sm text-gray-600 mb-2"><strong>Dónde implementar:</strong></p>
+                            <pre class="text-sm"><code class="language-sql">-- Forma normal (lenta con muchos datos):
+FOR rec IN (SELECT * FROM INGREDIENTES) LOOP
+    -- procesar cada registro
+END LOOP;
+
+-- Forma optimizada con BULK COLLECT:
+DECLARE
+    TYPE t_ingredientes IS TABLE OF INGREDIENTES%ROWTYPE;
+    v_ingredientes t_ingredientes;
+BEGIN
+    SELECT * BULK COLLECT INTO v_ingredientes 
+    FROM INGREDIENTES;
+    
+    -- Ahora procesar todos a la vez
+    FOR i IN 1..v_ingredientes.COUNT LOOP
+        -- procesar v_ingredientes(i)
+    END LOOP;
+END;</code></pre>
+                        </div>
+                        <div class="mt-3 bg-yellow-50 border border-yellow-300 p-3 rounded">
+                            <p class="text-sm text-gray-700">
+                                <strong>💡 Ventaja:</strong> Trae todos los datos en una sola operación en lugar de uno por uno. 
+                                Ideal para PKG_REPORTES cuando generen estadísticas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- AUTONOMOUS TRANSACTION -->
+                    <div class="border-l-4 border-purple-500 bg-purple-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-purple-800 mb-3">3️⃣ AUTONOMOUS TRANSACTION (para Auditoría)</h3>
+                        <p class="text-gray-700 mb-4">
+                            Hace que el trigger de auditoría funcione independientemente. Si la transacción principal falla y hace ROLLBACK, 
+                            la auditoría se guarda de todos modos.
+                        </p>
+                        <div class="bg-white p-4 rounded border border-purple-200">
+                            <p class="text-sm text-gray-600 mb-2"><strong>Cómo implementar:</strong></p>
+                            <pre class="text-sm"><code class="language-sql">CREATE OR REPLACE TRIGGER TRG_AUDITORIA_PLATILLO
+BEFORE UPDATE OR DELETE ON PLATILLOS
+FOR EACH ROW
+DECLARE
+    PRAGMA AUTONOMOUS_TRANSACTION;  -- ← Esta línea es la magia
+    v_accion VARCHAR2(10);
+BEGIN
+    -- ... mismo código de auditoría ...
+    
+    INSERT INTO AUDITORIA_PLATILLO (...) VALUES (...);
+    
+    COMMIT;  -- ← IMPORTANTE: debe tener su propio COMMIT
+END;</code></pre>
+                        </div>
+                        <div class="mt-3 bg-yellow-50 border border-yellow-300 p-3 rounded">
+                            <p class="text-sm text-gray-700">
+                                <strong>💡 Ventaja:</strong> La auditoría queda registrada incluso si el usuario cancela su operación. 
+                                Tienes un registro completo de TODOS los intentos de cambio.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Cómo Evaluarlo -->
+                    <div class="border-l-4 border-orange-500 bg-orange-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-orange-800 mb-3">📊 Cómo Evaluar Estos Puntos Extra</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-white p-4 rounded shadow-sm">
+                                <p class="font-bold text-blue-700 mb-2">Excepciones</p>
+                                <p class="text-sm text-gray-600">+3 puntos si las usan correctamente en validaciones</p>
+                            </div>
+                            <div class="bg-white p-4 rounded shadow-sm">
+                                <p class="font-bold text-green-700 mb-2">BULK COLLECT</p>
+                                <p class="text-sm text-gray-600">+3 puntos si optimizan al menos un reporte</p>
+                            </div>
+                            <div class="bg-white p-4 rounded shadow-sm">
+                                <p class="font-bold text-purple-700 mb-2">AUTONOMOUS</p>
+                                <p class="text-sm text-gray-600">+4 puntos si lo implementan en triggers</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumen y Cierre -->
+        <section class="mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold mb-6">📝 Resumen de la Sesión</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white/10 backdrop-blur rounded-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">✅ Lo que Completamos Hoy</h3>
+                        <ul class="space-y-2">
+                            <li>✓ Modificación de tabla INGREDIENTES_PLATILLOS</li>
+                            <li>✓ PKG_GESTION_INVENTARIO completo (4 funciones/procedimientos)</li>
+                            <li>✓ TRG_AUDITORIA_PLATILLO funcional</li>
+                            <li>✓ Ejemplos de prueba ejecutados</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur rounded-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">📚 Lo que los Estudiantes Harán</h3>
+                        <ul class="space-y-2">
+                            <li>→ PKG_GESTION_MENUS (completo desde cero)</li>
+                            <li>→ PKG_REPORTES (completo desde cero)</li>
+                            <li>→ Ampliar PKG_GESTION_INVENTARIO (2 funciones más)</li>
+                            <li>→ TRG_AUDITORIA_MENU (replicar el de platillos)</li>
+                            <li>→ OPCIONAL: Conceptos avanzados (puntos extra)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white/20 backdrop-blur rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-3">💬 Mensaje Final para los Estudiantes</h3>
+                    <p class="text-lg mb-4">
+                        "Ahora tienen una plantilla completa de cómo estructurar un paquete en PL/SQL. El paquete PKG_GESTION_INVENTARIO 
+                        que hemos creado juntos es su <strong>guía de referencia</strong>. Usen la misma estructura, la misma lógica, 
+                        pero aplicada a menús y reportes."
+                    </p>
+                    <p class="text-lg">
+                        "Recuerden: <strong>la programación se aprende programando</strong>. No tengan miedo de experimentar, 
+                        equivocarse es parte del proceso. Tienen todas las herramientas, ¡ahora es su turno de brillar! 🌟"
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips para el Profesor -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">👨‍🏫 Tips para el Profesor</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg">
+                        <span class="text-2xl">💡</span>
+                        <div>
+                            <p class="font-bold text-blue-800">Manejo del Tiempo</p>
+                            <p class="text-gray-700">Si vas corto de tiempo, reduce los ejemplos de prueba. Lo crítico es que vean la estructura del paquete completo.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3 p-4 bg-green-50 rounded-lg">
+                        <span class="text-2xl">🎯</span>
+                        <div>
+                            <p class="font-bold text-green-800">Participación</p>
+                            <p class="text-gray-700">Pregunta constantemente: "¿Qué creen que hace esta línea?", "¿Por qué usamos un cursor aquí?". Mantén la clase activa.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3 p-4 bg-yellow-50 rounded-lg">
+                        <span class="text-2xl">⚠️</span>
+                        <div>
+                            <p class="font-bold text-yellow-800">Errores Comunes</p>
+                            <p class="text-gray-700">Muestra deliberadamente un error (olvidar SET SERVEROUTPUT ON) para que vean cómo resolverlo. Aprender de errores es poderoso.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3 p-4 bg-purple-50 rounded-lg">
+                        <span class="text-2xl">📝</span>
+                        <div>
+                            <p class="font-bold text-purple-800">Conexión con la Realidad</p>
+                            <p class="text-gray-700">Enfatiza que esto es un sistema REAL de hospital. Las cantidades importan porque pueden afectar la salud de los pacientes.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3 p-4 bg-orange-50 rounded-lg">
+                        <span class="text-2xl">🚀</span>
+                        <div>
+                            <p class="font-bold text-orange-800">Motivación</p>
+                            <p class="text-gray-700">Menciona que estas habilidades (paquetes, triggers) son las que buscan las empresas. Es conocimiento MUY valioso en el mercado laboral.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-lg mb-4">🎓 Material creado para enseñanza de PL/SQL - Sistema Hospitalario</p>
+            <p class="text-sm text-gray-400">Este tutorial es parte de un taller práctico sobre Paquetes y Triggers en Oracle Database</p>
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <p class="text-sm">💪 Recuerda: Los estudiantes tienen TODA la información necesaria en este tutorial para completar sus actividades.</p>
+                <p class="text-sm mt-2">Cualquier duda técnica puede resolverse revisando el código de PKG_GESTION_INVENTARIO como referencia.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Función para copiar código
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const code = codeElement.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                // Feedback visual
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ Copiado!';
+                button.classList.add('bg-green-500');
+                button.classList.remove('bg-blue-500');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('bg-green-500');
+                    button.classList.add('bg-blue-500');
+                }, 2000);
+            }).catch(err => {
+                alert('Error al copiar: ' + err);
+            });
+        }
+
+        // Smooth scroll para navegación
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animación de entrada para las secciones
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '0';
+                    entry.target.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        entry.target.style.transition = 'all 0.6s ease-out';
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section-card').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

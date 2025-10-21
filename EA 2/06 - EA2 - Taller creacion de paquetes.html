@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller Práctico: Paquetes en PL/SQL</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: white;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-bar h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .progress {
+            background: var(--border);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card h3 {
+            color: var(--text);
+            margin: 1.5rem 0 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .accordion {
+            margin: 1rem 0;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background: var(--bg);
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .accordion-header:hover {
+            background: var(--border);
+        }
+
+        .accordion-header i {
+            transition: transform 0.3s;
+        }
+
+        .accordion-header.active i {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.active {
+            max-height: 2000px;
+        }
+
+        .accordion-body {
+            padding: 1rem;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+
+        .code-block .keyword { color: #c792ea; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #7c8c9a; font-style: italic; }
+        .code-block .function { color: #82aaff; }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: start;
+        }
+
+        .alert i {
+            margin-top: 0.2rem;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid var(--primary);
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background: var(--bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: var(--border);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-item.checked {
+            background: #d1fae5;
+        }
+
+        .notes-section {
+            background: #fffbeb;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px dashed var(--warning);
+        }
+
+        .notes-section h3 {
+            color: var(--warning);
+            margin-bottom: 0.75rem;
+        }
+
+        .notes-section textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(37,99,235,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .example-box {
+            background: #f0f9ff;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .example-box strong {
+            color: var(--primary);
+        }
+
+        .reflection-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border: 2px solid var(--primary);
+        }
+
+        .reflection-box h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .reflection-question {
+            background: white;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            border-radius: 8px;
+            border-left: 3px solid var(--secondary);
+        }
+
+        .tips-section {
+            background: #fef3c7;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .tips-section h4 {
+            color: var(--warning);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+            }
+
+            .code-block {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-box"></i> Taller Práctico: Paquetes en PL/SQL</h1>
+            <p>Aprende a organizar tu código con cohesión, bajo acoplamiento y encapsulación</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="progress-bar">
+            <h3>Tu Progreso en el Taller</h3>
+            <div class="progress">
+                <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('intro')">
+                <i class="fas fa-home"></i> Introducción
+            </button>
+            <button class="tab-btn" onclick="openTab('sesion1')">
+                <i class="fas fa-lightbulb"></i> Sesión 1: Agrupar con Sentido
+            </button>
+            <button class="tab-btn" onclick="openTab('sesion2')">
+                <i class="fas fa-code"></i> Sesión 2: Construir y Probar
+            </button>
+            <button class="tab-btn" onclick="openTab('recursos')">
+                <i class="fas fa-book"></i> Recursos
+            </button>
+        </div>
+
+        <div id="intro" class="tab-content active">
+            <div class="card">
+                <h2><i class="fas fa-rocket"></i> ¡Bienvenido al Taller!</h2>
+                <p>Este taller te ayudará a comprender y aplicar <strong>paquetes en PL/SQL</strong> para organizar tu código de manera profesional.</p>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Importante:</strong> Este es un espacio de aprendizaje, no una evaluación. El objetivo es experimentar, equivocarse y aprender. No hay una única solución correcta: tu base de datos es única y tu enfoque puede ser diferente al de tus compañeros.
+                    </div>
+                </div>
+
+                <h3>🎯 ¿Qué aprenderás?</h3>
+                <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                    <li><strong>Cohesión:</strong> Agrupar elementos relacionados</li>
+                    <li><strong>Acoplamiento:</strong> Minimizar dependencias innecesarias</li>
+                    <li><strong>Encapsulación:</strong> Decidir qué exponer y qué mantener privado</li>
+                </ul>
+
+                <h3>📋 Estructura del Taller</h3>
+                <div class="example-box">
+                    <strong>Sesión 1 (80 min):</strong> Comprender por qué y cómo agrupar procedimientos en paquetes<br>
+                    <strong>Sesión 2 (80 min):</strong> Implementar, probar y refinar tu paquete
+                </div>
+
+                <div class="alert alert-success">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <strong>Trabaja a tu ritmo:</strong> Puedes realizar este taller solo o en pareja. Si trabajas solo, considera consultar con un compañero o usar IA para validar tus ideas.
+                    </div>
+                </div>
+
+                <h3>🧠 Conceptos Fundamentales</h3>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Qué es un Paquete en PL/SQL?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>Un <strong>paquete</strong> es una estructura que agrupa procedimientos, funciones, variables y tipos relacionados. Piensa en él como una "caja organizada" donde guardas herramientas que trabajan juntas.</p>
+                                <p><strong>Tiene dos partes:</strong></p>
+                                <ul>
+                                    <li><strong>Especificación (SPEC):</strong> La "interfaz pública" - lo que otros pueden ver y usar</li>
+                                    <li><strong>Cuerpo (BODY):</strong> La "implementación privada" - cómo funciona internamente</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Qué es la Cohesión?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>La <strong>cohesión</strong> mide qué tan relacionados están los elementos dentro de un paquete.</p>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div><strong>Alta cohesión (bueno):</strong> Todos los procedimientos del paquete "PKG_INVENTARIO" manejan stock, productos y alertas de inventario.</div>
+                                </div>
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                    <div><strong>Baja cohesión (malo):</strong> Un paquete que mezcla gestión de usuarios, cálculos de facturación y reportes de ventas.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Qué es el Acoplamiento?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>El <strong>acoplamiento</strong> mide qué tan dependiente es un paquete de otros elementos externos.</p>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div><strong>Bajo acoplamiento (bueno):</strong> Tu paquete funciona de manera independiente, solo necesita datos básicos de entrada.</div>
+                                </div>
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                    <div><strong>Alto acoplamiento (malo):</strong> Tu paquete depende de variables globales, otros paquetes y estructuras complejas externas.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Qué es la Encapsulación?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p>La <strong>encapsulación</strong> es decidir qué partes de tu código son públicas y cuáles privadas.</p>
+                                <p><strong>Regla de oro:</strong> Solo expón lo necesario. Todo lo demás debe ser privado.</p>
+                                <div class="example-box">
+                                    <strong>Público:</strong> Procedimiento "agregar_platillo" que otros pueden llamar<br>
+                                    <strong>Privado:</strong> Función "validar_ingredientes" que solo usa el paquete internamente
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sesion1" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-lightbulb"></i> Sesión 1: Agrupar con Sentido (80 min)</h2>
+                <p><strong>Objetivo:</strong> Comprender por qué y cómo agrupar procedimientos y funciones en un paquete con alta cohesión.</p>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Recuerda:</strong> No busques la perfección. Busca entender el "por qué" detrás de cada decisión.
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 1: Analiza un Paquete Mal Diseñado (15 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Observa el siguiente paquete y reflexiona sobre sus problemas.</p>
+
+                                <div class="code-block">CREATE OR REPLACE PACKAGE pkg_hospital_confuso AS
+    <span class="comment">-- Procedimiento para agregar pacientes</span>
+    PROCEDURE agregar_paciente(p_nombre VARCHAR2, p_edad NUMBER);
+    
+    <span class="comment">-- Función para calcular total de factura</span>
+    FUNCTION calcular_factura(p_id_factura NUMBER) RETURN NUMBER;
+    
+    <span class="comment">-- Procedimiento para limpiar tablas antiguas</span>
+    PROCEDURE limpiar_logs_sistema;
+    
+    <span class="comment">-- Función para enviar email</span>
+    PROCEDURE enviar_notificacion(p_email VARCHAR2, p_mensaje VARCHAR2);
+END;</div>
+
+                                <div class="reflection-box">
+                                    <h4><i class="fas fa-brain"></i> Reflexiona</h4>
+                                    <div class="reflection-question">
+                                        <strong>1.</strong> ¿Qué tienen en común estos procedimientos y funciones?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>2.</strong> ¿Hay elementos que no deberían estar juntos? ¿Por qué?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>3.</strong> ¿Cómo mejorarías la cohesión de este paquete?
+                                    </div>
+                                </div>
+
+                                <div class="tips-section">
+                                    <h4><i class="fas fa-lightbulb"></i> ¿Estancado? Pistas</h4>
+                                    <ul>
+                                        <li>Un paquete debería tener un "tema" o "responsabilidad" clara</li>
+                                        <li>Pregúntate: "¿Qué pasa si elimino uno de estos elementos? ¿Los demás siguen teniendo sentido juntos?"</li>
+                                        <li>Los emails y logs del sistema no tienen relación directa con la gestión de pacientes o facturas</li>
+                                    </ul>
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Mis Notas del Lab 1</h3>
+                                    <textarea id="notesLab1" placeholder="Escribe aquí tus reflexiones y observaciones..."></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab1">
+                                    <span>He completado el Lab 1</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 2: Identifica Agrupaciones en tu BD (20 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Revisa los procedimientos y funciones que ya tienes en tu base de datos.</p>
+
+                                <h4>Paso 1: Haz un inventario</h4>
+                                <p>Lista todos los procedimientos, funciones y triggers que tienes. Ejemplo:</p>
+                                <div class="example-box">
+                                    <strong>Base de datos: Menús Hospitalarios</strong><br>
+                                    • PROC_INSERTAR_MENU<br>
+                                    • PROC_ACTUALIZAR_PLATILLO<br>
+                                    • FUNC_CALCULAR_COSTO_MENU<br>
+                                    • TRIGGER_AUDITAR_MENU<br>
+                                    • PROC_ALERTA_STOCK_BAJO
+                                </div>
+
+                                <h4>Paso 2: Agrupa por tema</h4>
+                                <p>Identifica qué elementos podrían ir juntos. Busca patrones como:</p>
+                                <ul>
+                                    <li><strong>Gestión de una entidad:</strong> Todo lo relacionado con menús, platillos, pacientes, etc.</li>
+                                    <li><strong>Operaciones similares:</strong> Reportes, auditorías, cálculos financieros</li>
+                                    <li><strong>Flujos de trabajo:</strong> Proceso completo de una transacción</li>
+                                </ul>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div>
+                                        <strong>Ejemplos de agrupaciones válidas:</strong><br>
+                                        • PKG_GESTION_MENUS: crear, modificar, eliminar menús<br>
+                                        • PKG_INVENTARIO: alertas de stock, actualizar cantidades, reportes<br>
+                                        • PKG_REPORTES: generar reportes de ventas, consumo, costos
+                                    </div>
+                                </div>
+
+                                <div class="tips-section">
+                                    <h4><i class="fas fa-lightbulb"></i> ¿Estancado? Preguntas guía</h4>
+                                    <ul>
+                                        <li>¿Qué entidades principales tiene mi BD? (ej: menús, platillos, ingredientes)</li>
+                                        <li>¿Qué operaciones realizo frecuentemente juntas?</li>
+                                        <li>Si tuviera que explicar mi sistema a alguien, ¿en qué "módulos" lo dividiría?</li>
+                                    </ul>
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Mis Agrupaciones Propuestas</h3>
+                                    <textarea id="notesLab2" placeholder="Paquete 1: [nombre]
+Incluye: [lista de procedimientos/funciones]
+Razón: [por qué van juntos]
+
+Paquete 2: ..."></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab2">
+                                    <span>He completado el Lab 2</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 3: Diseña la Especificación de tu Primer Paquete (25 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Elige UNA agrupación del Lab 2 y crea su especificación (SPEC).</p>
+
+                                <h4>Estructura básica de un SPEC</h4>
+                                <div class="code-block">CREATE OR REPLACE PACKAGE nombre_paquete AS
+    <span class="comment">-- Solo lo que quieres que sea público</span>
+    
+    PROCEDURE nombre_procedimiento(parametros);
+    
+    FUNCTION nombre_funcion(parametros) RETURN tipo;
+    
+    <span class="comment">-- Variables globales públicas (úsalas con cuidado)</span>
+    variable_global tipo;
+END nombre_paquete;</div>
+
+                                <h4>Ejemplo: Paquete de Gestión de Menús</h4>
+                                <div class="code-block">CREATE OR REPLACE PACKAGE pkg_gestion_menus AS
+    <span class="comment">-- Procedimientos públicos para gestionar menús</span>
+    PROCEDURE crear_menu(p_nombre VARCHAR2);
+    
+    PROCEDURE agregar_platillo_a_menu(
+        p_id_menu NUMBER, 
+        p_id_platillo NUMBER
+    );
+    
+    FUNCTION obtener_costo_menu(p_id_menu NUMBER) RETURN NUMBER;
+    
+    PROCEDURE eliminar_menu(p_id_menu NUMBER);
+END pkg_gestion_menus;</div>
+
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div>
+                                        <strong>Reglas importantes:</strong><br>
+                                        • Solo incluye lo que DEBE ser accesible desde fuera<br>
+                                        • Usa nombres descriptivos y consistentes<br>
+                                        • Agrupa operaciones relacionadas con la misma entidad o proceso
+                                    </div>
+                                </div>
+
+                                <div class="reflection-box">
+                                    <h4><i class="fas fa-brain"></i> Documenta tus Decisiones</h4>
+                                    <div class="reflection-question">
+                                        <strong>1.</strong> ¿Por qué elegiste este paquete como tu primero?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>2.</strong> ¿Qué tienen en común todos los elementos que incluiste?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>3.</strong> ¿Hay algo que dejaste fuera? ¿Por qué?
+                                    </div>
+                                </div>
+
+                                <div class="tips-section">
+                                    <h4><i class="fas fa-lightbulb"></i> ¿Estancado? Preguntas guía</h4>
+                                    <ul>
+                                        <li>Empieza con 3-5 procedimientos/funciones relacionados</li>
+                                        <li>Si dudas entre incluir algo, pregúntate: "¿Esta operación tiene sentido SIN las otras?"</li>
+                                        <li>No incluyas en el SPEC elementos que solo necesitas internamente</li>
+                                    </ul>
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Mi Especificación (SPEC)</h3>
+                                    <textarea id="notesLab3" placeholder="Escribe aquí tu código CREATE OR REPLACE PACKAGE..."></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab3">
+                                    <span>He completado el Lab 3</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 4: Reflexión Final de Sesión 1 (20 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Comparte y valida tu diseño con un compañero o mediante autoevaluación.</p>
+
+                                <h4>Opción A: Revisión con Compañero</h4>
+                                <p>Intercambia tu especificación con un compañero y respondan estas preguntas sobre el diseño del otro:</p>
+                                <div class="example-box">
+                                    ✓ ¿Puedo entender qué hace el paquete solo leyendo su nombre?<br>
+                                    ✓ ¿Los procedimientos/funciones tienen algo en común claro?<br>
+                                    ✓ ¿Hay algo que parece no encajar?<br>
+                                    ✓ ¿Qué sugiero mejorar?
+                                </div>
+
+                                <h4>Opción B: Autoevaluación / Consulta con IA</h4>
+                                <p>Usa estas preguntas para evaluar tu propio diseño o consultar con ChatGPT:</p>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-robot"></i>
+                                    <div>
+                                        <strong>Prompt sugerido para IA:</strong><br>
+                                        "Tengo este paquete PL/SQL. ¿La agrupación tiene sentido? ¿Los elementos tienen alta cohesión? ¿Qué mejorarías?"<br>
+                                        [pega tu SPEC aquí]
+                                    </div>
+                                </div>
+
+                                <div class="reflection-box">
+                                    <h4><i class="fas fa-brain"></i> Reflexión Final</h4>
+                                    <div class="reflection-question">
+                                        <strong>1.</strong> ¿Qué problemas resuelve mi paquete que antes no estaban resueltos?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>2.</strong> ¿Mi paquete tiene alta cohesión? ¿Por qué sí o por qué no?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>3.</strong> ¿Qué aprendí sobre cómo organizar código en esta sesión?
+                                    </div>
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Feedback Recibido y Ajustes</h3>
+                                    <textarea id="notesLab4" placeholder="¿Qué feedback recibiste? ¿Qué vas a ajustar para la Sesión 2?"></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab4">
+                                    <span>He completado el Lab 4</span>
+                                </label>
+
+                                <div class="alert alert-success" style="margin-top: 1.5rem;">
+                                    <i class="fas fa-trophy"></i>
+                                    <div>
+                                        <strong>¡Excelente trabajo!</strong> Has completado la Sesión 1. Ahora comprendes qué es cohesión y cómo diseñar la estructura de un paquete. En la Sesión 2, implementarás el cuerpo y lo probarás.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sesion2" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-code"></i> Sesión 2: Construir y Probar (80 min)</h2>
+                <p><strong>Objetivo:</strong> Implementar, probar y refinar un paquete con buena cohesión, bajo acoplamiento y encapsulación adecuada.</p>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Punto de partida:</strong> Ya tienes tu especificación (SPEC) de la Sesión 1. Ahora crearás el cuerpo (BODY) y lo pondrás a prueba.
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 5: Implementa el Cuerpo del Paquete (25 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Crea el BODY de tu paquete, implementando la lógica de cada procedimiento y función.</p>
+
+                                <h4>Estructura del BODY</h4>
+                                <div class="code-block">CREATE OR REPLACE PACKAGE BODY nombre_paquete AS
+    
+    <span class="comment">-- Puedes declarar elementos PRIVADOS aquí</span>
+    <span class="comment">-- (funciones, procedimientos o variables que solo usa el paquete)</span>
+    
+    FUNCTION validacion_interna(param tipo) RETURN BOOLEAN AS
+    BEGIN
+        <span class="comment">-- Lógica privada</span>
+        RETURN TRUE;
+    END;
+    
+    <span class="comment">-- Ahora implementa los elementos públicos del SPEC</span>
+    
+    PROCEDURE nombre_procedimiento(parametros) AS
+    BEGIN
+        <span class="comment">-- Implementación</span>
+    END;
+    
+    FUNCTION nombre_funcion(parametros) RETURN tipo AS
+    BEGIN
+        <span class="comment">-- Implementación</span>
+        RETURN valor;
+    END;
+    
+END nombre_paquete;</div>
+
+                                <h4>Ejemplo Completo: PKG_GESTION_MENUS</h4>
+                                <div class="code-block">CREATE OR REPLACE PACKAGE BODY pkg_gestion_menus AS
+    
+    <span class="comment">-- Función PRIVADA para validar que un menú existe</span>
+    FUNCTION menu_existe(p_id_menu NUMBER) RETURN BOOLEAN AS
+        v_count NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_count 
+        FROM MENUS WHERE id = p_id_menu;
+        RETURN v_count > 0;
+    END;
+    
+    <span class="comment">-- Implementación de procedimientos públicos</span>
+    
+    PROCEDURE crear_menu(p_nombre VARCHAR2) AS
+    BEGIN
+        INSERT INTO MENUS (id, nombre) 
+        VALUES (SEQ_MENU.NEXTVAL, p_nombre);
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Menú creado: ' || p_nombre);
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            RAISE_APPLICATION_ERROR(-20001, 'Error al crear menú');
+    END;
+    
+    PROCEDURE agregar_platillo_a_menu(
+        p_id_menu NUMBER, 
+        p_id_platillo NUMBER
+    ) AS
+    BEGIN
+        <span class="comment">-- Usa la función privada</span>
+        IF NOT menu_existe(p_id_menu) THEN
+            RAISE_APPLICATION_ERROR(-20002, 'El menú no existe');
+        END IF;
+        
+        INSERT INTO MENU_PLATILLOS (id_menu, id_platillo)
+        VALUES (p_id_menu, p_id_platillo);
+        COMMIT;
+    END;
+    
+    FUNCTION obtener_costo_menu(p_id_menu NUMBER) RETURN NUMBER AS
+        v_costo NUMBER := 0;
+    BEGIN
+        SELECT SUM(si.cantidad * si.precio_unitario)
+        INTO v_costo
+        FROM MENU_PLATILLOS mp
+        JOIN INGREDIENTES_PLATILLOS ip ON mp.id_platillo = ip.id_platillo
+        JOIN STOCK_INGREDIENTES si ON ip.id_ingrediente = si.id_ingrediente
+        WHERE mp.id_menu = p_id_menu;
+        
+        RETURN NVL(v_costo, 0);
+    END;
+    
+    PROCEDURE eliminar_menu(p_id_menu NUMBER) AS
+    BEGIN
+        DELETE FROM MENU_PLATILLOS WHERE id_menu = p_id_menu;
+        DELETE FROM MENUS WHERE id = p_id_menu;
+        COMMIT;
+    END;
+    
+END pkg_gestion_menus;</div>
+
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div>
+                                        <strong>Puntos clave de encapsulación:</strong><br>
+                                        • <code>menu_existe</code> es PRIVADA (solo está en el BODY, no en el SPEC)<br>
+                                        • Los procedimientos públicos pueden usar las funciones privadas<br>
+                                        • Manejo de errores con EXCEPTION en cada operación crítica
+                                    </div>
+                                </div>
+
+                                <div class="tips-section">
+                                    <h4><i class="fas fa-lightbulb"></i> ¿Estancado? Preguntas guía</h4>
+                                    <ul>
+                                        <li>¿Qué validaciones necesito que sean privadas?</li>
+                                        <li>¿Hay lógica repetida que pueda extraer a una función privada?</li>
+                                        <li>¿Estoy manejando excepciones apropiadamente?</li>
+                                        <li>¿Mi código es reutilizable o está muy acoplado a casos específicos?</li>
+                                    </ul>
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Mi Implementación (BODY)</h3>
+                                    <textarea id="notesLab5" placeholder="Escribe aquí tu código CREATE OR REPLACE PACKAGE BODY..."></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab5">
+                                    <span>He completado el Lab 5</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 6: Revisa y Mejora con Feedback (15 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Revisa tu código con un compañero o usa IA para identificar mejoras.</p>
+
+                                <h4>Checklist de Revisión</h4>
+                                <div class="example-box">
+                                    <strong>Cohesión:</strong><br>
+                                    ☐ Todos los elementos del paquete están relacionados<br>
+                                    ☐ El nombre del paquete describe claramente su propósito<br><br>
+                                    
+                                    <strong>Acoplamiento:</strong><br>
+                                    ☐ El paquete no depende excesivamente de otros paquetes<br>
+                                    ☐ Las dependencias externas son mínimas y claras<br><br>
+                                    
+                                    <strong>Encapsulación:</strong><br>
+                                    ☐ Solo lo necesario está en el SPEC (público)<br>
+                                    ☐ Las validaciones y lógica auxiliar están en el BODY (privado)<br>
+                                    ☐ No expongo variables globales innecesariamente<br><br>
+                                    
+                                    <strong>Calidad del Código:</strong><br>
+                                    ☐ Manejo excepciones apropiadamente<br>
+                                    ☐ Los nombres son descriptivos<br>
+                                    ☐ Incluyo comentarios donde es necesario
+                                </div>
+
+                                <h4>Preguntas para Revisión entre Pares</h4>
+                                <div class="reflection-box">
+                                    <h4><i class="fas fa-users"></i> Intercambio con Compañero</h4>
+                                    <div class="reflection-question">
+                                        <strong>1.</strong> ¿Entiendes qué hace cada procedimiento leyendo solo su nombre?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>2.</strong> ¿Hay algo que debería ser privado pero está público (o viceversa)?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>3.</strong> ¿El paquete tiene dependencias complejas o innecesarias?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>4.</strong> ¿Qué mejorarías del diseño?
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-robot"></i>
+                                    <div>
+                                        <strong>Prompt para IA:</strong><br>
+                                        "Revisa este paquete PL/SQL. Evalúa: (1) cohesión, (2) acoplamiento, (3) encapsulación. ¿Qué elementos deberían ser privados? ¿Hay dependencias innecesarias?"<br>
+                                        [pega tu código completo]
+                                    </div>
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Feedback y Mejoras Identificadas</h3>
+                                    <textarea id="notesLab6" placeholder="¿Qué mejoras te sugirieron? ¿Qué cambios realizarás?"></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab6">
+                                    <span>He completado el Lab 6</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 7: Prueba con Datos Reales (25 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Ejecuta tu paquete con datos de tu base de datos y documenta los resultados.</p>
+
+                                <h4>Plan de Pruebas</h4>
+                                <p>Crea bloques PL/SQL anónimos para probar cada procedimiento y función:</p>
+
+                                <div class="code-block">BEGIN
+    <span class="comment">-- Prueba 1: Crear un nuevo menú</span>
+    pkg_gestion_menus.crear_menu('Menú Diabético');
+    DBMS_OUTPUT.PUT_LINE('✓ Menú creado exitosamente');
+    
+    <span class="comment">-- Prueba 2: Agregar platillos al menú</span>
+    pkg_gestion_menus.agregar_platillo_a_menu(1, 10);
+    pkg_gestion_menus.agregar_platillo_a_menu(1, 11);
+    DBMS_OUTPUT.PUT_LINE('✓ Platillos agregados');
+    
+    <span class="comment">-- Prueba 3: Calcular costo</span>
+    DECLARE
+        v_costo NUMBER;
+    BEGIN
+        v_costo := pkg_gestion_menus.obtener_costo_menu(1);
+        DBMS_OUTPUT.PUT_LINE('Costo del menú:  || v_costo);
+    END;
+    
+    <span class="comment">-- Prueba 4: Caso de error (menú inexistente)</span>
+    BEGIN
+        pkg_gestion_menus.agregar_platillo_a_menu(999, 10);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('✓ Error manejado correctamente: ' || SQLERRM);
+    END;
+END;</div>
+
+                                <h4>Casos de Prueba Sugeridos</h4>
+                                <div class="example-box">
+                                    <strong>1. Caso Exitoso:</strong> Operación normal con datos válidos<br>
+                                    <strong>2. Caso Límite:</strong> Valores mínimos, máximos o especiales<br>
+                                    <strong>3. Caso de Error:</strong> Datos inválidos para verificar manejo de excepciones<br>
+                                    <strong>4. Caso Complejo:</strong> Múltiples operaciones en secuencia
+                                </div>
+
+                                <div class="tips-section">
+                                    <h4><i class="fas fa-lightbulb"></i> ¿Estancado? Preguntas guía</h4>
+                                    <ul>
+                                        <li>¿Qué escenarios reales puede enfrentar mi paquete?</li>
+                                        <li>¿Qué pasa si los datos de entrada son incorrectos o nulos?</li>
+                                        <li>¿Las excepciones se manejan de forma clara y útil?</li>
+                                        <li>¿Los procedimientos funcionan tanto solos como en combinación?</li>
+                                    </ul>
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Resultados de las Pruebas</h3>
+                                    <textarea id="notesLab7" placeholder="Documenta:
+- Qué probaste
+- Qué funcionó correctamente
+- Qué errores encontraste
+- Qué ajustes realizaste"></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab7">
+                                    <span>He completado el Lab 7</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-flask"></i> Lab 8: Reflexión Final del Taller (15 min)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Actividad:</strong> Reflexiona sobre todo el proceso de aprendizaje y consolida tus conocimientos.</p>
+
+                                <div class="reflection-box">
+                                    <h4><i class="fas fa-brain"></i> Reflexión Final</h4>
+                                    <div class="reflection-question">
+                                        <strong>1.</strong> ¿Cuándo es apropiado usar un paquete en lugar de procedimientos sueltos?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>2.</strong> ¿Qué ventajas concretas observaste al agrupar tu código en un paquete?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>3.</strong> ¿Cómo decidiste qué hacer público y qué privado?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>4.</strong> ¿Qué fue lo más desafiante del taller? ¿Cómo lo resolviste?
+                                    </div>
+                                    <div class="reflection-question">
+                                        <strong>5.</strong> ¿Qué otros paquetes podrías crear para tu base de datos?
+                                    </div>
+                                </div>
+
+                                <h4>Conexión con Conceptos Clave</h4>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div>
+                                        <strong>Cohesión:</strong> Aprendiste a agrupar elementos relacionados que "pertenecen juntos" y tienen un propósito común.
+                                    </div>
+                                </div>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div>
+                                        <strong>Acoplamiento:</strong> Minimizaste dependencias innecesarias, haciendo que tu paquete sea más independiente y reutilizable.
+                                    </div>
+                                </div>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <div>
+                                        <strong>Encapsulación:</strong> Distinguiste entre interfaz pública (SPEC) e implementación privada (BODY), exponiendo solo lo necesario.
+                                    </div>
+                                </div>
+
+                                <h4>Próximos Pasos</h4>
+                                <div class="example-box">
+                                    <strong>Para seguir aprendiendo:</strong><br>
+                                    • Crea un segundo paquete complementario a este<br>
+                                    • Explora cómo un paquete puede llamar a otro (acoplamiento controlado)<br>
+                                    • Investiga sobre variables globales en paquetes y cuándo usarlas<br>
+                                    • Documenta tus paquetes con comentarios estilo JavaDoc
+                                </div>
+
+                                <div class="notes-section">
+                                    <h3><i class="fas fa-pencil-alt"></i> Mis Aprendizajes Clave</h3>
+                                    <textarea id="notesLab8" placeholder="Resume en tus propias palabras:
+- Lo más importante que aprendiste
+- Conceptos que ahora entiendes mejor
+- Dudas que aún tienes
+- Ideas para aplicar en tu proyecto"></textarea>
+                                </div>
+
+                                <label class="checkbox-item" onclick="toggleCheck(this)">
+                                    <input type="checkbox" data-lab="lab8">
+                                    <span>He completado el Lab 8</span>
+                                </label>
+
+                                <div class="alert alert-success" style="margin-top: 1.5rem;">
+                                    <i class="fas fa-trophy"></i>
+                                    <div>
+                                        <strong>¡Felicitaciones!</strong> Has completado el taller completo de Paquetes en PL/SQL. Ahora tienes las herramientas para organizar tu código con profesionalismo, aplicando cohesión, bajo acoplamiento y encapsulación.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="recursos" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-book"></i> Recursos de Apoyo</h2>
+                
+                <h3>📚 Referencia Rápida: Sintaxis de Paquetes</h3>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Estructura Básica de un Paquete</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="code-block"><span class="comment">-- ESPECIFICACIÓN (SPEC) - Lo público</span>
+CREATE OR REPLACE PACKAGE nombre_pkg AS
+    <span class="comment">-- Variables públicas (usar con moderación)</span>
+    variable_publica TIPO;
+    
+    <span class="comment">-- Procedimientos públicos</span>
+    PROCEDURE proc_publico(parametros);
+    
+    <span class="comment">-- Funciones públicas</span>
+    FUNCTION func_publica(parametros) RETURN tipo;
+END nombre_pkg;
+/
+
+<span class="comment">-- CUERPO (BODY) - La implementación</span>
+CREATE OR REPLACE PACKAGE BODY nombre_pkg AS
+    
+    <span class="comment">-- Variables privadas (solo visibles dentro del paquete)</span>
+    variable_privada TIPO;
+    
+    <span class="comment">-- Procedimientos/funciones privadas</span>
+    FUNCTION validacion_privada RETURN BOOLEAN AS
+    BEGIN
+        RETURN TRUE;
+    END;
+    
+    <span class="comment">-- Implementación de elementos públicos</span>
+    PROCEDURE proc_publico(parametros) AS
+    BEGIN
+        <span class="comment">-- Lógica aquí</span>
+    END;
+    
+    FUNCTION func_publica(parametros) RETURN tipo AS
+    BEGIN
+        RETURN valor;
+    END;
+    
+END nombre_pkg;
+/</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Cómo Llamar a un Paquete</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="code-block"><span class="comment">-- Llamar a un procedimiento del paquete</span>
+BEGIN
+    nombre_pkg.proc_publico(parametros);
+END;
+/
+
+<span class="comment">-- Usar una función del paquete</span>
+DECLARE
+    resultado TIPO;
+BEGIN
+    resultado := nombre_pkg.func_publica(parametros);
+    DBMS_OUTPUT.PUT_LINE('Resultado: ' || resultado);
+END;
+/
+
+<span class="comment">-- Acceder a variables públicas</span>
+BEGIN
+    nombre_pkg.variable_publica := valor;
+END;
+/</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Manejo de Excepciones en Paquetes</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="code-block">PROCEDURE mi_procedimiento(param TIPO) AS
+BEGIN
+    <span class="comment">-- Lógica normal</span>
+    INSERT INTO tabla VALUES (param);
+    COMMIT;
+    
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20001, 'Valor duplicado');
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Datos no encontrados');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20999, 'Error: ' || SQLERRM);
+END;</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>💡 Patrones Comunes de Paquetes</h3>
+                <div class="example-box">
+                    <strong>1. Paquete de Gestión de Entidad:</strong><br>
+                    PKG_GESTION_CLIENTES → crear, modificar, eliminar, consultar clientes<br><br>
+                    
+                    <strong>2. Paquete de Operaciones de Negocio:</strong><br>
+                    PKG_VENTAS → procesar venta, calcular descuento, generar factura<br><br>
+                    
+                    <strong>3. Paquete de Reportes:</strong><br>
+                    PKG_REPORTES → reporte ventas mensual, top productos, inventario bajo<br><br>
+                    
+                    <strong>4. Paquete de Utilidades:</strong><br>
+                    PKG_UTILS → validaciones comunes, formateo, conversiones
+                </div>
+
+                <h3>🎯 Checklist de Calidad para Paquetes</h3>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Verificación de Cohesión</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <ul>
+                                    <li>☐ Todos los elementos trabajan con la misma entidad o proceso</li>
+                                    <li>☐ El nombre del paquete describe claramente su propósito</li>
+                                    <li>☐ Si elimino un elemento, los demás siguen teniendo sentido juntos</li>
+                                    <li>☐ No mezclo diferentes áreas de responsabilidad</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Verificación de Acoplamiento</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <ul>
+                                    <li>☐ El paquete puede funcionar de manera relativamente independiente</li>
+                                    <li>☐ Las dependencias externas son claras y justificadas</li>
+                                    <li>☐ No dependo excesivamente de variables globales externas</li>
+                                    <li>☐ Los parámetros de entrada/salida son simples y bien definidos</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Verificación de Encapsulación</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <ul>
+                                    <li>☐ Solo lo necesario está en el SPEC (público)</li>
+                                    <li>☐ Las validaciones y funciones auxiliares son privadas</li>
+                                    <li>☐ No expongo detalles de implementación innecesarios</li>
+                                    <li>☐ Los usuarios del paquete no necesitan conocer su lógica interna</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>❓ Preguntas Frecuentes</h3>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Cuándo usar un paquete vs procedimientos sueltos?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check"></i>
+                                    <div>
+                                        <strong>Usa un paquete cuando:</strong><br>
+                                        • Tienes múltiples procedimientos/funciones relacionados<br>
+                                        • Necesitas compartir variables o estado entre procedimientos<br>
+                                        • Quieres ocultar lógica de implementación (privada)<br>
+                                        • Necesitas organizar código complejo de manera profesional
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div>
+                                        <strong>Usa procedimientos sueltos cuando:</strong><br>
+                                        • Es una operación única y simple<br>
+                                        • No tiene relación lógica con otros procedimientos<br>
+                                        • Es temporal o experimental
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Puedo tener variables globales en un paquete?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Sí, pero con cuidado.</strong> Las variables declaradas en el SPEC son públicas y persisten durante toda la sesión.</p>
+                                <div class="code-block">CREATE OR REPLACE PACKAGE pkg_config AS
+    <span class="comment">-- Variable pública (usar con precaución)</span>
+    g_modo_debug BOOLEAN := FALSE;
+    
+    PROCEDURE activar_debug;
+END;</div>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div>
+                                        <strong>Precaución:</strong> Las variables globales pueden causar efectos secundarios difíciles de rastrear. Úsalas solo para configuración o estado que realmente necesite ser compartido.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Cómo depuro un paquete?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Técnicas útiles:</strong></p>
+                                <div class="code-block"><span class="comment">-- 1. Usa DBMS_OUTPUT para mensajes</span>
+DBMS_OUTPUT.PUT_LINE('Valor de x: ' || x);
+
+<span class="comment">-- 2. Registra en una tabla de auditoría</span>
+INSERT INTO log_debug VALUES (SYSDATE, 'pkg_ventas', 'Inicio proceso');
+
+<span class="comment">-- 3. Usa excepciones con mensajes claros</span>
+RAISE_APPLICATION_ERROR(-20001, 'Error en paso X: ' || SQLERRM);
+
+<span class="comment">-- 4. Habilita SERVEROUTPUT</span>
+SET SERVEROUTPUT ON;</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>¿Puedo modificar un paquete sin romper el código existente?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <p><strong>Depende de qué modifiques:</strong></p>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check"></i>
+                                    <div>
+                                        <strong>Cambios seguros (no rompen compatibilidad):</strong><br>
+                                        • Agregar nuevos procedimientos/funciones al SPEC<br>
+                                        • Modificar el BODY sin cambiar las firmas públicas<br>
+                                        • Agregar elementos privados en el BODY
+                                    </div>
+                                </div>
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-times"></i>
+                                    <div>
+                                        <strong>Cambios que rompen compatibilidad:</strong><br>
+                                        • Cambiar parámetros de procedimientos públicos<br>
+                                        • Eliminar elementos del SPEC<br>
+                                        • Cambiar tipos de retorno de funciones públicas
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🔗 Enlaces Útiles</h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-link"></i>
+                    <div>
+                        <strong>Documentación Oficial Oracle:</strong><br>
+                        • <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/lnpls/plsql-packages.html" target="_blank">PL/SQL Packages (Oracle 19c)</a><br>
+                        • <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/lnpls/CREATE-PACKAGE-statement.html" target="_blank">CREATE PACKAGE Statement</a><br>
+                        • <a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/lnpls/CREATE-PACKAGE-BODY-statement.html" target="_blank">CREATE PACKAGE BODY Statement</a>
+                    </div>
+                </div>
+
+                <h3>📝 Plantilla Base para tu Paquete</h3>
+                <div class="code-block"><span class="comment">-- ============================================
+-- PLANTILLA DE PAQUETE PL/SQL
+-- Autor: [Tu nombre]
+-- Fecha: [Fecha]
+-- Descripción: [Qué hace este paquete]
+-- ============================================</span>
+
+<span class="comment">-- ESPECIFICACIÓN</span>
+CREATE OR REPLACE PACKAGE pkg_nombre AS
+    
+    <span class="comment">-- Constantes públicas (opcional)</span>
+    c_constante CONSTANT VARCHAR2(20) := 'VALOR';
+    
+    <span class="comment">-- Procedimientos públicos</span>
+    PROCEDURE operacion1(
+        p_param1 IN tipo,
+        p_param2 OUT tipo
+    );
+    
+    <span class="comment">-- Funciones públicas</span>
+    FUNCTION consulta1(p_id NUMBER) RETURN tipo;
+    
+END pkg_nombre;
+/
+
+<span class="comment">-- CUERPO</span>
+CREATE OR REPLACE PACKAGE BODY pkg_nombre AS
+    
+    <span class="comment">-- Variables privadas</span>
+    v_privada tipo;
+    
+    <span class="comment">-- Funciones privadas</span>
+    FUNCTION validar(p_dato tipo) RETURN BOOLEAN AS
+    BEGIN
+        <span class="comment">-- Lógica de validación</span>
+        RETURN TRUE;
+    END validar;
+    
+    <span class="comment">-- Implementación de elementos públicos</span>
+    PROCEDURE operacion1(
+        p_param1 IN tipo,
+        p_param2 OUT tipo
+    ) AS
+    BEGIN
+        <span class="comment">-- Validaciones</span>
+        IF NOT validar(p_param1) THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Datos inválidos');
+        END IF;
+        
+        <span class="comment">-- Lógica principal</span>
+        <span class="comment">-- ...</span>
+        
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            RAISE;
+    END operacion1;
+    
+    FUNCTION consulta1(p_id NUMBER) RETURN tipo AS
+        v_resultado tipo;
+    BEGIN
+        SELECT campo INTO v_resultado
+        FROM tabla
+        WHERE id = p_id;
+        
+        RETURN v_resultado;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN NULL;
+        WHEN OTHERS THEN
+            RAISE;
+    END consulta1;
+    
+END pkg_nombre;
+/</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><i class="fas fa-graduation-cap"></i> Taller Práctico de Paquetes en PL/SQL</p>
+        <p>Diseñado para aprender haciendo, experimentando y reflexionando</p>
+    </footer>
+
+    <script>
+        // Funcionalidad de pestañas
+        function openTab(tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            contents.forEach(content => content.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Funcionalidad de acordeón
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const isActive = header.classList.contains('active');
+            
+            // Cerrar todos los demás
+            document.querySelectorAll('.accordion-header').forEach(h => {
+                h.classList.remove('active');
+                h.nextElementSibling.classList.remove('active');
+            });
+            
+            // Abrir el clickeado si no estaba activo
+            if (!isActive) {
+                header.classList.add('active');
+                content.classList.add('active');
+            }
+        }
+
+        // Funcionalidad de checkboxes
+        function toggleCheck(item) {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            
+            setTimeout(() => {
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+                updateProgress();
+                saveProgress();
+            }, 0);
+        }
+
+        // Actualizar barra de progreso
+        function updateProgress() {
+            const total = document.querySelectorAll('input[type="checkbox"]').length;
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const percentage = Math.round((checked / total) * 100);
+            
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = percentage + '%';
+        }
+
+        // Guardar progreso en localStorage
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const progress = {};
+            
+            checkboxes.forEach(cb => {
+                const lab = cb.dataset.lab;
+                progress[lab] = cb.checked;
+            });
+            
+            localStorage.setItem('plsqlProgress', JSON.stringify(progress));
+            
+            // Guardar notas
+            for (let i = 1; i <= 8; i++) {
+                const noteArea = document.getElementById('notesLab' + i);
+                if (noteArea) {
+                    localStorage.setItem('notes_lab' + i, noteArea.value);
+                }
+            }
+        }
+
+        // Cargar progreso desde localStorage
+        function loadProgress() {
+            const saved = localStorage.getItem('plsqlProgress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                
+                Object.keys(progress).forEach(lab => {
+                    const checkbox = document.querySelector(`input[data-lab="${lab}"]`);
+                    if (checkbox) {
+                        checkbox.checked = progress[lab];
+                        if (progress[lab]) {
+                            checkbox.closest('.checkbox-item').classList.add('checked');
+                        }
+                    }
+                });
+            }
+            
+            // Cargar notas
+            for (let i = 1; i <= 8; i++) {
+                const noteArea = document.getElementById('notesLab' + i);
+                if (noteArea) {
+                    const savedNote = localStorage.getItem('notes_lab' + i);
+                    if (savedNote) {
+                        noteArea.value = savedNote;
+                    }
+                    
+                    // Guardar automáticamente al escribir
+                    noteArea.addEventListener('input', saveProgress);
+                }
+            }
+            
+            updateProgress();
+        }
+
+        // Cargar todo al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            
+            // Agregar eventos a los checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    updateProgress();
+                    saveProgress();
+                });
+            });
+        });
+
+        // Abrir primer acordeón de cada sección automáticamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstAccordions = document.querySelectorAll('.tab-content .accordion-item:first-child .accordion-header');
+            // No abrimos automáticamente para dar más control al usuario
+        });
+    </script>
+</body>
+</html>

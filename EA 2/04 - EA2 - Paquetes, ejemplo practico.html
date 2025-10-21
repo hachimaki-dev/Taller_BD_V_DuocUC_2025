@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PL/SQL Package - Caso Práctico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            display: none;
+            height: 100vh;
+            padding: 3vh 4vw;
+            flex-direction: column;
+            justify-content: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            background: linear-gradient(135deg, #e94560, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2vh;
+            text-shadow: 0 0 30px rgba(233, 69, 96, 0.3);
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: #ec4899;
+            margin-bottom: 2vh;
+            text-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+        }
+
+        h3 {
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            color: #a855f7;
+            margin: 2vh 0 1vh 0;
+        }
+
+        p, li {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            line-height: 1.6;
+            margin-bottom: 1vh;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: #b8b8d1;
+            margin-bottom: 3vh;
+        }
+
+        .code-container {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid #a855f7;
+            border-radius: 8px;
+            padding: 2vh 2vw;
+            margin: 2vh 0;
+            max-height: 50vh;
+            overflow-x: auto;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+        }
+
+        pre {
+            margin: 0;
+            font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+            line-height: 1.4;
+            white-space: pre;
+        }
+
+        code {
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+        }
+
+        .keyword { color: #ec4899; font-weight: bold; }
+        .function { color: #a855f7; }
+        .string { color: #34d399; }
+        .comment { color: #6b7280; font-style: italic; }
+        .number { color: #fbbf24; }
+
+        .highlight-box {
+            background: rgba(168, 85, 247, 0.1);
+            border-left: 4px solid #a855f7;
+            padding: 2vh 2vw;
+            margin: 2vh 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: rgba(52, 211, 153, 0.1);
+            border-left: 4px solid #34d399;
+            padding: 2vh 2vw;
+            margin: 2vh 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+            padding: 2vh 2vw;
+            margin: 2vh 0;
+            border-radius: 4px;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2vw;
+            margin: 2vh 0;
+        }
+
+        .three-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5vw;
+            margin: 2vh 0;
+        }
+
+        @media (max-width: 768px) {
+            .two-columns, .three-columns {
+                grid-template-columns: 1fr;
+                gap: 2vh;
+            }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 3vh;
+            right: 3vw;
+            display: flex;
+            gap: 1vw;
+            z-index: 1000;
+        }
+
+        button {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            border: none;
+            padding: 1vh 2vw;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.6);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 2vh;
+            right: 3vw;
+            color: #a855f7;
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            font-weight: bold;
+        }
+
+        ul {
+            margin-left: 2vw;
+            margin-top: 1vh;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 1vw;
+        }
+
+        .content-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-wrapper::-webkit-scrollbar-track {
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .content-wrapper::-webkit-scrollbar-thumb {
+            background: #a855f7;
+            border-radius: 3px;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 0.5vw;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+            padding: 0.5vh 1vw;
+            border-radius: 20px;
+            font-size: clamp(0.8rem, 1.2vw, 0.9rem);
+            font-weight: bold;
+            margin: 0.5vh;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2vh 0;
+            font-size: clamp(0.8rem, 1.3vw, 1rem);
+        }
+
+        th, td {
+            padding: 1vh 1vw;
+            text-align: left;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        th {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: rgba(236, 72, 153, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="slide-counter" id="slideCounter">1 / 10</div>
+
+        <!-- Slide 1: Portada -->
+        <div class="slide active">
+            <div class="content-wrapper">
+                <h1>🍽️ CASO PRÁCTICO</h1>
+                <p class="subtitle">Creando un Paquete para Gestión de Menús</p>
+                
+                <div class="highlight-box">
+                    <h3>🎯 Objetivo del Tutorial</h3>
+                    <p>Aplicar TODO lo aprendido sobre paquetes en un caso real: gestionar menús de restaurante con control de stock de ingredientes.</p>
+                </div>
+
+                <div class="two-columns">
+                    <div class="success-box">
+                        <h3>✅ Lo que haremos:</h3>
+                        <ul>
+                            <li>Crear tabla STOCK_INGREDIENTES</li>
+                            <li>Insertar datos de prueba</li>
+                            <li>Diseñar PKG_GESTION_MENU</li>
+                            <li>Implementar funciones prácticas</li>
+                            <li>Probar todo el sistema</li>
+                        </ul>
+                    </div>
+                    <div class="warning-box">
+                        <h3>🎨 Otros caminos posibles:</h3>
+                        <ul>
+                            <li>PKG_INVENTARIO (alertas stock)</li>
+                            <li>PKG_REPORTES (estadísticas)</li>
+                            <li>PKG_COSTOS (análisis financiero)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p style="margin-top: 3vh; color: #b8b8d1; font-style: italic;">Usa las flechas ← → o los botones para navegar</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Contexto BD -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>📊 Entendiendo la Base de Datos</h2>
+                <p>Antes de crear el paquete, veamos qué tenemos:</p>
+
+                <div class="three-columns">
+                    <div class="highlight-box">
+                        <h3>🍽️ MENUS</h3>
+                        <p><small>Almacena menús del restaurante</small></p>
+                        <ul style="font-size: 0.9em;">
+                            <li>id</li>
+                            <li>nombre</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box">
+                        <h3>🍕 PLATILLOS</h3>
+                        <p><small>Platillos individuales</small></p>
+                        <ul style="font-size: 0.9em;">
+                            <li>id</li>
+                            <li>nombre</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box">
+                        <h3>🥕 INGREDIENTES</h3>
+                        <p><small>Ingredientes disponibles</small></p>
+                        <ul style="font-size: 0.9em;">
+                            <li>id</li>
+                            <li>nombre</li>
+                            <li>id_tipo</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🔗 Relaciones Existentes:</h3>
+                    <ul>
+                        <li><strong>MENU_PLATILLOS:</strong> Un menú puede tener múltiples platillos</li>
+                        <li><strong>INGREDIENTES_PLATILLOS:</strong> Un platillo usa múltiples ingredientes</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h3>❌ Problema Detectado:</h3>
+                    <p><strong>No tenemos control de stock!</strong> No sabemos cuánto de cada ingrediente hay disponible ni su precio.</p>
+                    <p style="margin-top: 1vh;">🎯 <strong>Solución:</strong> Crear la tabla STOCK_INGREDIENTES</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Creación de Tabla -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🔧 Paso 1: Crear Tabla STOCK_INGREDIENTES</h2>
+                <p>Necesitamos una tabla que controle cantidad y precio de cada ingrediente:</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Tabla para controlar stock y precios de ingredientes</span>
+<span class="keyword">CREATE TABLE</span> STOCK_INGREDIENTES (
+    id_ingrediente <span class="keyword">NUMBER PRIMARY KEY</span>,
+    cantidad       <span class="keyword">NUMBER</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>,  <span class="comment">-- Cantidad disponible (kg, litros, unidades)</span>
+    unidad_medida  <span class="keyword">VARCHAR2</span>(<span class="number">10</span>),          <span class="comment">-- 'kg', 'L', 'unidades'</span>
+    precio_unitario <span class="keyword">NUMBER</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">NOT NULL</span>, <span class="comment">-- Precio por unidad</span>
+    stock_minimo   <span class="keyword">NUMBER</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">5</span>,    <span class="comment">-- Alerta de stock bajo</span>
+    <span class="keyword">FOREIGN KEY</span> (id_ingrediente) <span class="keyword">REFERENCES</span> INGREDIENTES(id)
+);
+
+<span class="keyword">COMMIT</span>;</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>💡 Diseño de la tabla:</h3>
+                    <ul>
+                        <li><strong>id_ingrediente:</strong> Referencia al ingrediente (FK)</li>
+                        <li><strong>cantidad:</strong> Cuánto tenemos disponible (permite decimales)</li>
+                        <li><strong>unidad_medida:</strong> Para saber si es kg, litros, etc.</li>
+                        <li><strong>precio_unitario:</strong> Precio por kg/litro/unidad</li>
+                        <li><strong>stock_minimo:</strong> Para alertas automáticas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Insertar Tipos -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🏷️ Paso 2: Datos de Tipos de Ingredientes</h2>
+                <p>Primero insertemos tipos de ingredientes para categorizar:</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Tipos de ingredientes</span>
+<span class="keyword">INSERT INTO</span> TIPO_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'Vegetales'</span>);
+<span class="keyword">INSERT INTO</span> TIPO_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">2</span>, <span class="string">'Carnes'</span>);
+<span class="keyword">INSERT INTO</span> TIPO_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">3</span>, <span class="string">'Lácteos'</span>);
+<span class="keyword">INSERT INTO</span> TIPO_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="string">'Granos y Pastas'</span>);
+<span class="keyword">INSERT INTO</span> TIPO_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">5</span>, <span class="string">'Condimentos'</span>);
+<span class="keyword">COMMIT</span>;
+
+<span class="comment">-- Ahora insertemos ingredientes reales</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'Tomate'</span>, <span class="number">1</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">2</span>, <span class="string">'Lechuga'</span>, <span class="number">1</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">3</span>, <span class="string">'Cebolla'</span>, <span class="number">1</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="string">'Pollo'</span>, <span class="number">2</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">5</span>, <span class="string">'Carne de Res'</span>, <span class="number">2</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">6</span>, <span class="string">'Queso'</span>, <span class="number">3</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">7</span>, <span class="string">'Leche'</span>, <span class="number">3</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">8</span>, <span class="string">'Arroz'</span>, <span class="number">4</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">9</span>, <span class="string">'Pasta'</span>, <span class="number">4</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">10</span>, <span class="string">'Sal'</span>, <span class="number">5</span>);
+<span class="keyword">INSERT INTO</span> INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">11</span>, <span class="string">'Aceite de Oliva'</span>, <span class="number">5</span>);
+<span class="keyword">COMMIT</span>;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Insertar Stock -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>📦 Paso 3: Cargar Stock Inicial</h2>
+                <p>Ahora insertemos el stock con cantidades y precios:</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Stock inicial de ingredientes (cantidad, unidad, precio, stock_mínimo)</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="number">25.5</span>, <span class="string">'kg'</span>, <span class="number">1500</span>, <span class="number">10</span>);  <span class="comment">-- Tomate</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">2</span>, <span class="number">15.0</span>, <span class="string">'kg'</span>, <span class="number">1200</span>, <span class="number">8</span>);   <span class="comment">-- Lechuga</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">3</span>, <span class="number">18.0</span>, <span class="string">'kg'</span>, <span class="number">900</span>, <span class="number">10</span>);   <span class="comment">-- Cebolla</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="number">30.0</span>, <span class="string">'kg'</span>, <span class="number">5500</span>, <span class="number">15</span>);  <span class="comment">-- Pollo</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">5</span>, <span class="number">20.0</span>, <span class="string">'kg'</span>, <span class="number">7800</span>, <span class="number">12</span>);  <span class="comment">-- Carne de Res</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">6</span>, <span class="number">12.0</span>, <span class="string">'kg'</span>, <span class="number">6500</span>, <span class="number">5</span>);   <span class="comment">-- Queso</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">7</span>, <span class="number">40.0</span>, <span class="string">'L'</span>, <span class="number">1000</span>, <span class="number">20</span>);    <span class="comment">-- Leche</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">8</span>, <span class="number">50.0</span>, <span class="string">'kg'</span>, <span class="number">1200</span>, <span class="number">20</span>);  <span class="comment">-- Arroz</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">9</span>, <span class="number">35.0</span>, <span class="string">'kg'</span>, <span class="number">1800</span>, <span class="number">15</span>);  <span class="comment">-- Pasta</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">10</span>, <span class="number">10.0</span>, <span class="string">'kg'</span>, <span class="number">500</span>, <span class="number">5</span>);   <span class="comment">-- Sal</span>
+<span class="keyword">INSERT INTO</span> STOCK_INGREDIENTES <span class="keyword">VALUES</span> (<span class="number">11</span>, <span class="number">8.5</span>, <span class="string">'L'</span>, <span class="number">8500</span>, <span class="number">3</span>);    <span class="comment">-- Aceite</span>
+<span class="keyword">COMMIT</span>;
+
+<span class="comment">-- Crear algunos platillos de ejemplo</span>
+<span class="keyword">INSERT INTO</span> PLATILLOS <span class="keyword">VALUES</span> (<span class="number">10</span>, <span class="string">'Ensalada César'</span>);
+<span class="keyword">INSERT INTO</span> PLATILLOS <span class="keyword">VALUES</span> (<span class="number">11</span>, <span class="string">'Pollo a la Plancha'</span>);
+<span class="keyword">INSERT INTO</span> PLATILLOS <span class="keyword">VALUES</span> (<span class="number">12</span>, <span class="string">'Pasta Alfredo'</span>);
+<span class="keyword">COMMIT</span>;</code></pre>
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ ¡Base de datos lista!</strong> Ahora sí podemos crear nuestro paquete.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Especificación del Paquete -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>📋 Paso 4: Especificación del Paquete</h2>
+                <p>Definimos la interfaz pública de <code>PKG_GESTION_MENU</code>:</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- ESPECIFICACIÓN: Define QUÉ se puede usar desde afuera</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE</span> pkg_gestion_menu <span class="keyword">IS</span>
+    
+    <span class="comment">-- Variable global: contador de menús creados en esta sesión</span>
+    g_menus_creados <span class="keyword">NUMBER</span> := <span class="number">0</span>;
+    
+    <span class="comment">-- Procedimiento: Crear un menú completo con sus platillos</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">crear_menu_completo</span>(
+        p_nombre_menu <span class="keyword">IN VARCHAR2</span>,
+        p_id_menu     <span class="keyword">IN NUMBER</span>
+    );
+    
+    <span class="comment">-- Función: Calcular el costo total de ingredientes de un menú</span>
+    <span class="keyword">FUNCTION</span> <span class="function">calcular_costo_menu</span>(
+        p_id_menu <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN NUMBER</span>;
+    
+    <span class="comment">-- Función: Verificar si hay stock suficiente para un platillo</span>
+    <span class="keyword">FUNCTION</span> <span class="function">verificar_stock_platillo</span>(
+        p_id_platillo <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN</span>;
+    
+    <span class="comment">-- Procedimiento: Agregar platillo a un menú existente</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">agregar_platillo_a_menu</span>(
+        p_id_menu     <span class="keyword">IN NUMBER</span>,
+        p_id_platillo <span class="keyword">IN NUMBER</span>
+    );
+
+<span class="keyword">END</span> pkg_gestion_menu;
+/</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🎯 Funciones Diseñadas:</h3>
+                    <ul>
+                        <li><span class="badge">PÚBLICA</span> <strong>crear_menu_completo:</strong> Crea menú nuevo</li>
+                        <li><span class="badge">PÚBLICA</span> <strong>calcular_costo_menu:</strong> Suma costos de ingredientes</li>
+                        <li><span class="badge">PÚBLICA</span> <strong>verificar_stock_platillo:</strong> Valida disponibilidad</li>
+                        <li><span class="badge">PÚBLICA</span> <strong>agregar_platillo_a_menu:</strong> Asocia platillo a menú</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Body del Paquete Parte 1 -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🔧 Paso 5: Body del Paquete (Parte 1)</h2>
+                <p>Implementación de las funciones - primera mitad:</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- BODY: Implementación del paquete</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE BODY</span> pkg_gestion_menu <span class="keyword">IS</span>
+    
+    <span class="comment">-- Función PRIVADA: validar que un ingrediente tenga stock</span>
+    <span class="comment">-- Esta función NO está en el SPEC, solo la usa el paquete internamente</span>
+    <span class="keyword">FUNCTION</span> <span class="function">validar_stock_ingrediente</span>(
+        p_id_ingrediente <span class="keyword">IN NUMBER</span>,
+        p_cantidad_necesaria <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN IS</span>
+        v_cantidad_disponible <span class="keyword">NUMBER</span>;
+    <span class="keyword">BEGIN</span>
+        <span class="keyword">SELECT</span> cantidad <span class="keyword">INTO</span> v_cantidad_disponible
+        <span class="keyword">FROM</span> STOCK_INGREDIENTES
+        <span class="keyword">WHERE</span> id_ingrediente = p_id_ingrediente;
+        
+        <span class="keyword">RETURN</span> v_cantidad_disponible >= p_cantidad_necesaria;
+    <span class="keyword">EXCEPTION</span>
+        <span class="keyword">WHEN NO_DATA_FOUND THEN</span>
+            <span class="keyword">RETURN FALSE</span>;
+    <span class="keyword">END</span> validar_stock_ingrediente;
+    
+    <span class="comment">-- Procedimiento PÚBLICO: Crear menú completo</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">crear_menu_completo</span>(
+        p_nombre_menu <span class="keyword">IN VARCHAR2</span>,
+        p_id_menu     <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">IS</span>
+    <span class="keyword">BEGIN</span>
+        <span class="comment">-- Insertar el nuevo menú</span>
+        <span class="keyword">INSERT INTO</span> MENUS (id, nombre)
+        <span class="keyword">VALUES</span> (p_id_menu, p_nombre_menu);
+        
+        <span class="comment">-- Incrementar contador global</span>
+        g_menus_creados := g_menus_creados + <span class="number">1</span>;
+        
+        <span class="keyword">COMMIT</span>;
+        DBMS_OUTPUT.PUT_LINE(<span class="string">'✅ Menú creado: '</span> || p_nombre_menu);
+        DBMS_OUTPUT.PUT_LINE(<span class="string">'📊 Total menús creados en sesión: '</span> || g_menus_creados);
+    <span class="keyword">END</span> crear_menu_completo;
+    
+    <span class="comment">-- Función PÚBLICA: Verificar stock de platillo</span>
+    <span class="keyword">FUNCTION</span> <span class="function">verificar_stock_platillo</span>(
+        p_id_platillo <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN IS</span>
+        v_tiene_stock <span class="keyword">BOOLEAN</span> := <span class="keyword">TRUE</span>;
+        v_count <span class="keyword">NUMBER</span>;
+    <span class="keyword">BEGIN</span>
+        <span class="comment">-- Verificar cada ingrediente del platillo usando función privada</span>
+        <span class="keyword">FOR</span> ingrediente <span class="keyword">IN</span> (
+            <span class="keyword">SELECT</span> id_ingrediente 
+            <span class="keyword">FROM</span> INGREDIENTES_PLATILLOS 
+            <span class="keyword">WHERE</span> id_platillo = p_id_platillo
+        ) <span class="keyword">LOOP</span>
+            <span class="keyword">IF NOT</span> validar_stock_ingrediente(ingrediente.id_ingrediente, <span class="number">1</span>) <span class="keyword">THEN</span>
+                v_tiene_stock := <span class="keyword">FALSE</span>;
+                <span class="keyword">EXIT</span>;
+            <span class="keyword">END IF</span>;
+        <span class="keyword">END LOOP</span>;
+        
+        <span class="keyword">RETURN</span> v_tiene_stock;
+    <span class="keyword">END</span> verificar_stock_platillo;
+    
+    <span class="comment">-- Función PÚBLICA: Calcular costo del menú</span>
+    <span class="keyword">FUNCTION</span> <span class="function">calcular_costo_menu</span>(
+        p_id_menu <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN NUMBER IS</span>
+        v_costo_total <span class="keyword">NUMBER</span> := <span class="number">0</span>;
+    <span class="keyword">BEGIN</span>
+        <span class="comment">-- Sumar el precio de todos los ingredientes de todos los platillos del menú</span>
+        <span class="keyword">SELECT</span> <span class="keyword">NVL</span>(<span class="keyword">SUM</span>(s.precio_unitario), <span class="number">0</span>)
+        <span class="keyword">INTO</span> v_costo_total
+        <span class="keyword">FROM</span> MENU_PLATILLOS mp
+        <span class="keyword">INNER JOIN</span> INGREDIENTES_PLATILLOS ip <span class="keyword">ON</span> mp.id_platillo = ip.id_platillo
+        <span class="keyword">INNER JOIN</span> STOCK_INGREDIENTES s <span class="keyword">ON</span> ip.id_ingrediente = s.id_ingrediente
+        <span class="keyword">WHERE</span> mp.id_menu = p_id_menu;
+        
+        <span class="keyword">RETURN</span> v_costo_total;
+    <span class="keyword">EXCEPTION</span>
+        <span class="keyword">WHEN NO_DATA_FOUND THEN</span>
+            <span class="keyword">RETURN</span> <span class="number">0</span>;
+    <span class="keyword">END</span> calcular_costo_menu;
+    
+    <span class="comment">-- Procedimiento PÚBLICO: Agregar platillo al menú</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">agregar_platillo_a_menu</span>(
+        p_id_menu     <span class="keyword">IN NUMBER</span>,
+        p_id_platillo <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">IS</span>
+    <span class="keyword">BEGIN</span>
+        <span class="comment">-- Verificar stock antes de agregar</span>
+        <span class="keyword">IF</span> verificar_stock_platillo(p_id_platillo) <span class="keyword">THEN</span>
+            <span class="keyword">INSERT INTO</span> MENU_PLATILLOS (id_menu, id_platillo)
+            <span class="keyword">VALUES</span> (p_id_menu, p_id_platillo);
+            <span class="keyword">COMMIT</span>;
+            DBMS_OUTPUT.PUT_LINE(<span class="string">'✅ Platillo agregado al menú'</span>);
+        <span class="keyword">ELSE</span>
+            DBMS_OUTPUT.PUT_LINE(<span class="string">'⚠️ Stock insuficiente para este platillo'</span>);
+        <span class="keyword">END IF</span>;
+    <span class="keyword">END</span> agregar_platillo_a_menu;
+
+<span class="keyword">END</span> pkg_gestion_menu;
+/</code></pre>
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ Paquete completado!</strong> Nota cómo <code>validar_stock_ingrediente</code> es PRIVADA.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Preparar Datos de Prueba -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🧪 Paso 6: Preparar Datos de Prueba</h2>
+                <p>Antes de probar, creemos relaciones entre ingredientes y platillos:</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Relacionar ingredientes con platillos</span>
+<span class="comment">-- Ensalada César (ID 10) usa: Lechuga, Tomate, Queso, Aceite</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">2</span>, <span class="number">10</span>); <span class="comment">-- Lechuga</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="number">10</span>); <span class="comment">-- Tomate</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">6</span>, <span class="number">10</span>); <span class="comment">-- Queso</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">11</span>, <span class="number">10</span>); <span class="comment">-- Aceite</span>
+
+<span class="comment">-- Pollo a la Plancha (ID 11) usa: Pollo, Sal, Aceite</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="number">11</span>); <span class="comment">-- Pollo</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">10</span>, <span class="number">11</span>); <span class="comment">-- Sal</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">11</span>, <span class="number">11</span>); <span class="comment">-- Aceite</span>
+
+<span class="comment">-- Pasta Alfredo (ID 12) usa: Pasta, Queso, Leche</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">9</span>, <span class="number">12</span>); <span class="comment">-- Pasta</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">6</span>, <span class="number">12</span>); <span class="comment">-- Queso</span>
+<span class="keyword">INSERT INTO</span> INGREDIENTES_PLATILLOS <span class="keyword">VALUES</span> (<span class="number">7</span>, <span class="number">12</span>); <span class="comment">-- Leche</span>
+
+<span class="keyword">COMMIT</span>;</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>📊 Resumen de Platillos:</h3>
+                    <table>
+                        <tr>
+                            <th>Platillo</th>
+                            <th>Ingredientes</th>
+                            <th>Stock OK</th>
+                        </tr>
+                        <tr>
+                            <td>Ensalada César</td>
+                            <td>Lechuga, Tomate, Queso, Aceite</td>
+                            <td style="color: #34d399;">✅ Sí</td>
+                        </tr>
+                        <tr>
+                            <td>Pollo a la Plancha</td>
+                            <td>Pollo, Sal, Aceite</td>
+                            <td style="color: #34d399;">✅ Sí</td>
+                        </tr>
+                        <tr>
+                            <td>Pasta Alfredo</td>
+                            <td>Pasta, Queso, Leche</td>
+                            <td style="color: #34d399;">✅ Sí</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Pruebas del Paquete -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🚀 Paso 7: Probando el Paquete</h2>
+                <p>¡Hora de usar nuestro paquete!</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Habilitar salida de mensajes</span>
+<span class="keyword">SET SERVEROUTPUT ON</span>;
+
+<span class="comment">-- 1. Crear un nuevo menú ejecutivo</span>
+<span class="keyword">BEGIN</span>
+    pkg_gestion_menu.crear_menu_completo(<span class="string">'Menú Ejecutivo Lunes'</span>, <span class="number">100</span>);
+<span class="keyword">END</span>;
+/
+<span class="comment">-- Salida: ✅ Menú creado: Menú Ejecutivo Lunes
+--         📊 Total menús creados en sesión: 1</span>
+
+<span class="comment">-- 2. Agregar platillos al menú</span>
+<span class="keyword">BEGIN</span>
+    pkg_gestion_menu.agregar_platillo_a_menu(<span class="number">100</span>, <span class="number">10</span>); <span class="comment">-- Ensalada</span>
+    pkg_gestion_menu.agregar_platillo_a_menu(<span class="number">100</span>, <span class="number">11</span>); <span class="comment">-- Pollo</span>
+<span class="keyword">END</span>;
+/
+<span class="comment">-- Salida: ✅ Platillo agregado al menú (x2)</span>
+
+<span class="comment">-- 3. Verificar stock de un platillo específico</span>
+<span class="keyword">DECLARE</span>
+    v_hay_stock <span class="keyword">BOOLEAN</span>;
+<span class="keyword">BEGIN</span>
+    v_hay_stock := pkg_gestion_menu.verificar_stock_platillo(<span class="number">12</span>); <span class="comment">-- Pasta</span>
+    
+    <span class="keyword">IF</span> v_hay_stock <span class="keyword">THEN</span>
+        DBMS_OUTPUT.PUT_LINE(<span class="string">'✅ Stock disponible para Pasta Alfredo'</span>);
+    <span class="keyword">ELSE</span>
+        DBMS_OUTPUT.PUT_LINE(<span class="string">'❌ Stock insuficiente'</span>);
+    <span class="keyword">END IF</span>;
+<span class="keyword">END</span>;
+/
+
+<span class="comment">-- 4. Calcular costo del menú</span>
+<span class="keyword">DECLARE</span>
+    v_costo <span class="keyword">NUMBER</span>;
+<span class="keyword">BEGIN</span>
+    v_costo := pkg_gestion_menu.calcular_costo_menu(<span class="number">100</span>);
+    DBMS_OUTPUT.PUT_LINE(<span class="string">'💰 Costo total del menú: </span> || v_costo);
+<span class="keyword">END</span>;
+/</code></pre>
+                </div>
+
+                <div class="success-box">
+                    <h3>🎉 Resultados Esperados:</h3>
+                    <ul>
+                        <li>Menú creado exitosamente</li>
+                        <li>Platillos agregados (con validación de stock)</li>
+                        <li>Costo calculado automáticamente</li>
+                        <li>Contador global funcionando</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Otros Caminos -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🎨 Otros Caminos Posibles</h2>
+                <p>Existen múltiples formas de organizar la lógica en paquetes. Veamos alternativas:</p>
+
+                <div class="three-columns">
+                    <div class="highlight-box">
+                        <h3>📦 PKG_INVENTARIO</h3>
+                        <p><strong>Enfoque:</strong> Control de stock</p>
+                        <ul style="font-size: 0.85em;">
+                            <li>alertas_stock_bajo()</li>
+                            <li>reabastecer_ingrediente()</li>
+                            <li>registrar_uso()</li>
+                            <li>generar_orden_compra()</li>
+                        </ul>
+                        <p style="margin-top: 1vh; color: #34d399;"><strong>Cuándo usar:</strong> Si el foco es la logística</p>
+                    </div>
+                    
+                    <div class="highlight-box">
+                        <h3>📊 PKG_REPORTES</h3>
+                        <p><strong>Enfoque:</strong> Análisis de datos</p>
+                        <ul style="font-size: 0.85em;">
+                            <li>platillos_mas_vendidos()</li>
+                            <li>ingredientes_criticos()</li>
+                            <li>costo_promedio_menu()</li>
+                            <li>tendencias_consumo()</li>
+                        </ul>
+                        <p style="margin-top: 1vh; color: #34d399;"><strong>Cuándo usar:</strong> Para dashboards y BI</p>
+                    </div>
+                    
+                    <div class="highlight-box">
+                        <h3>💰 PKG_COSTOS</h3>
+                        <p><strong>Enfoque:</strong> Análisis financiero</p>
+                        <ul style="font-size: 0.85em;">
+                            <li>calcular_margen()</li>
+                            <li>optimizar_precios()</li>
+                            <li>proyectar_gastos()</li>
+                            <li>analizar_rentabilidad()</li>
+                        </ul>
+                        <p style="margin-top: 1vh; color: #34d399;"><strong>Cuándo usar:</strong> Para contabilidad</p>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <h3>🎯 Criterios para Diseñar Paquetes:</h3>
+                    <ul>
+                        <li><strong>Cohesión:</strong> Funciones relacionadas van juntas</li>
+                        <li><strong>Responsabilidad única:</strong> Cada paquete tiene un propósito claro</li>
+                        <li><strong>Independencia:</strong> Un paquete puede usar otro (modularidad)</li>
+                        <li><strong>Escalabilidad:</strong> Fácil agregar nuevas funciones sin romper código existente</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 2vh;">
+                    <h3>💡 Ejemplo de Integración:</h3>
+                    <p><code>PKG_GESTION_MENU</code> podría llamar a <code>PKG_INVENTARIO.registrar_uso()</code> cuando se crea un menú, y a <code>PKG_COSTOS.calcular_margen()</code> para sugerir precio de venta.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Resumen Final -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🎓 Resumen: Lo que Lograste</h2>
+                
+                <div class="success-box">
+                    <h3>✅ Completaste el Caso Práctico:</h3>
+                    <ul>
+                        <li>Diseñaste y creaste tabla <code>STOCK_INGREDIENTES</code></li>
+                        <li>Insertaste datos realistas de prueba</li>
+                        <li>Creaste el paquete <code>PKG_GESTION_MENU</code> completo</li>
+                        <li>Implementaste funciones públicas y privadas</li>
+                        <li>Usaste variables globales de sesión</li>
+                        <li>Probaste todo el sistema</li>
+                    </ul>
+                </div>
+
+                <div class="two-columns" style="margin-top: 3vh;">
+                    <div class="highlight-box">
+                        <h3>🔑 Conceptos Aplicados:</h3>
+                        <ul>
+                            <li>✅ Especificación vs Body</li>
+                            <li>✅ Funciones públicas/privadas</li>
+                            <li>✅ Variables globales (<code>g_menus_creados</code>)</li>
+                            <li>✅ Encapsulamiento de lógica</li>
+                            <li>✅ Organización del código</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box">
+                        <h3>🚀 Ventajas Obtenidas:</h3>
+                        <ul>
+                            <li>✅ Código organizado y mantenible</li>
+                            <li>✅ Reutilización de funciones</li>
+                            <li>✅ Validaciones centralizadas</li>
+                            <li>✅ Fácil de extender</li>
+                            <li>✅ Lógica protegida</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="warning-box" style="margin-top: 3vh;">
+                    <h3>🎯 Próximos Desafíos:</h3>
+                    <ol>
+                        <li>Agrega sobrecarga a <code>crear_menu_completo()</code> para aceptar lista de platillos</li>
+                        <li>Crea <code>PKG_INVENTARIO</code> con función de alertas</li>
+                        <li>Implementa un trigger que use el paquete automáticamente</li>
+                        <li>Agrega manejo de excepciones personalizado</li>
+                    </ol>
+                </div>
+
+                <div style="text-align: center; margin-top: 4vh; padding: 3vh; background: rgba(236, 72, 153, 0.1); border-radius: 10px;">
+                    <h3 style="color: #ec4899; font-size: clamp(1.5rem, 3vw, 2rem);">🎉 ¡Felicitaciones!</h3>
+                    <p style="font-size: clamp(1rem, 1.8vw, 1.3rem); color: #b8b8d1; margin-top: 1vh;">
+                        Ya dominas los fundamentos de PL/SQL Packages<br>
+                        ¡Ahora aplícalos en tus propios proyectos!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <button id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+        <button id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        showSlide(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PL/SQL Packages Tutorial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            display: none;
+            height: 100vh;
+            padding: 3vh 4vw;
+            flex-direction: column;
+            justify-content: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            background: linear-gradient(135deg, #e94560, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2vh;
+            text-shadow: 0 0 30px rgba(233, 69, 96, 0.3);
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: #ec4899;
+            margin-bottom: 2vh;
+            text-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+        }
+
+        h3 {
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            color: #a855f7;
+            margin: 2vh 0 1vh 0;
+        }
+
+        p, li {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            line-height: 1.6;
+            margin-bottom: 1vh;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: #b8b8d1;
+            margin-bottom: 3vh;
+        }
+
+        .code-container {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid #a855f7;
+            border-radius: 8px;
+            padding: 2vh 2vw;
+            margin: 2vh 0;
+            max-height: 45vh;
+            overflow-x: auto;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+        }
+
+        pre {
+            margin: 0;
+            font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+            line-height: 1.4;
+            white-space: pre;
+        }
+
+        code {
+            color: #e8e8e8;
+            font-family: 'Courier New', monospace;
+        }
+
+        .keyword { color: #ec4899; font-weight: bold; }
+        .function { color: #a855f7; }
+        .string { color: #34d399; }
+        .comment { color: #6b7280; font-style: italic; }
+        .number { color: #fbbf24; }
+
+        .highlight-box {
+            background: rgba(168, 85, 247, 0.1);
+            border-left: 4px solid #a855f7;
+            padding: 2vh 2vw;
+            margin: 2vh 0;
+            border-radius: 4px;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2vw;
+            margin: 2vh 0;
+        }
+
+        @media (max-width: 768px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+                gap: 2vh;
+            }
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 3vh;
+            right: 3vw;
+            display: flex;
+            gap: 1vw;
+            z-index: 1000;
+        }
+
+        button {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            border: none;
+            padding: 1vh 2vw;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.6);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 2vh;
+            right: 3vw;
+            color: #a855f7;
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            font-weight: bold;
+        }
+
+        ul {
+            margin-left: 2vw;
+            margin-top: 1vh;
+        }
+
+        .icon {
+            display: inline-block;
+            margin-right: 0.5vw;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 1vw;
+        }
+
+        .content-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-wrapper::-webkit-scrollbar-track {
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .content-wrapper::-webkit-scrollbar-thumb {
+            background: #a855f7;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="slide-counter" id="slideCounter">1 / 10</div>
+
+        <!-- Slide 1: Portada -->
+        <div class="slide active">
+            <div class="content-wrapper">
+                <h1>🚀 PL/SQL PACKAGES</h1>
+                <p class="subtitle">Tu guía progresiva para dominar los paquetes en Oracle</p>
+                <div class="highlight-box">
+                    <h3>¿Qué aprenderás?</h3>
+                    <ul>
+                        <li>📦 Recordatorio: Procedimientos y Funciones</li>
+                        <li>🎯 ¿Qué son los Paquetes y por qué existen?</li>
+                        <li>🔧 Especificación vs Body (Implementación)</li>
+                        <li>💾 Variables Globales y Estado del Paquete</li>
+                        <li>🎭 Sobrecarga de Funciones</li>
+                        <li>🔒 Encapsulamiento y Buenas Prácticas</li>
+                    </ul>
+                </div>
+                <p style="margin-top: 3vh; color: #b8b8d1; font-style: italic;">Usa las flechas ← → o los botones para navegar</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Recordatorio Procedimientos -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>📌 Recordatorio: Procedimientos</h2>
+                <p>Un <strong style="color: #ec4899;">procedimiento</strong> es un bloque de código reutilizable que <strong>realiza una acción</strong> pero NO retorna un valor directamente.</p>
+                
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Ejemplo: Procedimiento para dar aumento de salario</span>
+<span class="keyword">CREATE OR REPLACE PROCEDURE</span> <span class="function">aumentar_salario</span>(
+    p_empleado_id <span class="keyword">IN</span> <span class="keyword">NUMBER</span>,
+    p_porcentaje  <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+) <span class="keyword">IS</span>
+<span class="keyword">BEGIN</span>
+    <span class="keyword">UPDATE</span> empleados
+    <span class="keyword">SET</span> salario = salario * (<span class="number">1</span> + p_porcentaje/<span class="number">100</span>)
+    <span class="keyword">WHERE</span> empleado_id = p_empleado_id;
+    
+    <span class="keyword">COMMIT</span>;
+<span class="keyword">END</span>;
+/
+
+<span class="comment">-- Llamada al procedimiento</span>
+<span class="keyword">EXECUTE</span> aumentar_salario(<span class="number">101</span>, <span class="number">10</span>); <span class="comment">-- Aumenta 10% al empleado 101</span></code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>💡 Clave:</strong> Los procedimientos ejecutan acciones (INSERT, UPDATE, DELETE) pero no retornan valores con RETURN.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Recordatorio Funciones -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>📌 Recordatorio: Funciones</h2>
+                <p>Una <strong style="color: #a855f7;">función</strong> es similar a un procedimiento, pero <strong>SIEMPRE retorna un valor</strong>.</p>
+                
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Ejemplo: Función para calcular salario anual</span>
+<span class="keyword">CREATE OR REPLACE FUNCTION</span> <span class="function">calcular_salario_anual</span>(
+    p_empleado_id <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+) <span class="keyword">RETURN NUMBER IS</span>
+    v_salario_mensual <span class="keyword">NUMBER</span>;
+    v_salario_anual   <span class="keyword">NUMBER</span>;
+<span class="keyword">BEGIN</span>
+    <span class="keyword">SELECT</span> salario <span class="keyword">INTO</span> v_salario_mensual
+    <span class="keyword">FROM</span> empleados
+    <span class="keyword">WHERE</span> empleado_id = p_empleado_id;
+    
+    v_salario_anual := v_salario_mensual * <span class="number">12</span>;
+    <span class="keyword">RETURN</span> v_salario_anual;
+<span class="keyword">END</span>;
+/
+
+<span class="comment">-- Uso en un SELECT</span>
+<span class="keyword">SELECT</span> nombre, calcular_salario_anual(empleado_id) <span class="keyword">AS</span> salario_anual
+<span class="keyword">FROM</span> empleados;</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>💡 Clave:</strong> Las funciones RETORNAN un valor y pueden usarse en SELECTs, WHEREs, etc.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: El Problema -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🤔 El Problema: Código Desorganizado</h2>
+                <p>Imagina que tienes muchos procedimientos y funciones relacionados con empleados:</p>
+                
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Todo suelto en la base de datos:</span>
+aumentar_salario(...)
+calcular_salario_anual(...)
+contratar_empleado(...)
+despedir_empleado(...)
+obtener_antiguedad(...)
+calcular_bonificacion(...)
+actualizar_datos(...)
+<span class="comment">... y 20 más ...</span></code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>❌ Problemas:</h3>
+                    <ul>
+                        <li>Todo está desorganizado en la BD</li>
+                        <li>Difícil encontrar qué funciones están relacionadas</li>
+                        <li>No hay forma de ocultar lógica interna</li>
+                        <li>Nombres pueden colisionar con otros módulos</li>
+                        <li>Difícil mantener y versionar</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 2vh; color: #34d399; font-weight: bold;">✅ Solución: ¡PAQUETES!</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Qué son los Paquetes -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>📦 ¿Qué es un PAQUETE?</h2>
+                <p>Un <strong style="color: #ec4899;">paquete</strong> es un contenedor que agrupa procedimientos, funciones y variables relacionadas.</p>
+
+                <div class="highlight-box">
+                    <h3>🎯 Analogía:</h3>
+                    <p>Piensa en un paquete como una <strong>caja de herramientas</strong>:</p>
+                    <ul>
+                        <li>🔧 Cada herramienta = procedimiento o función</li>
+                        <li>📦 La caja = el paquete que las organiza</li>
+                        <li>🏷️ La etiqueta de la caja = especificación (qué contiene)</li>
+                        <li>🔩 El interior de la caja = implementación (cómo funciona)</li>
+                    </ul>
+                </div>
+
+                <h3>Un paquete tiene DOS partes:</h3>
+                <div class="two-columns">
+                    <div class="highlight-box">
+                        <h3 style="color: #ec4899;">1️⃣ ESPECIFICACIÓN</h3>
+                        <p>La "interfaz pública"</p>
+                        <p>Define QUÉ se puede usar</p>
+                    </div>
+                    <div class="highlight-box">
+                        <h3 style="color: #a855f7;">2️⃣ BODY (Cuerpo)</h3>
+                        <p>La "implementación"</p>
+                        <p>Define CÓMO funciona</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Especificación -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🏷️ Parte 1: ESPECIFICACIÓN (Package Spec)</h2>
+                <p>La especificación es el <strong>"contrato público"</strong>. Declara qué pueden usar otros programas.</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Especificación del paquete PKG_EMPLEADOS</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE</span> pkg_empleados <span class="keyword">IS</span>
+    
+    <span class="comment">-- Procedimiento público: contratar empleado</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">contratar</span>(
+        p_nombre   <span class="keyword">IN</span> <span class="keyword">VARCHAR2</span>,
+        p_salario  <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+    );
+    
+    <span class="comment">-- Función pública: calcular salario anual</span>
+    <span class="keyword">FUNCTION</span> <span class="function">salario_anual</span>(
+        p_empleado_id <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+    ) <span class="keyword">RETURN NUMBER</span>;
+    
+    <span class="comment">-- Procedimiento público: dar aumento</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">dar_aumento</span>(
+        p_empleado_id  <span class="keyword">IN</span> <span class="keyword">NUMBER</span>,
+        p_porcentaje   <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+    );
+
+<span class="keyword">END</span> pkg_empleados;
+/</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>💡 Nota:</strong> Aquí solo declaramos las "firmas" de los procedimientos/funciones. La implementación va en el BODY.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Body -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🔧 Parte 2: BODY (Implementación)</h2>
+                <p>El body contiene la <strong>implementación real</strong> del código.</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Body del paquete PKG_EMPLEADOS</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE BODY</span> pkg_empleados <span class="keyword">IS</span>
+    
+    <span class="comment">-- Implementación del procedimiento contratar</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">contratar</span>(
+        p_nombre   <span class="keyword">IN</span> <span class="keyword">VARCHAR2</span>,
+        p_salario  <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+    ) <span class="keyword">IS</span>
+    <span class="keyword">BEGIN</span>
+        <span class="keyword">INSERT INTO</span> empleados (nombre, salario, fecha_contrato)
+        <span class="keyword">VALUES</span> (p_nombre, p_salario, <span class="keyword">SYSDATE</span>);
+        <span class="keyword">COMMIT</span>;
+    <span class="keyword">END</span> contratar;
+    
+    <span class="comment">-- Implementación de la función salario_anual</span>
+    <span class="keyword">FUNCTION</span> <span class="function">salario_anual</span>(
+        p_empleado_id <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+    ) <span class="keyword">RETURN NUMBER IS</span>
+        v_salario <span class="keyword">NUMBER</span>;
+    <span class="keyword">BEGIN</span>
+        <span class="keyword">SELECT</span> salario * <span class="number">12</span> <span class="keyword">INTO</span> v_salario
+        <span class="keyword">FROM</span> empleados <span class="keyword">WHERE</span> empleado_id = p_empleado_id;
+        <span class="keyword">RETURN</span> v_salario;
+    <span class="keyword">END</span> salario_anual;
+    
+    <span class="comment">-- Implementación de dar_aumento</span>
+    <span class="keyword">PROCEDURE</span> <span class="function">dar_aumento</span>(
+        p_empleado_id  <span class="keyword">IN</span> <span class="keyword">NUMBER</span>,
+        p_porcentaje   <span class="keyword">IN</span> <span class="keyword">NUMBER</span>
+    ) <span class="keyword">IS</span>
+    <span class="keyword">BEGIN</span>
+        <span class="keyword">UPDATE</span> empleados 
+        <span class="keyword">SET</span> salario = salario * (<span class="number">1</span> + p_porcentaje/<span class="number">100</span>)
+        <span class="keyword">WHERE</span> empleado_id = p_empleado_id;
+        <span class="keyword">COMMIT</span>;
+    <span class="keyword">END</span> dar_aumento;
+
+<span class="keyword">END</span> pkg_empleados;
+/</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Uso del Paquete -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🎯 Usando el Paquete</h2>
+                <p>Para usar procedimientos/funciones de un paquete, usa la sintaxis: <code style="color: #ec4899;">nombre_paquete.nombre_funcion</code></p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- Contratar un nuevo empleado</span>
+<span class="keyword">BEGIN</span>
+    pkg_empleados.contratar(<span class="string">'Ana García'</span>, <span class="number">3500</span>);
+<span class="keyword">END</span>;
+/
+
+<span class="comment">-- Dar aumento a un empleado</span>
+<span class="keyword">BEGIN</span>
+    pkg_empleados.dar_aumento(<span class="number">101</span>, <span class="number">15</span>); <span class="comment">-- 15% de aumento</span>
+<span class="keyword">END</span>;
+/
+
+<span class="comment">-- Consultar salario anual en un SELECT</span>
+<span class="keyword">SELECT</span> 
+    nombre,
+    salario <span class="keyword">AS</span> salario_mensual,
+    pkg_empleados.salario_anual(empleado_id) <span class="keyword">AS</span> salario_anual
+<span class="keyword">FROM</span> empleados;
+</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>✨ Ventajas hasta ahora:</strong>
+                    <ul>
+                        <li>Todo está organizado bajo <code>pkg_empleados</code></li>
+                        <li>Es claro qué funciones están relacionadas</li>
+                        <li>No hay conflicto de nombres con otras funciones</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Variables Globales -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>💾 Variables Globales del Paquete</h2>
+                <p>Los paquetes pueden tener <strong>variables que persisten</strong> durante toda la sesión.</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- ESPECIFICACIÓN</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE</span> pkg_banco <span class="keyword">IS</span>
+    <span class="comment">-- Variable global visible (pública)</span>
+    g_banco_nombre <span class="keyword">VARCHAR2</span>(<span class="number">50</span>) := <span class="string">'Banco Nacional'</span>;
+    
+    <span class="keyword">PROCEDURE</span> <span class="function">depositar</span>(p_cuenta <span class="keyword">IN NUMBER</span>, p_monto <span class="keyword">IN NUMBER</span>);
+    <span class="keyword">FUNCTION</span> <span class="function">obtener_saldo</span>(p_cuenta <span class="keyword">IN NUMBER</span>) <span class="keyword">RETURN NUMBER</span>;
+<span class="keyword">END</span> pkg_banco;
+/
+
+<span class="comment">-- BODY</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE BODY</span> pkg_banco <span class="keyword">IS</span>
+    <span class="comment">-- Variable privada (solo visible dentro del body)</span>
+    g_total_transacciones <span class="keyword">NUMBER</span> := <span class="number">0</span>;
+    
+    <span class="keyword">PROCEDURE</span> <span class="function">depositar</span>(p_cuenta <span class="keyword">IN NUMBER</span>, p_monto <span class="keyword">IN NUMBER</span>) <span class="keyword">IS</span>
+    <span class="keyword">BEGIN</span>
+        <span class="keyword">UPDATE</span> cuentas <span class="keyword">SET</span> saldo = saldo + p_monto
+        <span class="keyword">WHERE</span> cuenta_id = p_cuenta;
+        
+        g_total_transacciones := g_total_transacciones + <span class="number">1</span>; <span class="comment">-- Contador interno</span>
+        <span class="keyword">COMMIT</span>;
+    <span class="keyword">END</span>;
+    
+    <span class="keyword">FUNCTION</span> <span class="function">obtener_saldo</span>(p_cuenta <span class="keyword">IN NUMBER</span>) <span class="keyword">RETURN NUMBER IS</span>
+        v_saldo <span class="keyword">NUMBER</span>;
+    <span class="keyword">BEGIN</span>
+        <span class="keyword">SELECT</span> saldo <span class="keyword">INTO</span> v_saldo <span class="keyword">FROM</span> cuentas 
+        <span class="keyword">WHERE</span> cuenta_id = p_cuenta;
+        <span class="keyword">RETURN</span> v_saldo;
+    <span class="keyword">END</span>;
+<span class="keyword">END</span> pkg_banco;
+/</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>💡 Diferencia:</strong>
+                    <ul>
+                        <li><strong>Variables en SPEC:</strong> Públicas (accesibles desde fuera)</li>
+                        <li><strong>Variables en BODY:</strong> Privadas (solo para uso interno)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Sobrecarga -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🎭 Sobrecarga de Funciones</h2>
+                <p>Puedes tener <strong>múltiples versiones</strong> de la misma función con diferentes parámetros.</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- ESPECIFICACIÓN con sobrecarga</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE</span> pkg_banco <span class="keyword">IS</span>
+    <span class="comment">-- Versión 1: Retiro con cuenta ID</span>
+    <span class="keyword">FUNCTION</span> <span class="function">retirar</span>(
+        p_cuenta_id <span class="keyword">IN NUMBER</span>,
+        p_monto     <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN</span>;
+    
+    <span class="comment">-- Versión 2: Retiro con número de cuenta (String)</span>
+    <span class="keyword">FUNCTION</span> <span class="function">retirar</span>(
+        p_num_cuenta <span class="keyword">IN VARCHAR2</span>,
+        p_monto      <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN</span>;
+<span class="keyword">END</span> pkg_banco;
+/
+
+<span class="comment">-- Uso:</span>
+<span class="keyword">DECLARE</span>
+    v_exito <span class="keyword">BOOLEAN</span>;
+<span class="keyword">BEGIN</span>
+    <span class="comment">-- Llama a la versión 1 (por ID numérico)</span>
+    v_exito := pkg_banco.retirar(<span class="number">1001</span>, <span class="number">500</span>);
+    
+    <span class="comment">-- Llama a la versión 2 (por número de cuenta string)</span>
+    v_exito := pkg_banco.retirar(<span class="string">'CTA-2023-456'</span>, <span class="number">300</span>);
+<span class="keyword">END</span>;
+/</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>✨ Ventaja:</strong> Una sola función <code>retirar</code> con múltiples formas de uso. PL/SQL elige automáticamente la correcta según los parámetros.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Encapsulamiento -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🔒 Encapsulamiento y Privacidad</h2>
+                <p>Puedes tener funciones/procedimientos <strong>privados</strong> que solo el paquete usa internamente.</p>
+
+                <div class="code-container">
+                    <pre><code><span class="comment">-- ESPECIFICACIÓN (solo funciones públicas)</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE</span> pkg_banco <span class="keyword">IS</span>
+    <span class="keyword">FUNCTION</span> <span class="function">transferir</span>(
+        p_origen  <span class="keyword">IN NUMBER</span>,
+        p_destino <span class="keyword">IN NUMBER</span>,
+        p_monto   <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN</span>;
+<span class="keyword">END</span> pkg_banco;
+/
+
+<span class="comment">-- BODY (con funciones privadas)</span>
+<span class="keyword">CREATE OR REPLACE PACKAGE BODY</span> pkg_banco <span class="keyword">IS</span>
+    
+    <span class="comment">-- Función PRIVADA: validar saldo (no está en el SPEC)</span>
+    <span class="keyword">FUNCTION</span> <span class="function">validar_saldo</span>(
+        p_cuenta <span class="keyword">IN NUMBER</span>,
+        p_monto  <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN IS</span>
+        v_saldo <span class="keyword">NUMBER</span>;
+    <span class="keyword">BEGIN</span>
+        <span class="keyword">SELECT</span> saldo <span class="keyword">INTO</span> v_saldo 
+        <span class="keyword">FROM</span> cuentas <span class="keyword">WHERE</span> cuenta_id = p_cuenta;
+        <span class="keyword">RETURN</span> v_saldo >= p_monto;
+    <span class="keyword">END</span>;
+    
+    <span class="comment">-- Función PÚBLICA: transferir (usa la función privada)</span>
+    <span class="keyword">FUNCTION</span> <span class="function">transferir</span>(
+        p_origen  <span class="keyword">IN NUMBER</span>,
+        p_destino <span class="keyword">IN NUMBER</span>,
+        p_monto   <span class="keyword">IN NUMBER</span>
+    ) <span class="keyword">RETURN BOOLEAN IS</span>
+    <span class="keyword">BEGIN</span>
+        <span class="comment">-- Usa función privada internamente</span>
+        <span class="keyword">IF NOT</span> validar_saldo(p_origen, p_monto) <span class="keyword">THEN</span>
+            <span class="keyword">RETURN FALSE</span>; <span class="comment">-- Saldo insuficiente</span>
+        <span class="keyword">END IF</span>;
+        
+        <span class="keyword">UPDATE</span> cuentas <span class="keyword">SET</span> saldo = saldo - p_monto
+        <span class="keyword">WHERE</span> cuenta_id = p_origen;
+        
+        <span class="keyword">UPDATE</span> cuentas <span class="keyword">SET</span> saldo = saldo + p_monto
+        <span class="keyword">WHERE</span> cuenta_id = p_destino;
+        
+        <span class="keyword">COMMIT</span>;
+        <span class="keyword">RETURN TRUE</span>;
+    <span class="keyword">END</span>;
+<span class="keyword">END</span> pkg_banco;
+/</code></pre>
+                </div>
+
+                <div class="highlight-box">
+                    <strong>🔐 Encapsulamiento:</strong>
+                    <ul>
+                        <li><code>validar_saldo</code> es PRIVADA (solo en el body)</li>
+                        <li><code>transferir</code> es PÚBLICA (está en spec y body)</li>
+                        <li>Nadie fuera del paquete puede llamar a <code>validar_saldo</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Resumen Final -->
+        <div class="slide">
+            <div class="content-wrapper">
+                <h2>🎓 Resumen: Lo que Aprendiste</h2>
+                
+                <div class="highlight-box">
+                    <h3>📦 Paquetes = Organización + Poder</h3>
+                    <ul>
+                        <li><strong>Especificación:</strong> Define QUÉ es público (interfaz)</li>
+                        <li><strong>Body:</strong> Define CÓMO funciona (implementación)</li>
+                        <li><strong>Variables globales:</strong> Estado que persiste en la sesión</li>
+                        <li><strong>Sobrecarga:</strong> Misma función, múltiples firmas</li>
+                        <li><strong>Encapsulamiento:</strong> Funciones privadas internas</li>
+                    </ul>
+                </div>
+
+                <h3 style="margin-top: 3vh;">✨ Ventajas de usar Paquetes:</h3>
+                <div class="two-columns">
+                    <div>
+                        <p>✅ <strong>Organización:</strong> Código agrupado lógicamente</p>
+                        <p>✅ <strong>Reutilización:</strong> Funciones compartidas</p>
+                        <p>✅ <strong>Seguridad:</strong> Ocultar lógica interna</p>
+                    </div>
+                    <div>
+                        <p>✅ <strong>Rendimiento:</strong> Se cargan una vez en memoria</p>
+                        <p>✅ <strong>Mantenimiento:</strong> Más fácil actualizar</p>
+                        <p>✅ <strong>Namespacing:</strong> Evita conflictos de nombres</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 3vh; background: rgba(236, 72, 153, 0.1); border-left-color: #ec4899;">
+                    <h3>🚀 Próximos Pasos:</h3>
+                    <p>Practica creando tu propio paquete con:</p>
+                    <ul>
+                        <li>Al menos 2 procedimientos públicos</li>
+                        <li>1 función pública</li>
+                        <li>1 función privada (solo en el body)</li>
+                        <li>1 variable global de estado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <button id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+        <button id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        showSlide(0);
+    </script>
+</body>
+</html>

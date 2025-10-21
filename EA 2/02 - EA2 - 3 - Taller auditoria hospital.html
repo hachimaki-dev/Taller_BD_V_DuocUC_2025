@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial PL/SQL Simplificado - Sistema Hospitalario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <style>
+        .section-card {
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        pre[class*="language-"] {
+            margin: 0;
+            border-radius: 0.5rem;
+        }
+        .copy-button {
+            transition: all 0.2s;
+        }
+        .copy-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-8">
+            <h1 class="text-4xl font-bold mb-2">🏥 Sistema Hospitalario - PL/SQL</h1>
+            <p class="text-xl opacity-90">Introducción Práctica a Paquetes y Triggers</p>
+            <div class="mt-4 bg-white/20 rounded-lg p-4">
+                <p class="text-sm">⏱️ 20 minutos | 👥 Nivel: Básico-Intermedio | 📚 Código reducido y explicable</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="#intro" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">📋 Introducción</a>
+                <a href="#tabla" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition">🔧 Tabla Simple</a>
+                <a href="#paquete" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition">📦 Paquete Básico</a>
+                <a href="#trigger" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition">⚡ Trigger</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-8">
+        
+        <!-- Introducción -->
+        <section id="intro" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">📋</span>
+                    ¿Qué vamos a hacer hoy?
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+                        <h3 class="font-bold text-lg text-blue-800 mb-3">🎯 Plan de la Sesión</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>✅ Crear una tabla simple de auditoría</li>
+                            <li>✅ Hacer un paquete con 2 funciones sencillas</li>
+                            <li>✅ Crear un trigger automático</li>
+                            <li>✅ Probar todo con ejemplos reales</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+                        <h3 class="font-bold text-lg text-green-800 mb-3">💡 ¿Por qué esto es útil?</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>• Los paquetes organizan tu código</li>
+                            <li>• Los triggers automatizan tareas repetitivas</li>
+                            <li>• Son técnicas que usan empresas reales</li>
+                            <li>• Todo el código es corto y explicable</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
+                    <h3 class="font-bold text-lg text-yellow-800 mb-3">🎓 Para el Profesor</h3>
+                    <p class="text-gray-700">
+                        Este tutorial tiene <strong>ejemplos pequeños y completos</strong>. Cada pieza de código tiene máximo 15-20 líneas. 
+                        Puedes explicar línea por línea sin apuros. Los conceptos son los mismos que en sistemas profesionales, 
+                        pero con implementaciones más simples.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 1: Crear tabla de auditoría -->
+        <section id="tabla" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8 section-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">🔧</span>
+                        Paso 1: Crear Tabla de Auditoría
+                    </h2>
+                    <div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+                        ⏱️ 3 minutos
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-gray-700"><strong>🎯 Objetivo:</strong> Crear una tabla simple para guardar historial de cambios en platillos.</p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">📚 Explicación</h3>
+                    <p class="text-gray-700 mb-4">
+                        Queremos saber <strong>quién</strong> modificó un platillo, <strong>cuándo</strong> lo hizo, 
+                        y <strong>qué</strong> cambió. Esta tabla guardará esa información automáticamente.
+                    </p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center justify-between">
+                        <span>💻 Código SQL</span>
+                        <button onclick="copyCode('code1')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600">
+                            📋 Copiar
+                        </button>
+                    </h3>
+                    <pre id="code1"><code class="language-sql">-- Crear tabla de auditoría (solo 5 columnas)
+CREATE TABLE AUDITORIA_PLATILLO (
+    id NUMBER PRIMARY KEY,
+    id_platillo NUMBER,
+    nombre_anterior VARCHAR2(100),
+    nombre_nuevo VARCHAR2(100),
+    fecha TIMESTAMP DEFAULT SYSTIMESTAMP,
+    usuario VARCHAR2(50) DEFAULT USER
+);
+
+-- Verificar que se creó correctamente
+SELECT * FROM AUDITORIA_PLATILLO;</code></pre>
+                </div>
+
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                    <h4 class="font-bold text-green-800 mb-2">✅ Puntos a explicar:</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        <li>• <strong>DEFAULT SYSTIMESTAMP:</strong> Se llena automáticamente con la fecha/hora actual</li>
+                        <li>• <strong>DEFAULT USER:</strong> Se llena automáticamente con el usuario de Oracle</li>
+                        <li>• Esta tabla es muy simple, solo guarda lo esencial</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 2: Paquete Simple -->
+        <section id="paquete" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8 section-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-purple-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">📦</span>
+                        Paso 2: Paquete Básico de Inventario
+                    </h2>
+                    <div class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-semibold">
+                        ⏱️ 10 minutos
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                    <p class="text-gray-700"><strong>🎯 Objetivo:</strong> Crear un paquete con solo 2 funciones: una para verificar stock y otra para contar ingredientes.</p>
+                </div>
+
+                <!-- Especificación -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">📋 A) Especificación (la "portada" del paquete)</h3>
+                    <p class="text-gray-700 mb-4">
+                        Aquí solo <strong>anunciamos</strong> qué funciones tendremos. No decimos cómo funcionan todavía.
+                    </p>
+                    
+                    <div class="mb-4">
+                        <button onclick="copyCode('code2')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                            📋 Copiar
+                        </button>
+                        <pre id="code2"><code class="language-sql">CREATE OR REPLACE PACKAGE PKG_INVENTARIO_SIMPLE AS
+    
+    -- Función 1: Verifica si hay stock de UN ingrediente específico
+    FUNCTION hay_stock(p_id_ingrediente NUMBER, p_cantidad_necesaria NUMBER) 
+    RETURN BOOLEAN;
+    
+    -- Función 2: Cuenta cuántos ingredientes usa un platillo
+    FUNCTION contar_ingredientes(p_id_platillo NUMBER) 
+    RETURN NUMBER;
+    
+END PKG_INVENTARIO_SIMPLE;
+/</code></pre>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <p class="text-gray-700"><strong>💡 Explicar:</strong> Esto es como el "índice" de un libro. Solo dice qué temas hay, no explica el contenido aún.</p>
+                    </div>
+                </div>
+
+                <!-- Cuerpo -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">⚙️ B) Cuerpo (el "contenido" del paquete)</h3>
+                    <p class="text-gray-700 mb-4">
+                        Aquí <strong>implementamos</strong> cómo funciona cada función. El código es corto y claro.
+                    </p>
+                    
+                    <div class="mb-4">
+                        <button onclick="copyCode('code3')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                            📋 Copiar
+                        </button>
+                        <pre id="code3"><code class="language-sql">CREATE OR REPLACE PACKAGE BODY PKG_INVENTARIO_SIMPLE AS
+    
+    -- Implementación Función 1: Verificar stock
+    FUNCTION hay_stock(p_id_ingrediente NUMBER, p_cantidad_necesaria NUMBER) 
+    RETURN BOOLEAN IS
+        v_stock_actual NUMBER;
+    BEGIN
+        -- Obtenemos el stock actual del ingrediente
+        SELECT cantidad INTO v_stock_actual
+        FROM STOCK_INGREDIENTES
+        WHERE id_ingrediente = p_id_ingrediente;
+        
+        -- Comparamos: ¿hay suficiente?
+        IF v_stock_actual >= p_cantidad_necesaria THEN
+            RETURN TRUE;  -- Sí hay stock
+        ELSE
+            RETURN FALSE; -- No hay suficiente
+        END IF;
+    END hay_stock;
+    
+    -- Implementación Función 2: Contar ingredientes
+    FUNCTION contar_ingredientes(p_id_platillo NUMBER) 
+    RETURN NUMBER IS
+        v_cantidad NUMBER;
+    BEGIN
+        -- Contamos cuántos ingredientes tiene el platillo
+        SELECT COUNT(*) INTO v_cantidad
+        FROM INGREDIENTES_PLATILLOS
+        WHERE id_platillo = p_id_platillo;
+        
+        RETURN v_cantidad;
+    END contar_ingredientes;
+    
+END PKG_INVENTARIO_SIMPLE;
+/</code></pre>
+                    </div>
+                </div>
+
+                <!-- Ejemplos de Uso -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">🧪 C) Probar el Paquete</h3>
+                    <p class="text-gray-700 mb-4">Vamos a usar nuestras funciones con datos reales:</p>
+                    
+                    <div class="mb-4">
+                        <button onclick="copyCode('code4')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                            📋 Copiar
+                        </button>
+                        <pre id="code4"><code class="language-sql">-- Activar salida de mensajes
+SET SERVEROUTPUT ON;
+
+-- Prueba 1: ¿Hay stock de 5kg del ingrediente ID 1?
+DECLARE
+    v_resultado BOOLEAN;
+BEGIN
+    v_resultado := PKG_INVENTARIO_SIMPLE.hay_stock(1, 5);
+    
+    IF v_resultado THEN
+        DBMS_OUTPUT.PUT_LINE('✅ SÍ hay stock suficiente');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('❌ NO hay stock suficiente');
+    END IF;
+END;
+/
+
+-- Prueba 2: ¿Cuántos ingredientes tiene el platillo ID 10?
+DECLARE
+    v_total NUMBER;
+BEGIN
+    v_total := PKG_INVENTARIO_SIMPLE.contar_ingredientes(10);
+    DBMS_OUTPUT.PUT_LINE('El platillo tiene ' || v_total || ' ingredientes');
+END;
+/</code></pre>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <h4 class="font-bold text-blue-800 mb-2">✅ Ventajas de este enfoque</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>• Solo 2 funciones = fácil de explicar</li>
+                            <li>• Cada función hace UNA cosa clara</li>
+                            <li>• No hay conversiones complicadas</li>
+                            <li>• Puedes explicar línea por línea</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                        <h4 class="font-bold text-yellow-800 mb-2">🎓 Para el estudiante</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>• Pueden agregar más funciones después</li>
+                            <li>• Este es el patrón básico de TODO paquete</li>
+                            <li>• Entender esto = entender el 80% de PL/SQL</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 3: Trigger Simple -->
+        <section id="trigger" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8 section-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <span class="bg-orange-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">⚡</span>
+                        Paso 3: Trigger Automático
+                    </h2>
+                    <div class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-semibold">
+                        ⏱️ 7 minutos
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                    <p class="text-gray-700"><strong>🎯 Objetivo:</strong> Crear un trigger que guarde automáticamente en la tabla de auditoría cuando alguien cambie el nombre de un platillo.</p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">📚 ¿Qué es un Trigger?</h3>
+                    <p class="text-gray-700 mb-4">
+                        Es como una <strong>"trampa automática"</strong>. Cuando alguien hace un UPDATE en PLATILLOS, 
+                        el trigger se dispara solito y guarda el cambio en nuestra tabla de auditoría. 
+                        ¡No tienes que hacer nada manualmente!
+                    </p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">💻 Código del Trigger</h3>
+                    <button onclick="copyCode('code5')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                        📋 Copiar
+                    </button>
+                    <pre id="code5"><code class="language-sql">CREATE OR REPLACE TRIGGER TRG_AUDITORIA_SIMPLE
+AFTER UPDATE ON PLATILLOS
+FOR EACH ROW
+BEGIN
+    -- Solo guardamos si el NOMBRE cambió
+    IF :OLD.nombre != :NEW.nombre THEN
+        INSERT INTO AUDITORIA_PLATILLO (
+            id,
+            id_platillo,
+            nombre_anterior,
+            nombre_nuevo
+        ) VALUES (
+            (SELECT NVL(MAX(id), 0) + 1 FROM AUDITORIA_PLATILLO),
+            :OLD.id,
+            :OLD.nombre,
+            :NEW.nombre
+        );
+    END IF;
+END;
+/</code></pre>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">🧪 Probar el Trigger</h3>
+                    <button onclick="copyCode('code6')" class="copy-button bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600 mb-2">
+                        📋 Copiar
+                    </button>
+                    <pre id="code6"><code class="language-sql">-- Paso 1: Ver cómo está el platillo ahora
+SELECT id, nombre FROM PLATILLOS WHERE id = 10;
+
+-- Paso 2: Cambiar el nombre (aquí se dispara el trigger automáticamente)
+UPDATE PLATILLOS 
+SET nombre = 'Ensalada César Especial'
+WHERE id = 10;
+
+-- Paso 3: Ver que se guardó en auditoría
+SELECT id_platillo, nombre_anterior, nombre_nuevo, 
+       TO_CHAR(fecha, 'DD/MM/YYYY HH24:MI') AS cuando,
+       usuario
+FROM AUDITORIA_PLATILLO;
+
+-- Resultado: Verás el cambio registrado automáticamente!</code></pre>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <h4 class="font-bold text-blue-800 mb-2">💡 Conceptos del Trigger</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li><strong>AFTER UPDATE:</strong> Se ejecuta DESPUÉS del cambio</li>
+                            <li><strong>FOR EACH ROW:</strong> Una vez por cada fila modificada</li>
+                            <li><strong>:OLD.nombre:</strong> El nombre ANTES del cambio</li>
+                            <li><strong>:NEW.nombre:</strong> El nombre DESPUÉS del cambio</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                        <h4 class="font-bold text-green-800 mb-2">✅ ¿Por qué es útil?</h4>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>• Nadie puede "olvidar" guardar el historial</li>
+                            <li>• Funciona 24/7 automáticamente</li>
+                            <li>• Puedes ver quién cambió qué y cuándo</li>
+                            <li>• Es como tener una cámara de seguridad en tu BD</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumen -->
+        <section class="mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold mb-6">🎯 Resumen: ¿Qué aprendimos?</h2>
+                
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white/10 backdrop-blur rounded-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">1️⃣ Tabla de Auditoría</h3>
+                        <p class="text-sm">Una tabla simple para guardar historial de cambios</p>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur rounded-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">2️⃣ Paquete Básico</h3>
+                        <p class="text-sm">Especificación + Cuerpo con 2 funciones útiles y simples</p>
+                    </div>
+                    
+                    <div class="bg-white/10 backdrop-blur rounded-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">3️⃣ Trigger Automático</h3>
+                        <p class="text-sm">Se dispara solo cuando hay cambios, sin intervención manual</p>
+                    </div>
+                </div>
+
+                <div class="bg-white/20 backdrop-blur rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-3">💬 Lo Más Importante</h3>
+                    <p class="text-lg">
+                        Estos tres conceptos (tabla, paquete, trigger) son los <strong>fundamentos de PL/SQL profesional</strong>. 
+                        Los ejemplos son pequeños y simples a propósito, pero la lógica es la misma que usan 
+                        sistemas de bancos, hospitales y grandes empresas. Una vez que dominas estos conceptos básicos, 
+                        solo es cuestión de hacer el código más largo, pero <strong>la estructura es siempre la misma</strong>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actividades para Estudiantes -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📝 Actividades para Practicar</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <span class="text-2xl">📌</span>
+                        <div>
+                            <p class="font-bold text-blue-800">Actividad 1: Agregar una función más</p>
+                            <p class="text-gray-700">Al paquete PKG_INVENTARIO_SIMPLE, agrega una función que calcule el total de platillos en la base de datos.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                        <span class="text-2xl">📌</span>
+                        <div>
+                            <p class="font-bold text-green-800">Actividad 2: Trigger para otra tabla</p>
+                            <p class="text-gray-700">Crea un trigger similar pero para la tabla MENUS. Guarda cambios en el campo "nombre" en una tabla AUDITORIA_MENU.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                        <span class="text-2xl">📌</span>
+                        <div>
+                            <p class="font-bold text-purple-800">Actividad 3: Procedimiento simple</p>
+                            <p class="text-gray-700">Agrega al paquete un procedimiento que imprima los nombres de todos los platillos. Usa DBMS_OUTPUT.PUT_LINE y un cursor simple.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                    <p class="text-gray-700">
+                        <strong>💡 Tip:</strong> Estas actividades son progresivas. Empieza por la 1, luego la 2, y finalmente la 3. 
+                        Cada una te enseñará un concepto nuevo sin abrumarte con código largo.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips Finales -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">👨‍🏫 Tips Finales para el Profesor</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <h3 class="font-bold text-green-800 mb-3">✅ Lo que SÍ hacer</h3>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>✓ Ejecuta cada bloque de código en vivo</li>
+                            <li>✓ Explica :OLD y :NEW con dibujos o analogías</li>
+                            <li>✓ Muestra la tabla de auditoría después del UPDATE</li>
+                            <li>✓ Pregunta "¿qué creen que pasará aquí?"</li>
+                            <li>✓ Deja que los estudiantes modifiquen valores</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                        <h3 class="font-bold text-red-800 mb-3">❌ Lo que NO hacer</h3>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li>✗ No intentes explicar TODO el código de una vez</li>
+                            <li>✗ No agregues más funciones "porque sí"</li>
+                            <li>✗ No te saltes la parte de PROBAR el código</li>
+                            <li>✗ No asumas que entienden :OLD y :NEW</li>
+                            <li>✗ No olvides SET SERVEROUTPUT ON</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <h3 class="font-bold text-blue-800 mb-3">🎯 Estrategia de Enseñanza</h3>
+                    <div class="space-y-2 text-gray-700">
+                        <p><strong>Minutos 1-3:</strong> Crear la tabla de auditoría y explicar su propósito</p>
+                        <p><strong>Minutos 4-13:</strong> Crear el paquete (especificación + cuerpo + pruebas)</p>
+                        <p><strong>Minutos 14-20:</strong> Crear el trigger y ver cómo funciona en tiempo real</p>
+                        <p><strong>Últimos minutos:</strong> Preguntas y mostrar las actividades para practicar</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                    <h3 class="font-bold text-purple-800 mb-3">💪 Frases Motivacionales</h3>
+                    <ul class="space-y-2 text-gray-700 text-sm">
+                        <li>"Este paquete tiene solo 2 funciones, pero usa la MISMA estructura que paquetes de 50 funciones en empresas"</li>
+                        <li>"Los triggers son como 'robots' que trabajan 24/7 sin quejarse ni olvidar nada"</li>
+                        <li>"Si entienden estos 3 conceptos hoy, ya saben hacer el 80% de lo que necesitan en PL/SQL"</li>
+                        <li>"El código es corto, pero el conocimiento es PODEROSO"</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparación con la versión avanzada -->
+        <section class="mb-8">
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold mb-6">🔄 Diferencias con la Versión Avanzada</h2>
+                
+                <div class="bg-white/20 backdrop-blur rounded-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold mb-4">¿Qué eliminamos para simplificar?</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="font-bold mb-2">❌ Eliminado:</p>
+                            <ul class="space-y-1 text-sm">
+                                <li>• Conversiones de unidades (g→kg, ml→L)</li>
+                                <li>• Cursores complejos con múltiples joins</li>
+                                <li>• Funciones con 4-5 parámetros</li>
+                                <li>• Cálculos de porciones disponibles</li>
+                                <li>• Procedimientos de consumo de stock</li>
+                                <li>• Manejo de DELETE en triggers</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-2">✅ Mantenido:</p>
+                            <ul class="space-y-1 text-sm">
+                                <li>• Estructura correcta de paquetes</li>
+                                <li>• Sintaxis válida y profesional</li>
+                                <li>• Conceptos fundamentales completos</li>
+                                <li>• Ejemplos funcionales y reales</li>
+                                <li>• Buenas prácticas de nomenclatura</li>
+                                <li>• Lógica de auditoría real</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/20 backdrop-blur rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-3">💡 Resultado</h3>
+                    <p class="text-lg">
+                        Pasamos de <strong>~200 líneas de código</strong> en la versión avanzada a 
+                        <strong>~60 líneas</strong> en esta versión simplificada. Los estudiantes aprenden 
+                        <strong>exactamente los mismos conceptos</strong>, pero sin abrumarse. 
+                        Cuando dominen esto, pueden avanzar a la versión completa.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preguntas Frecuentes -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ Preguntas Frecuentes de Estudiantes</h2>
+                
+                <div class="space-y-4">
+                    <details class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <summary class="font-bold text-blue-800 cursor-pointer">¿Por qué separar especificación y cuerpo?</summary>
+                        <p class="text-gray-700 mt-3">
+                            Imagina que tienes una caja misteriosa. La especificación es la etiqueta que dice "dentro hay herramientas", 
+                            pero no explica cómo funcionan. El cuerpo es cuando abres la caja y ves los tornillos y engranajes. 
+                            Esto permite que otros programadores usen tu paquete sin necesitar saber todos los detalles internos.
+                        </p>
+                    </details>
+
+                    <details class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <summary class="font-bold text-green-800 cursor-pointer">¿Qué significa RETURN BOOLEAN?</summary>
+                        <p class="text-gray-700 mt-3">
+                            BOOLEAN es un tipo de dato que solo puede ser TRUE (verdadero) o FALSE (falso). Es perfecto para funciones 
+                            que responden preguntas de Sí o No, como "¿hay stock?" o "¿el usuario tiene permisos?".
+                        </p>
+                    </details>
+
+                    <details class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                        <summary class="font-bold text-purple-800 cursor-pointer">¿Por qué usar :OLD y :NEW con dos puntos?</summary>
+                        <p class="text-gray-700 mt-3">
+                            Los dos puntos (:) indican que son "variables especiales" del trigger. :OLD tiene los valores ANTES del cambio, 
+                            :NEW tiene los valores DESPUÉS. Es como una foto del "antes y después" de cada fila modificada.
+                        </p>
+                    </details>
+
+                    <details class="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
+                        <summary class="font-bold text-orange-800 cursor-pointer">¿El trigger necesita COMMIT?</summary>
+                        <p class="text-gray-700 mt-3">
+                            NO. Los triggers son parte de la transacción principal. Si haces UPDATE en PLATILLOS, el cambio en PLATILLOS 
+                            Y el INSERT en AUDITORIA_PLATILLO se guardan juntos automáticamente con un solo COMMIT.
+                        </p>
+                    </details>
+
+                    <details class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                        <summary class="font-bold text-yellow-800 cursor-pointer">¿Puedo tener múltiples paquetes?</summary>
+                        <p class="text-gray-700 mt-3">
+                            ¡Por supuesto! En sistemas grandes es común tener PKG_INVENTARIO, PKG_VENTAS, PKG_USUARIOS, etc. 
+                            Cada paquete agrupa funciones relacionadas. Es como tener diferentes cajas de herramientas para diferentes trabajos.
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- Errores Comunes -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">⚠️ Errores Comunes y Soluciones</h2>
+                
+                <div class="space-y-4">
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                        <h3 class="font-bold text-red-800 mb-2">Error: "PLS-00302: component must be declared"</h3>
+                        <p class="text-gray-700 mb-2"><strong>Causa:</strong> Creaste el cuerpo antes que la especificación, o hay un typo en el nombre.</p>
+                        <p class="text-gray-700"><strong>Solución:</strong> Siempre crear PRIMERO la especificación, DESPUÉS el cuerpo. Los nombres deben coincidir exactamente.</p>
+                    </div>
+
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                        <h3 class="font-bold text-red-800 mb-2">Error: No veo mensajes de DBMS_OUTPUT</h3>
+                        <p class="text-gray-700 mb-2"><strong>Causa:</strong> Olvidaste ejecutar SET SERVEROUTPUT ON</p>
+                        <p class="text-gray-700"><strong>Solución:</strong> Ejecuta <code class="bg-white px-2 py-1 rounded">SET SERVEROUTPUT ON;</code> antes de ejecutar tus bloques PL/SQL.</p>
+                    </div>
+
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                        <h3 class="font-bold text-red-800 mb-2">Error: "ORA-00942: table or view does not exist"</h3>
+                        <p class="text-gray-700 mb-2"><strong>Causa:</strong> La tabla AUDITORIA_PLATILLO no existe todavía.</p>
+                        <p class="text-gray-700"><strong>Solución:</strong> Ejecutar primero el CREATE TABLE antes de crear el trigger.</p>
+                    </div>
+
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                        <h3 class="font-bold text-red-800 mb-2">Error: El trigger no se ejecuta</h3>
+                        <p class="text-gray-700 mb-2"><strong>Causa:</strong> El trigger solo se dispara en UPDATE. Si haces INSERT o DELETE, no funcionará.</p>
+                        <p class="text-gray-700"><strong>Solución:</strong> Verifica que estés haciendo UPDATE en PLATILLOS, no otra operación.</p>
+                    </div>
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg">
+                        <h3 class="font-bold text-yellow-800 mb-2">Advertencia: Olvidar el "/" después de bloques</h3>
+                        <p class="text-gray-700 mb-2"><strong>Problema:</strong> Los bloques PL/SQL (paquetes, triggers) necesitan "/" en una línea nueva al final.</p>
+                        <p class="text-gray-700"><strong>Buena práctica:</strong> Siempre terminar con:
+                            <pre class="bg-white p-2 rounded mt-2 text-sm"><code>END nombre_paquete;
+/</code></pre>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Extensiones Opcionales -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">🎁 Extensiones Opcionales (Para Estudiantes Avanzados)</h2>
+                
+                <p class="text-gray-700 mb-6">
+                    Si algún estudiante termina rápido y quiere más desafíos, estas son ideas que pueden implementar 
+                    <strong>usando la misma estructura simple</strong>:
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+                        <h3 class="font-bold text-blue-800 mb-3">🌟 Nivel 1: Función de Búsqueda</h3>
+                        <p class="text-gray-700 text-sm mb-3">
+                            Agregar una función al paquete que busque un platillo por nombre y retorne su ID:
+                        </p>
+                        <pre class="text-xs bg-white p-2 rounded"><code class="language-sql">FUNCTION buscar_platillo(p_nombre VARCHAR2) 
+RETURN NUMBER;</code></pre>
+                    </div>
+
+                    <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+                        <h3 class="font-bold text-green-800 mb-3">🌟 Nivel 2: Procedimiento de Reporte</h3>
+                        <p class="text-gray-700 text-sm mb-3">
+                            Crear un procedimiento que imprima todos los platillos con bajo stock de ingredientes:
+                        </p>
+                        <pre class="text-xs bg-white p-2 rounded"><code class="language-sql">PROCEDURE mostrar_bajo_stock;</code></pre>
+                    </div>
+
+                    <div class="bg-purple-50 p-6 rounded-lg border-l-4 border-purple-500">
+                        <h3 class="font-bold text-purple-800 mb-3">🌟 Nivel 3: Trigger con Validación</h3>
+                        <p class="text-gray-700 text-sm mb-3">
+                            Crear un trigger BEFORE INSERT que valide que el nombre del platillo no esté vacío:
+                        </p>
+                        <pre class="text-xs bg-white p-2 rounded"><code class="language-sql">CREATE OR REPLACE TRIGGER TRG_VALIDAR_PLATILLO
+BEFORE INSERT ON PLATILLOS
+FOR EACH ROW
+BEGIN
+    IF :NEW.nombre IS NULL THEN
+        RAISE_APPLICATION_ERROR(-20001, 
+            'El nombre no puede estar vacío');
+    END IF;
+END;</code></pre>
+                    </div>
+
+                    <div class="bg-orange-50 p-6 rounded-lg border-l-4 border-orange-500">
+                        <h3 class="font-bold text-orange-800 mb-3">🌟 Nivel 4: Auditoría Completa</h3>
+                        <p class="text-gray-700 text-sm mb-3">
+                            Modificar el trigger para que también capture INSERT y DELETE, no solo UPDATE:
+                        </p>
+                        <pre class="text-xs bg-white p-2 rounded"><code class="language-sql">CREATE OR REPLACE TRIGGER TRG_AUDITORIA_COMPLETA
+AFTER INSERT OR UPDATE OR DELETE ON PLATILLOS
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        -- guardar con acción 'INSERT'
+    ELSIF UPDATING THEN
+        -- guardar con acción 'UPDATE'
+    ELSIF DELETING THEN
+        -- guardar con acción 'DELETE'
+    END IF;
+END;</code></pre>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                    <p class="text-gray-700">
+                        <strong>💡 Nota:</strong> Estas extensiones NO son obligatorias. Son para estudiantes que quieran 
+                        explorar más después de dominar los conceptos básicos. Pueden dar puntos extra si quieres motivarlos.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-lg mb-4">🎓 Tutorial PL/SQL Simplificado - Sistema Hospitalario</p>
+            <p class="text-sm text-gray-400">Versión reducida y explicable para clases de 20 minutos</p>
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <p class="text-sm">✅ Código total: ~60 líneas | ✅ Conceptos: 100% completos | ✅ Explicable: Línea por línea</p>
+                <p class="text-sm mt-2">💪 "Menos código, mismos fundamentos, mejor comprensión"</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Función para copiar código
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const code = codeElement.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ Copiado!';
+                button.classList.add('bg-green-500');
+                button.classList.remove('bg-blue-500');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('bg-green-500');
+                    button.classList.add('bg-blue-500');
+                }, 2000);
+            }).catch(err => {
+                alert('Error al copiar: ' + err);
+            });
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animación de entrada
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '0';
+                    entry.target.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        entry.target.style.transition = 'all 0.5s ease-out';
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section-card').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
