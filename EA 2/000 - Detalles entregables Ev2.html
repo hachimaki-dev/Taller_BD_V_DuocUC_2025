@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía para la Elaboración del Informe y Presentación - Proyecto PL/SQL</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      margin: 40px;
+    }
+    h1, h2, h3 {
+      color: #1a5276;
+    }
+    h1 {
+      text-align: center;
+    }
+    section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    ul {
+      margin-left: 20px;
+    }
+    .example {
+      background: #e8f6f3;
+      border-left: 4px solid #1abc9c;
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Guía para Elaborar el Informe y la Presentación del Proyecto en PL/SQL</h1>
+
+  <section>
+    <h2>🌟 Propósito del Proyecto</h2>
+    <p>
+      Este proyecto es una oportunidad para que apliques tus conocimientos de <strong>PL/SQL</strong> en un contexto de negocio real que tú mismo elijas.
+      Puede ser una <em>veterinaria</em>, una <em>tienda de ropa</em>, un <em>menú de comida en hospitales</em>, una <em>tienda web de airsoft</em>, o cualquier otro entorno que te interese.
+    </p>
+    <p>
+      Tu misión es crear objetos en PL/SQL (procedimientos, funciones, packages y triggers) que procesen información de forma eficiente y aporten valor a ese negocio.
+      Luego, deberás <strong>explicar y documentar</strong> cómo construiste tu solución en un informe y una presentación.
+    </p>
+  </section>
+
+  <section>
+    <h2>📘 Parte 1: El Informe</h2>
+
+    <h3>1. Introducción</h3>
+    <ul>
+      <li><strong>Descripción del Proyecto:</strong> Explica de qué trata tu proyecto, cuál es su objetivo y cómo el uso de PL/SQL te ayuda a alcanzarlo.</li>
+      <li><strong>Alcance:</strong> Define qué parte del negocio cubrirá tu solución (por ejemplo, registro de clientes, gestión de productos, generación de reportes).</li>
+      <li><strong>Tecnologías Utilizadas:</strong> Menciona las herramientas que empleaste, como Oracle, SQL Developer, etc.</li>
+    </ul>
+    <div class="example">
+      <strong>Ejemplo:</strong>  
+      “Mi proyecto consiste en una base de datos para una clínica veterinaria que permite registrar pacientes, tratamientos y citas. 
+      Utilizo procedimientos y funciones para automatizar los reportes diarios de atención.”
+    </div>
+
+    <h3>2. Desarrollo de Procedimientos y Funciones</h3>
+    <ul>
+      <li>Explica qué son los procedimientos y funciones en PL/SQL.</li>
+      <li>Menciona sus ventajas y posibles limitaciones.</li>
+      <li>Cuenta qué papel cumplen dentro de tu proyecto.</li>
+      <li>Incluye ejemplos o fragmentos de código y muestra cómo los usaste para procesar información.</li>
+    </ul>
+    <div class="example">
+      <strong>Ejemplo:</strong>  
+      “Creé un procedimiento que actualiza el stock automáticamente cada vez que se realiza una venta. También desarrollé una función que calcula el total de ventas diarias.”
+    </div>
+
+    <h3>3. Desarrollo de Packages</h3>
+    <ul>
+      <li>Define qué es un package y para qué sirve.</li>
+      <li>Comenta las ventajas y desventajas de su uso.</li>
+      <li>Explica cómo agrupa tus procedimientos y funciones dentro del proyecto.</li>
+      <li>Incluye un ejemplo del package implementado.</li>
+    </ul>
+    <div class="example">
+      <strong>Ejemplo:</strong>  
+      “En el package <code>pkg_ventas</code> agrupé todas las funciones y procedimientos relacionados con la gestión de ventas, lo que facilita su mantenimiento y reutilización.”
+    </div>
+
+    <h3>4. Desarrollo de Triggers</h3>
+    <ul>
+      <li>Explica qué son los triggers y cuándo se activan.</li>
+      <li>Describe sus ventajas y desventajas.</li>
+      <li>Muestra cómo ayudan a mantener la integridad o automatización del sistema.</li>
+      <li>Incluye un ejemplo con su propósito dentro de tu base de datos.</li>
+    </ul>
+    <div class="example">
+      <strong>Ejemplo:</strong>  
+      “Creé un trigger que se activa al insertar una nueva cita médica para verificar que el veterinario no tenga otra cita a la misma hora.”
+    </div>
+
+    <h3>5. Conclusión</h3>
+    <ul>
+      <li><strong>Resumen:</strong> Sintetiza lo más importante que lograste en el proyecto.</li>
+      <li><strong>Impacto:</strong> Comenta cómo tu solución mejora los procesos del negocio.</li>
+      <li><strong>Recomendaciones:</strong> Propón posibles mejoras o funciones adicionales para el futuro.</li>
+    </ul>
+
+    <h3>6. Anexos</h3>
+    <ul>
+      <li><strong>Código Completo:</strong> Incluye todos los scripts PL/SQL utilizados.</li>
+      <li><strong>Diagramas:</strong> Agrega modelos de datos, esquemas o diagramas de flujo que ayuden a entender tu solución.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🎤 Parte 2: La Presentación</h2>
+    <p>En la presentación, deberás explicar y defender tu proyecto ante el docente o tus compañeros.</p>
+
+    <h3>Qué debes incluir:</h3>
+    <ul>
+      <li><strong>Inicio:</strong> Explica el problema que aborda tu proyecto y su importancia.</li>
+      <li><strong>Procedimientos y Funciones:</strong> Justifica por qué y cómo los usaste.</li>
+      <li><strong>Packages:</strong> Explica cómo te ayudaron a organizar el código.</li>
+      <li><strong>Triggers:</strong> Describe qué controlan y por qué son necesarios.</li>
+      <li><strong>Cierre:</strong> Resume lo aprendido y los resultados logrados.</li>
+    </ul>
+
+    <h3>Consejos útiles:</h3>
+    <ul>
+      <li>Usa <strong>diapositivas claras y visuales</strong>: evita el exceso de texto.</li>
+      <li>Apóyate en <strong>gráficos, diagramas y fragmentos de código</strong> para ilustrar tus ideas.</li>
+      <li>Ensaya tu presentación para controlar el tiempo y hablar con seguridad.</li>
+      <li>Prepárate para responder preguntas sobre tu código y decisiones técnicas.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>📚 Subdirección de Diseño Instruccional · Subdirección de Evaluación de Resultados de Aprendizaje · 2024</p>
+  </footer>
+</body>
+</html>

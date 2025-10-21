@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial PL/SQL: Variables Globales y Paquetes</title>
+  
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Highlight.js para colorear código -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+
+  <!-- Animaciones suaves -->
+  <script src="https://unpkg.com/scrollreveal"></script>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans leading-relaxed">
+
+  <header class="bg-gray-800 p-6 shadow-lg sticky top-0 z-10">
+    <h1 class="text-3xl font-bold text-center text-blue-400">💡 Tutorial: Variables Globales y Paquetes en PL/SQL</h1>
+    <p class="text-center text-gray-400 mt-2">Aprende paso a paso con ejemplos y visualizaciones interactivas</p>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-6 space-y-12">
+
+    <!-- Sección 1 -->
+    <section id="intro" class="bg-gray-800 rounded-2xl p-6 shadow-lg">
+      <h2 class="text-2xl font-semibold text-blue-300">1️⃣ ¿Qué es una variable global en un paquete?</h2>
+      <p class="mt-4 text-gray-300">
+        Una <strong>variable global</strong> en PL/SQL es una variable declarada
+        <em>fuera</em> de cualquier procedimiento o función dentro de un paquete.
+        Su valor se mantiene durante toda la sesión del usuario.
+      </p>
+
+      <div class="bg-gray-900 rounded-xl p-4 mt-4">
+        <pre><code class="language-sql">
+-- ESPECIFICACIÓN DEL PAQUETE
+CREATE OR REPLACE PACKAGE pkg_sesiones IS
+  g_contador_sesiones NUMBER := 0;  -- ✅ Variable global
+  PROCEDURE iniciar_sesion(p_usuario VARCHAR2);
+  FUNCTION obtener_total_sesiones RETURN NUMBER;
+END pkg_sesiones;
+        </code></pre>
+      </div>
+
+      <p class="mt-3 text-gray-400">
+        🔍 Esta variable se puede usar en cualquier parte del paquete, 
+        y cada usuario conectado tiene su propia copia.
+      </p>
+    </section>
+
+    <!-- Sección 2 -->
+    <section id="uso" class="bg-gray-800 rounded-2xl p-6 shadow-lg">
+      <h2 class="text-2xl font-semibold text-blue-300">2️⃣ ¿Cómo se usa dentro del cuerpo del paquete?</h2>
+      <p class="mt-4 text-gray-300">
+        Aquí tienes el cuerpo del paquete, donde la variable global <code>g_contador_sesiones</code>
+        se usa para contar cuántas sesiones se han iniciado:
+      </p>
+
+      <div class="bg-gray-900 rounded-xl p-4 mt-4">
+        <pre><code class="language-sql">
+CREATE OR REPLACE PACKAGE BODY pkg_sesiones IS
+
+  PROCEDURE iniciar_sesion(p_usuario VARCHAR2) IS
+  BEGIN
+    g_contador_sesiones := g_contador_sesiones + 1;
+    DBMS_OUTPUT.PUT_LINE('Sesión iniciada para: ' || p_usuario);
+  END;
+
+  FUNCTION obtener_total_sesiones RETURN NUMBER IS
+  BEGIN
+    RETURN g_contador_sesiones;
+  END;
+
+END pkg_sesiones;
+        </code></pre>
+      </div>
+
+      <p class="mt-3 text-gray-400">
+        Cada vez que ejecutas <code>pkg_sesiones.iniciar_sesion('Carlos')</code>, el contador aumenta.  
+        Luego puedes consultar <code>pkg_sesiones.obtener_total_sesiones</code> para ver el total.
+      </p>
+    </section>
+
+    <!-- Sección 3 -->
+    <section id="internos" class="bg-gray-800 rounded-2xl p-6 shadow-lg">
+      <h2 class="text-2xl font-semibold text-blue-300">3️⃣ ¿Los procedimientos y funciones pueden llamarse entre sí?</h2>
+      <p class="mt-4 text-gray-300">
+        ✅ Sí. Los subprogramas de un mismo paquete pueden invocarse directamente, sin prefijo.
+      </p>
+
+      <div class="bg-gray-900 rounded-xl p-4 mt-4">
+        <pre><code class="language-sql">
+CREATE OR REPLACE PACKAGE pkg_matematica IS
+  FUNCTION cuadrado(p_num NUMBER) RETURN NUMBER;
+  PROCEDURE mostrar_cuadrado(p_num NUMBER);
+END pkg_matematica;
+/
+
+CREATE OR REPLACE PACKAGE BODY pkg_matematica IS
+  FUNCTION cuadrado(p_num NUMBER) RETURN NUMBER IS
+  BEGIN
+    RETURN p_num * p_num;
+  END;
+
+  PROCEDURE mostrar_cuadrado(p_num NUMBER) IS
+    v_resultado NUMBER;
+  BEGIN
+    v_resultado := cuadrado(p_num); -- 🧠 función interna
+    DBMS_OUTPUT.PUT_LINE('El cuadrado es: ' || v_resultado);
+  END;
+END pkg_matematica;
+/
+        </code></pre>
+      </div>
+
+      <p class="mt-3 text-gray-400">
+        Aquí, <code>mostrar_cuadrado</code> llama a <code>cuadrado</code> dentro del mismo paquete y
+        muestra el resultado.  
+        Las funciones pueden devolver valores y los procedimientos pueden usar esos valores.
+      </p>
+    </section>
+
+    <!-- Sección 4 -->
+    <section id="practica" class="bg-gray-800 rounded-2xl p-6 shadow-lg">
+      <h2 class="text-2xl font-semibold text-blue-300">4️⃣ Ejemplo completo: funciones, procedimientos y variable global</h2>
+      <p class="mt-4 text-gray-300">
+        Este ejemplo combina todo lo aprendido: una variable global, un procedimiento que la modifica,
+        y otro que usa una función para mostrar resultados.
+      </p>
+
+      <div class="bg-gray-900 rounded-xl p-4 mt-4">
+        <pre><code class="language-sql">
+CREATE OR REPLACE PACKAGE pkg_log IS
+  g_eventos NUMBER := 0;  -- 🌐 Variable global
+  PROCEDURE registrar_evento(p_desc VARCHAR2);
+  FUNCTION total_eventos RETURN NUMBER;
+  PROCEDURE evento_y_contar(p_desc VARCHAR2);
+END pkg_log;
+/
+
+CREATE OR REPLACE PACKAGE BODY pkg_log IS
+  PROCEDURE registrar_evento(p_desc VARCHAR2) IS
+  BEGIN
+    g_eventos := g_eventos + 1;
+    DBMS_OUTPUT.PUT_LINE('Evento: ' || p_desc);
+  END;
+
+  FUNCTION total_eventos RETURN NUMBER IS
+  BEGIN
+    RETURN g_eventos;
+  END;
+
+  PROCEDURE evento_y_contar(p_desc VARCHAR2) IS
+    v_total NUMBER;
+  BEGIN
+    registrar_evento(p_desc);
+    v_total := total_eventos;
+    DBMS_OUTPUT.PUT_LINE('Total de eventos: ' || v_total);
+  END;
+END pkg_log;
+/
+        </code></pre>
+      </div>
+
+      <p class="mt-3 text-gray-400">
+        Ejecuta:
+        <br>
+        <code>BEGIN pkg_log.evento_y_contar('Inicio del sistema'); END;</code>  
+        y verás cómo la variable global <code>g_eventos</code> aumenta cada vez que llamas el procedimiento.
+      </p>
+    </section>
+
+    <!-- Sección final -->
+    <section class="bg-blue-950 p-6 rounded-2xl text-center shadow-xl">
+      <h3 class="text-2xl font-semibold text-blue-200 mb-3">🎓 En resumen</h3>
+      <ul class="text-gray-300 text-left max-w-lg mx-auto space-y-2">
+        <li>✔️ Las variables globales viven mientras dure la sesión.</li>
+        <li>✔️ Son compartidas entre todos los subprogramas del paquete.</li>
+        <li>✔️ Los procedimientos y funciones dentro del mismo paquete pueden llamarse entre sí.</li>
+        <li>✔️ Puedes combinar ambos conceptos para construir lógica modular y reutilizable.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="text-center text-gray-500 py-6">
+    <p>Desarrollado con ❤️ por para mis estudiantes del <strong> Duoc</strong> .</p>
+  </footer>
+
+  <!-- Script para animaciones -->
+  <script>
+    ScrollReveal().reveal('section', {
+      delay: 200,
+      distance: '40px',
+      duration: 800,
+      easing: 'ease-in-out',
+      origin: 'bottom'
+    });
+  </script>
+</body>
+</html>
