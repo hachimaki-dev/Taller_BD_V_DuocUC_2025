@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Parcial N°2 - Taller de Base de Datos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .duoc-blue { color: #003DA5; }
+        .duoc-bg { background-color: #003DA5; }
+        .timeline-line { 
+            position: absolute; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 4px; 
+            height: 100%; 
+            background: linear-gradient(to bottom, #003DA5, #60A5FA);
+        }
+        @media (max-width: 768px) {
+            .timeline-line { left: 20px; }
+        }
+        .code-block {
+            background-color: #1e293b;
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+        .code-block code {
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .accordion-content.active {
+            max-height: 2000px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Hero Section -->
+    <div class="duoc-bg text-white py-16 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-sm mb-4 opacity-90">BDY1103-1V | Taller de Base de Datos | Docente: Carlos Orellana</div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">Evaluación Parcial N°2</h1>
+            <p class="text-xl md:text-2xl mb-8">Implementación de Programas PL/SQL en Base de Datos</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                <div class="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <div class="text-3xl font-bold">40%</div>
+                    <div class="text-sm opacity-90">de tu nota final</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <div class="text-3xl font-bold">1 semana</div>
+                    <div class="text-sm opacity-90">de tiempo asignado</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <div class="text-3xl font-bold">3 personas</div>
+                    <div class="text-sm opacity-90">máximo por equipo</div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-yellow-500/20 border-l-4 border-yellow-300 p-4 rounded">
+                <p class="text-sm">💡 <strong>Clave del éxito:</strong> Construir código MODULAR con packages que tengan alta cohesión y bajo acoplamiento. Evita crear un único package gigante con todo.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4">
+            <nav class="flex overflow-x-auto gap-4 py-4 text-sm">
+                <a href="#roadmap" class="whitespace-nowrap hover:text-blue-600 font-medium">Roadmap</a>
+                <a href="#informe" class="whitespace-nowrap hover:text-blue-600 font-medium">Informe</a>
+                <a href="#presentacion" class="whitespace-nowrap hover:text-blue-600 font-medium">Presentación</a>
+                <a href="#sugerencias" class="whitespace-nowrap hover:text-blue-600 font-medium">Sugerencias</a>
+                <a href="#ejemplos" class="whitespace-nowrap hover:text-blue-600 font-medium">Ejemplos</a>
+                <a href="#faq" class="whitespace-nowrap hover:text-blue-600 font-medium">FAQ</a>
+                <a href="#cohesion" class="whitespace-nowrap hover:text-blue-600 font-medium">Test Cohesión</a>
+                <a href="#tips" class="whitespace-nowrap hover:text-blue-600 font-medium">Tips</a>
+                <a href="#rubrica" class="whitespace-nowrap hover:text-blue-600 font-medium">Rúbrica</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-12">
+
+        <!-- Roadmap Section -->
+        <section id="roadmap" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">Roadmap de la Evaluación</h2>
+            
+            <div class="relative">
+                <div class="timeline-line hidden md:block"></div>
+                
+                <!-- Paso 1 -->
+                <div class="mb-12 relative">
+                    <div class="md:flex items-center">
+                        <div class="md:w-1/2 md:pr-8 mb-4 md:mb-0 md:text-right">
+                            <div class="inline-block duoc-bg text-white px-4 py-2 rounded-full text-sm font-semibold mb-2">PASO 1</div>
+                            <h3 class="text-2xl font-bold mb-2">Desarrollo del Informe</h3>
+                            <p class="text-gray-600">40% de la EP2</p>
+                        </div>
+                        <div class="hidden md:block w-8 h-8 duoc-bg rounded-full absolute left-1/2 transform -translate-x-1/2 z-10 border-4 border-white"></div>
+                        <div class="md:w-1/2 md:pl-8">
+                            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                                <ul class="space-y-2 text-sm">
+                                    <li>✅ Desarrollar procedimientos con/sin parámetros</li>
+                                    <li>✅ Desarrollar funciones con/sin parámetros</li>
+                                    <li>✅ Construir packages con estructura pública/privada</li>
+                                    <li>✅ Implementar triggers (nivel sentencia y fila)</li>
+                                    <li>✅ Documentar todo en el informe siguiendo la estructura</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="mb-12 relative">
+                    <div class="md:flex items-center">
+                        <div class="md:w-1/2 md:pr-8 mb-4 md:mb-0 md:text-right">
+                            <div class="bg-white p-6 rounded-lg shadow-md border-r-4 border-green-500">
+                                <ul class="space-y-2 text-sm">
+                                    <li>✅ Preparar diapositivas claras (sin sobrecarga de texto)</li>
+                                    <li>✅ Incluir diagramas y ejemplos de código legibles</li>
+                                    <li>✅ Practicar timing y transiciones</li>
+                                    <li>✅ Preparar respuestas para posibles preguntas</li>
+                                    <li>✅ Cada integrante debe dominar todo el proyecto</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="hidden md:block w-8 h-8 bg-green-600 rounded-full absolute left-1/2 transform -translate-x-1/2 z-10 border-4 border-white"></div>
+                        <div class="md:w-1/2 md:pl-8">
+                            <div class="inline-block bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-2">PASO 2</div>
+                            <h3 class="text-2xl font-bold mb-2">Preparación de Presentación</h3>
+                            <p class="text-gray-600">60% de la EP2</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="relative">
+                    <div class="md:flex items-center">
+                        <div class="md:w-1/2 md:pr-8 mb-4 md:mb-0 md:text-right">
+                            <div class="inline-block bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-2">PASO 3</div>
+                            <h3 class="text-2xl font-bold mb-2">Entrega y Presentación</h3>
+                            <p class="text-gray-600">Evaluación Individual</p>
+                        </div>
+                        <div class="hidden md:block w-8 h-8 bg-purple-600 rounded-full absolute left-1/2 transform -translate-x-1/2 z-10 border-4 border-white"></div>
+                        <div class="md:w-1/2 md:pl-8">
+                            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+                                <ul class="space-y-2 text-sm">
+                                    <li>📄 Entregar informe completo (documento único)</li>
+                                    <li>🎤 Presentar individualmente ante el docente</li>
+                                    <li>💬 Responder preguntas sobre cualquier parte del proyecto</li>
+                                    <li>⚠️ Aunque el código sea grupal, la evaluación es INDIVIDUAL</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Informe Section -->
+        <section id="informe" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">📄 El Informe (40% de EP2)</h2>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg mb-8">
+                <h3 class="font-bold text-lg mb-2">Situación Evaluativa 1: Entrega de Encargo</h3>
+                <p class="text-gray-700">El informe debe demostrar que construiste e implementaste correctamente procedimientos, funciones, packages y triggers. No basta con tener el código, debes explicar el contexto de negocio y justificar cada decisión.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Introducción -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="duoc-bg text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">1</span>
+                        Introducción
+                    </h4>
+                    <ul class="space-y-2 text-gray-700 ml-11">
+                        <li><strong>Descripción del Proyecto:</strong> ¿De qué trata tu proyecto? ¿Cuál es su objetivo principal?</li>
+                        <li><strong>Alcance:</strong> ¿Qué procesos de negocio abordas con PL/SQL? ¿Qué se verá mejorado?</li>
+                        <li><strong>Tecnologías Utilizadas:</strong> Oracle Database, PL/SQL, herramientas de desarrollo, etc.</li>
+                    </ul>
+                </div>
+
+                <!-- Procedimientos y Funciones -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="duoc-bg text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">2</span>
+                        Desarrollo de Procedimientos y Funciones
+                    </h4>
+                    <div class="space-y-3 ml-11 text-gray-700">
+                        <p><strong>Define:</strong> ¿Qué son los procedimientos y funciones? ¿Cuál es la diferencia?</p>
+                        <p><strong>Ventajas y Desventajas:</strong> Analiza pros y contras de cada uno</p>
+                        <p><strong>Propósito en tu proyecto:</strong> ¿Por qué decidiste usar procedimientos/funciones en este contexto?</p>
+                        <p><strong>Demuestra:</strong> Muestra ejemplos concretos de tu código con explicación de parámetros, lógica y uso</p>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                            <p class="text-sm">💡 <strong>Tip:</strong> Incluye ejemplos de llamadas desde SQL y desde otros programas PL/SQL</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Packages -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="duoc-bg text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                        Desarrollo de Packages
+                    </h4>
+                    <div class="space-y-3 ml-11 text-gray-700">
+                        <p><strong>Define:</strong> ¿Qué es un package? ¿Qué significa constructor público vs privado?</p>
+                        <p><strong>Ventajas y Desventajas:</strong> ¿Por qué usar packages? ¿Cuándo no conviene?</p>
+                        <p><strong>Organización del código:</strong> ¿Cómo los packages ayudan a estructurar mejor tu solución?</p>
+                        <p><strong>Relación con proc/func:</strong> ¿Cómo agrupaste procedimientos y funciones dentro de packages?</p>
+                        <p><strong>Demuestra:</strong> Muestra la especificación (spec) y el cuerpo (body) de tus packages</p>
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
+                            <p class="text-sm">⚠️ <strong>Importante:</strong> Cada package debe tener UN propósito claro de negocio. Evita crear "PKG_TODO".</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Triggers -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="duoc-bg text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">4</span>
+                        Desarrollo de Triggers
+                    </h4>
+                    <div class="space-y-3 ml-11 text-gray-700">
+                        <p><strong>Define:</strong> ¿Qué es un trigger? ¿Diferencia entre nivel sentencia y nivel fila?</p>
+                        <p><strong>Ventajas y Desventajas:</strong> ¿Cuándo usar triggers? ¿Cuándo evitarlos?</p>
+                        <p><strong>Propósito en tu proyecto:</strong> ¿Qué problema de negocio resuelven tus triggers?</p>
+                        <p><strong>Demuestra:</strong> Muestra ejemplos de triggers BEFORE/AFTER, nivel sentencia y fila</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
+                            <p class="text-sm">💡 <strong>Casos de uso comunes:</strong> Auditoría, validaciones de negocio, alertas de stock, cálculos automáticos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conclusión -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="duoc-bg text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">5</span>
+                        Conclusión
+                    </h4>
+                    <ul class="space-y-2 text-gray-700 ml-11">
+                        <li><strong>Resumen:</strong> Sintetiza los puntos principales del informe</li>
+                        <li><strong>Impacto del Proyecto:</strong> ¿Cómo contribuyeron proc/func/packages/triggers a tu solución?</li>
+                        <li><strong>Recomendaciones:</strong> ¿Qué mejoras futuras propones? ¿Dónde extender el uso de PL/SQL?</li>
+                    </ul>
+                </div>
+
+                <!-- Anexos -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="duoc-bg text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">6</span>
+                        Anexos
+                    </h4>
+                    <ul class="space-y-2 text-gray-700 ml-11">
+                        <li><strong>Código Completo:</strong> Scripts SQL con todos los objetos creados</li>
+                        <li><strong>Diagramas y Modelos:</strong> Diagramas de flujo, modelo de datos, esquemas de arquitectura</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Presentación Section -->
+        <section id="presentacion" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">🎤 La Presentación (60% de EP2)</h2>
+            
+            <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg mb-8">
+                <h3 class="font-bold text-lg mb-2">Situación Evaluativa 2: Presentación Individual</h3>
+                <p class="text-gray-700 mb-2">Aunque el código sea grupal, <strong>cada estudiante presenta individualmente</strong> y es evaluado por su capacidad de explicar y justificar el proyecto completo.</p>
+                <p class="text-red-600 font-semibold">⚠️ Debes dominar TODO el proyecto, no solo "tu parte"</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="font-bold text-lg mb-4">📋 Contenido de la Presentación</h4>
+                    <ol class="space-y-3 list-decimal list-inside text-gray-700">
+                        <li><strong>Problema del Proyecto</strong><br>
+                            <span class="text-sm text-gray-600">Explica el problema que aborda tu proyecto, su relevancia y contexto de negocio</span>
+                        </li>
+                        <li><strong>Justificar Procedimientos y Funciones</strong><br>
+                            <span class="text-sm text-gray-600">¿Por qué los usaste? ¿Qué valor aportan?</span>
+                        </li>
+                        <li><strong>Justificar Packages</strong><br>
+                            <span class="text-sm text-gray-600">¿Cómo organizaste el código? ¿Por qué esa estructura?</span>
+                        </li>
+                        <li><strong>Justificar Triggers</strong><br>
+                            <span class="text-sm text-gray-600">¿Qué procesos automatizan? ¿Por qué son necesarios?</span>
+                        </li>
+                        <li><strong>Conclusión</strong><br>
+                            <span class="text-sm text-gray-600">Cierre con impacto y aprendizajes</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="font-bold text-lg mb-4">💡 Consejos para tu Presentación</h4>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>Claridad visual:</strong> Una idea por diapositiva, usa viñetas y gráficos</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>Código legible:</strong> Muestra fragmentos clave, no todo el código</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>Practica timing:</strong> Ensaya para ajustarte al tiempo determinado</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>Prepara respuestas:</strong> El docente puede preguntar sobre cualquier parte</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span><strong>Usa diagramas:</strong> Ilustra arquitectura y flujos de datos</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sugerencias por Proyecto -->
+        <section id="sugerencias" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">💼 Sugerencias por Tipo de Proyecto</h2>
+            <p class="text-gray-700 mb-6">Estas son ideas para organizar tus packages según tu proyecto. Recuerda: cada package debe tener <strong>alta cohesión</strong> (un propósito claro) y <strong>bajo acoplamiento</strong> (mínima dependencia entre packages).</p>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
+                    <thead class="duoc-bg text-white">
+                        <tr>
+                            <th class="px-6 py-4 text-left">Proyecto</th>
+                            <th class="px-6 py-4 text-left">Packages Sugeridos</th>
+                            <th class="px-6 py-4 text-left">Ejemplos de Triggers</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-semibold">Veterinaria</td>
+                            <td class="px-6 py-4">
+                                <ul class="text-sm space-y-1">
+                                    <li>• PKG_GESTION_CITAS</li>
+                                    <li>• PKG_HISTORIAL_CLINICO</li>
+                                    <li>• PKG_INVENTARIO_FARMACIA</li>
+                                    <li>• PKG_REPORTES_MEDICOS</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                • Auditoría de cambios en historial clínico<br>
+                                • Validación de citas duplicadas<br>
+                                • Alerta de vacunas vencidas
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-semibold">Airsoft Webstore</td>
+                            <td class="px-6 py-4">
+                                <ul class="text-sm space-y-1">
+                                    <li>• PKG_GESTION_PEDIDOS</li>
+                                    <li>• PKG_GESTION_INVENTARIO</li>
+                                    <li>• PKG_NOTIFICACIONES_STOCK</li>
+                                    <li>• PKG_REPORTERIA_VENTAS</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                • Alerta automática de stock crítico<br>
+                                • Actualizar inventario al confirmar pedido<br>
+                                • Log de cambios de precios
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-semibold">Tienda de Ropa</td>
+                            <td class="px-6 py-4">
+                                <ul class="text-sm space-y-1">
+                                    <li>• PKG_GESTION_VENTAS</li>
+                                    <li>• PKG_CONTROL_STOCK</li>
+                                    <li>• PKG_PROMOCIONES</li>
+                                    <li>• PKG_ESTADISTICAS_VENTAS</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                • Aplicar descuentos automáticos<br>
+                                • Validar stock antes de venta<br>
+                                • Historial de movimientos de inventario
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-semibold">PDI (Policía)</td>
+                            <td class="px-6 py-4">
+                                <ul class="text-sm space-y-1">
+                                    <li>• PKG_GESTION_CASOS</li>
+                                    <li>• PKG_REGISTRO_EVIDENCIAS</li>
+                                    <li>• PKG_SEGUIMIENTO_INVESTIGACIONES</li>
+                                    <li>• PKG_REPORTES_ESTADISTICOS</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                • Auditoría de acceso a datos sensibles<br>
+                                • Validación de cadena de custodia<br>
+                                • Alerta de casos sin actualizar
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-semibold">Restaurante Hospital</td>
+                            <td class="px-6 py-4">
+                                <ul class="text-sm space-y-1">
+                                    <li>• PKG_GESTION_MENUS</li>
+                                    <li>• PKG_PEDIDOS_PACIENTES</li>
+                                    <li>• PKG_CONTROL_DIETAS</li>
+                                    <li>• PKG_INVENTARIO_COCINA</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                • Validar dietas según restricciones médicas<br>
+                                • Actualizar stock de ingredientes<br>
+                                • Alertas de alergias
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-semibold">Servicio Técnico PC</td>
+                            <td class="px-6 py-4">
+                                <ul class="text-sm space-y-1">
+                                    <li>• PKG_GESTION_ORDENES</li>
+                                    <li>• PKG_INVENTARIO_REPUESTOS</li>
+                                    <li>• PKG_SEGUIMIENTO_REPARACIONES</li>
+                                    <li>• PKG_FACTURACION</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                • Cambio de estado de órdenes<br>
+                                • Notificación de repuesto disponible<br>
+                                • Cálculo automático de garantía
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-semibold">Hot Wheels Coleccionistas</td>
+                            <td class="px-6 py-4">
+                                <ul class="text-sm space-y-1">
+                                    <li>• PKG_GESTION_CATALOGO</li>
+                                    <li>• PKG_TRANSACCIONES_VT</li>
+                                    <li>• PKG_VALORACIONES</li>
+                                    <li>• PKG_ESTADISTICAS_MERCADO</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                • Actualizar estado de publicación<br>
+                                • Validar disponibilidad para trueque<br>
+                                • Historial de precios
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Ejemplos de Código -->
+        <section id="ejemplos" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">💻 Ejemplos de Código</h2>
+            
+            <!-- Procedimiento -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-xl font-bold mb-4">1. Procedimiento (Registrar Pedido - Airsoft)</h3>
+                
+                <div class="mb-4">
+                    <div class="flex border-b">
+                        <button class="tab-btn px-4 py-2 font-medium border-b-2 border-blue-500 text-blue-600" onclick="showTab('proc', 'pseudo')">Pseudocódigo</button>
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('proc', 'plsql')">PL/SQL</button>
+                    </div>
+                </div>
+
+                <div id="proc-pseudo" class="tab-content active">
+                    <div class="code-block">
+                        <code>
+PROCEDIMIENTO sp_registrar_pedido(id_cliente, lista_productos)
+INICIO
+    // 1. Validar que el cliente existe
+    SI NO existe_cliente(id_cliente) ENTONCES
+        LANZAR_ERROR("Cliente no encontrado")
+    FIN SI
+    
+    // 2. Verificar stock de cada producto
+    PARA cada producto EN lista_productos HACER
+        SI stock_actual(producto.id) < producto.cantidad ENTONCES
+            LANZAR_ERROR("Stock insuficiente para " + producto.nombre)
+        FIN SI
+    FIN PARA
+    
+    // 3. Calcular total del pedido
+    total = 0
+    PARA cada producto EN lista_productos HACER
+        total = total + (producto.precio * producto.cantidad)
+    FIN PARA
+    
+    // 4. Insertar el pedido
+    INSERTAR EN pedidos(id_cliente, fecha, total, estado)
+    VALORES(id_cliente, HOY, total, 'PENDIENTE')
+    
+    // 5. Insertar detalle de productos
+    PARA cada producto EN lista_productos HACER
+        INSERTAR EN detalle_pedido(id_pedido, id_producto, cantidad, precio)
+    FIN PARA
+    
+    // 6. Actualizar inventario
+    PARA cada producto EN lista_productos HACER
+        ACTUALIZAR stock SET cantidad = cantidad - producto.cantidad
+        DONDE id_producto = producto.id
+    FIN PARA
+    
+    CONFIRMAR_TRANSACCION()
+    RETORNAR "Pedido registrado exitosamente"
+FIN
+                        </code>
+                    </div>
+                </div>
+
+                <div id="proc-plsql" class="tab-content">
+                    <div class="code-block">
+                        <code>
+CREATE OR REPLACE PROCEDURE sp_registrar_pedido(
+    p_id_cliente IN NUMBER,
+    p_productos IN productos_tabla_type
+) IS
+    v_id_pedido NUMBER;
+    v_total NUMBER := 0;
+    v_stock_actual NUMBER;
+BEGIN
+    -- 1. Validar cliente
+    IF NOT existe_cliente(p_id_cliente) THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Cliente no encontrado');
+    END IF;
+    
+    -- 2. Verificar stock y calcular total
+    FOR i IN 1..p_productos.COUNT LOOP
+        SELECT stock INTO v_stock_actual 
+        FROM productos 
+        WHERE id_producto = p_productos(i).id_producto;
+        
+        IF v_stock_actual < p_productos(i).cantidad THEN
+            RAISE_APPLICATION_ERROR(-20002, 
+                'Stock insuficiente para producto ' || p_productos(i).id_producto);
+        END IF;
+        
+        v_total := v_total + (p_productos(i).precio * p_productos(i).cantidad);
+    END LOOP;
+    
+    -- 3. Insertar pedido
+    INSERT INTO pedidos(id_cliente, fecha_pedido, total, estado)
+    VALUES(p_id_cliente, SYSDATE, v_total, 'PENDIENTE')
+    RETURNING id_pedido INTO v_id_pedido;
+    
+    -- 4. Insertar detalle
+    FOR i IN 1..p_productos.COUNT LOOP
+        INSERT INTO detalle_pedido(id_pedido, id_producto, cantidad, precio_unitario)
+        VALUES(v_id_pedido, p_productos(i).id_producto, 
+               p_productos(i).cantidad, p_productos(i).precio);
+        
+        -- 5. Actualizar stock
+        UPDATE productos 
+        SET stock = stock - p_productos(i).cantidad
+        WHERE id_producto = p_productos(i).id_producto;
+    END LOOP;
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Pedido ' || v_id_pedido || ' registrado exitosamente');
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END sp_registrar_pedido;
+/
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Función -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-xl font-bold mb-4">2. Función (Calcular Descuento - Tienda de Ropa)</h3>
+                
+                <div class="mb-4">
+                    <div class="flex border-b">
+                        <button class="tab-btn px-4 py-2 font-medium border-b-2 border-blue-500 text-blue-600" onclick="showTab('func', 'pseudo')">Pseudocódigo</button>
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('func', 'plsql')">PL/SQL</button>
+                    </div>
+                </div>
+
+                <div id="func-pseudo" class="tab-content active">
+                    <div class="code-block">
+                        <code>
+FUNCION fn_calcular_descuento(id_cliente, monto_compra) RETORNA NUMERO
+INICIO
+    descuento = 0
+    
+    // 1. Obtener categoría del cliente (VIP, Regular, Nuevo)
+    categoria = OBTENER_CATEGORIA_CLIENTE(id_cliente)
+    
+    // 2. Aplicar descuento según categoría
+    SEGUN categoria HACER
+        CASO 'VIP':
+            SI monto_compra >= 100000 ENTONCES
+                descuento = monto_compra * 0.20  // 20%
+            SINO
+                descuento = monto_compra * 0.15  // 15%
+            FIN SI
+            
+        CASO 'REGULAR':
+            SI monto_compra >= 50000 ENTONCES
+                descuento = monto_compra * 0.10  // 10%
+            FIN SI
+            
+        CASO 'NUEVO':
+            descuento = monto_compra * 0.05  // 5% bienvenida
+    FIN SEGUN
+    
+    // 3. Verificar promoción activa del día
+    SI existe_promocion_activa() ENTONCES
+        descuento_adicional = monto_compra * 0.05
+        descuento = descuento + descuento_adicional
+    FIN SI
+    
+    RETORNAR descuento
+FIN
+                        </code>
+                    </div>
+                </div>
+
+                <div id="func-plsql" class="tab-content">
+                    <div class="code-block">
+                        <code>
+CREATE OR REPLACE FUNCTION fn_calcular_descuento(
+    p_id_cliente IN NUMBER,
+    p_monto_compra IN NUMBER
+) RETURN NUMBER IS
+    v_descuento NUMBER := 0;
+    v_categoria VARCHAR2(20);
+    v_promocion_activa BOOLEAN;
+BEGIN
+    -- 1. Obtener categoría del cliente
+    SELECT categoria INTO v_categoria
+    FROM clientes
+    WHERE id_cliente = p_id_cliente;
+    
+    -- 2. Aplicar descuento según categoría
+    CASE v_categoria
+        WHEN 'VIP' THEN
+            IF p_monto_compra >= 100000 THEN
+                v_descuento := p_monto_compra * 0.20;
+            ELSE
+                v_descuento := p_monto_compra * 0.15;
+            END IF;
+            
+        WHEN 'REGULAR' THEN
+            IF p_monto_compra >= 50000 THEN
+                v_descuento := p_monto_compra * 0.10;
+            END IF;
+            
+        WHEN 'NUEVO' THEN
+            v_descuento := p_monto_compra * 0.05;
+            
+        ELSE
+            v_descuento := 0;
+    END CASE;
+    
+    -- 3. Verificar promoción activa
+    SELECT COUNT(*) INTO v_promocion_activa
+    FROM promociones
+    WHERE TRUNC(SYSDATE) BETWEEN fecha_inicio AND fecha_fin
+    AND estado = 'ACTIVA';
+    
+    IF v_promocion_activa > 0 THEN
+        v_descuento := v_descuento + (p_monto_compra * 0.05);
+    END IF;
+    
+    RETURN v_descuento;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+    WHEN OTHERS THEN
+        RETURN 0;
+END fn_calcular_descuento;
+/
+
+-- Ejemplo de uso en SQL:
+SELECT id_venta, 
+       monto_total,
+       fn_calcular_descuento(id_cliente, monto_total) AS descuento,
+       monto_total - fn_calcular_descuento(id_cliente, monto_total) AS monto_final
+FROM ventas
+WHERE fecha_venta = TRUNC(SYSDATE);
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-xl font-bold mb-4">3. Package (Gestión de Inventario - Airsoft)</h3>
+                
+                <div class="mb-4">
+                    <div class="flex border-b">
+                        <button class="tab-btn px-4 py-2 font-medium border-b-2 border-blue-500 text-blue-600" onclick="showTab('pkg', 'pseudo')">Estructura</button>
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('pkg', 'plsql')">PL/SQL</button>
+                    </div>
+                </div>
+
+                <div id="pkg-pseudo" class="tab-content active">
+                    <div class="code-block">
+                        <code>
+PACKAGE PKG_GESTION_INVENTARIO
+
+    // ========== PARTE PÚBLICA (SPECIFICATION) ==========
+    // Lo que otros pueden usar
+    
+    PROCEDIMIENTO actualizar_stock(id_producto, cantidad_movimiento, tipo_movimiento)
+    FUNCION obtener_stock_actual(id_producto) RETORNA NUMERO
+    FUNCION productos_stock_critico() RETORNA LISTA
+    PROCEDIMIENTO generar_reporte_inventario(fecha_inicio, fecha_fin)
+    
+    // ========== PARTE PRIVADA (BODY) ==========
+    // Funciones auxiliares internas
+    
+    FUNCION privada validar_producto(id_producto) RETORNA BOOLEANO
+    PROCEDIMIENTO privado registrar_movimiento_log(id_producto, cantidad, tipo)
+    FUNCION privada calcular_costo_promedio(id_producto) RETORNA NUMERO
+
+FIN PACKAGE
+
+EXPLICACIÓN:
+- Los procedimientos/funciones PÚBLICOS son la interfaz del package
+- Los elementos PRIVADOS son helpers que solo usa el package internamente
+- Esto permite cambiar la implementación interna sin afectar a quien usa el package
+                        </code>
+                    </div>
+                </div>
+
+                <div id="pkg-plsql" class="tab-content">
+                    <div class="code-block">
+                        <code>
+-- ==================== SPECIFICATION ====================
+CREATE OR REPLACE PACKAGE PKG_GESTION_INVENTARIO AS
+    
+    -- Procedimientos públicos
+    PROCEDURE actualizar_stock(
+        p_id_producto IN NUMBER,
+        p_cantidad IN NUMBER,
+        p_tipo_movimiento IN VARCHAR2
+    );
+    
+    PROCEDURE generar_reporte_inventario(
+        p_fecha_inicio IN DATE,
+        p_fecha_fin IN DATE
+    );
+    
+    -- Funciones públicas
+    FUNCTION obtener_stock_actual(
+        p_id_producto IN NUMBER
+    ) RETURN NUMBER;
+    
+    FUNCTION productos_stock_critico RETURN SYS_REFCURSOR;
+    
+END PKG_GESTION_INVENTARIO;
+/
+
+-- ==================== BODY ====================
+CREATE OR REPLACE PACKAGE BODY PKG_GESTION_INVENTARIO AS
+    
+    -- Variable privada del package
+    c_stock_minimo CONSTANT NUMBER := 10;
+    
+    -- Función privada (no está en la spec)
+    FUNCTION validar_producto(p_id_producto IN NUMBER) 
+    RETURN BOOLEAN IS
+        v_count NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_count
+        FROM productos
+        WHERE id_producto = p_id_producto;
+        
+        RETURN v_count > 0;
+    END validar_producto;
+    
+    -- Procedimiento privado
+    PROCEDURE registrar_movimiento_log(
+        p_id_producto IN NUMBER,
+        p_cantidad IN NUMBER,
+        p_tipo IN VARCHAR2
+    ) IS
+    BEGIN
+        INSERT INTO log_movimientos(id_producto, cantidad, tipo, fecha)
+        VALUES(p_id_producto, p_cantidad, p_tipo, SYSDATE);
+    END registrar_movimiento_log;
+    
+    -- Implementación de procedimientos públicos
+    PROCEDURE actualizar_stock(
+        p_id_producto IN NUMBER,
+        p_cantidad IN NUMBER,
+        p_tipo_movimiento IN VARCHAR2
+    ) IS
+    BEGIN
+        -- Usar función privada para validar
+        IF NOT validar_producto(p_id_producto) THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Producto no existe');
+        END IF;
+        
+        -- Actualizar stock
+        IF p_tipo_movimiento = 'ENTRADA' THEN
+            UPDATE productos 
+            SET stock = stock + p_cantidad
+            WHERE id_producto = p_id_producto;
+        ELSIF p_tipo_movimiento = 'SALIDA' THEN
+            UPDATE productos 
+            SET stock = stock - p_cantidad
+            WHERE id_producto = p_id_producto;
+        END IF;
+        
+        -- Registrar en log (privado)
+        registrar_movimiento_log(p_id_producto, p_cantidad, p_tipo_movimiento);
+        
+        COMMIT;
+    END actualizar_stock;
+    
+    FUNCTION obtener_stock_actual(p_id_producto IN NUMBER) 
+    RETURN NUMBER IS
+        v_stock NUMBER;
+    BEGIN
+        SELECT stock INTO v_stock
+        FROM productos
+        WHERE id_producto = p_id_producto;
+        
+        RETURN v_stock;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 0;
+    END obtener_stock_actual;
+    
+    FUNCTION productos_stock_critico 
+    RETURN SYS_REFCURSOR IS
+        v_cursor SYS_REFCURSOR;
+    BEGIN
+        OPEN v_cursor FOR
+            SELECT id_producto, nombre, stock, stock_minimo
+            FROM productos
+            WHERE stock <= c_stock_minimo
+            ORDER BY stock ASC;
+        
+        RETURN v_cursor;
+    END productos_stock_critico;
+    
+    PROCEDURE generar_reporte_inventario(
+        p_fecha_inicio IN DATE,
+        p_fecha_fin IN DATE
+    ) IS
+    BEGIN
+        -- Implementación del reporte
+        FOR rec IN (
+            SELECT p.nombre, 
+                   SUM(CASE WHEN lm.tipo = 'ENTRADA' THEN lm.cantidad ELSE 0 END) as entradas,
+                   SUM(CASE WHEN lm.tipo = 'SALIDA' THEN lm.cantidad ELSE 0 END) as salidas
+            FROM productos p
+            LEFT JOIN log_movimientos lm ON p.id_producto = lm.id_producto
+            WHERE lm.fecha BETWEEN p_fecha_inicio AND p_fecha_fin
+            GROUP BY p.nombre
+        ) LOOP
+            DBMS_OUTPUT.PUT_LINE(rec.nombre || ': ' || rec.entradas || ' entradas, ' || rec.salidas || ' salidas');
+        END LOOP;
+    END generar_reporte_inventario;
+    
+END PKG_GESTION_INVENTARIO;
+/
+
+-- Ejemplo de uso:
+BEGIN
+    PKG_GESTION_INVENTARIO.actualizar_stock(101, 50, 'ENTRADA');
+    DBMS_OUTPUT.PUT_LINE('Stock actual: ' || 
+        PKG_GESTION_INVENTARIO.obtener_stock_actual(101));
+END;
+/
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trigger -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4">4. Triggers (Auditoría y Validación - Veterinaria)</h3>
+                
+                <div class="mb-4">
+                    <div class="flex border-b">
+                        <button class="tab-btn px-4 py-2 font-medium border-b-2 border-blue-500 text-blue-600" onclick="showTab('trg', 'pseudo')">Pseudocódigo</button>
+                        <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('trg', 'plsql')">PL/SQL</button>
+                    </div>
+                </div>
+
+                <div id="trg-pseudo" class="tab-content active">
+                    <div class="code-block">
+                        <code>
+// TRIGGER 1: Auditoría de cambios (NIVEL FILA)
+TRIGGER trg_auditoria_historial
+DESPUES DE (INSERT, UPDATE, DELETE) EN historial_clinico
+POR CADA FILA
+INICIO
+    SI operacion = INSERT ENTONCES
+        INSERTAR EN auditoria(tabla, operacion, usuario, datos)
+        VALORES('historial_clinico', 'INSERT', USUARIO_ACTUAL, NUEVA_FILA)
+    FIN SI
+    
+    SI operacion = UPDATE ENTONCES
+        INSERTAR EN auditoria(tabla, operacion, usuario, datos_antes, datos_despues)
+        VALORES('historial_clinico', 'UPDATE', USUARIO_ACTUAL, FILA_ANTIGUA, NUEVA_FILA)
+    FIN SI
+    
+    SI operacion = DELETE ENTONCES
+        INSERTAR EN auditoria(tabla, operacion, usuario, datos)
+        VALORES('historial_clinico', 'DELETE', USUARIO_ACTUAL, FILA_ANTIGUA)
+    FIN SI
+FIN TRIGGER
+
+// TRIGGER 2: Validación de citas (NIVEL SENTENCIA)
+TRIGGER trg_validar_citas
+ANTES DE INSERT EN citas
+POR CADA SENTENCIA
+INICIO
+    // Verificar que no haya conflictos de horario del veterinario
+    SI EXISTS(citas con mismo veterinario en mismo horario) ENTONCES
+        LANZAR_ERROR("El veterinario ya tiene una cita en ese horario")
+    FIN SI
+FIN TRIGGER
+
+// TRIGGER 3: Validación individual (NIVEL FILA)
+TRIGGER trg_validar_cita_individual
+ANTES DE INSERT O UPDATE EN citas
+POR CADA FILA
+INICIO
+    // Validar que la fecha de cita sea futura
+    SI NUEVA_FILA.fecha_cita < HOY ENTONCES
+        LANZAR_ERROR("No se pueden agendar citas en el pasado")
+    FIN SI
+    
+    // Validar horario laboral (8:00 - 20:00)
+    SI HORA(NUEVA_FILA.fecha_cita) < 8 O HORA(NUEVA_FILA.fecha_cita) > 20 ENTONCES
+        LANZAR_ERROR("Citas solo en horario 8:00 - 20:00")
+    FIN SI
+FIN TRIGGER
+                        </code>
+                    </div>
+                </div>
+
+                <div id="trg-plsql" class="tab-content">
+                    <div class="code-block">
+                        <code>
+-- ========== TRIGGER 1: Auditoría (AFTER + ROW LEVEL) ==========
+CREATE OR REPLACE TRIGGER trg_auditoria_historial
+AFTER INSERT OR UPDATE OR DELETE ON historial_clinico
+FOR EACH ROW
+DECLARE
+    v_operacion VARCHAR2(10);
+BEGIN
+    -- Determinar tipo de operación
+    IF INSERTING THEN
+        v_operacion := 'INSERT';
+        INSERT INTO auditoria_historial(
+            id_historial, operacion, usuario, fecha,
+            datos_nuevos
+        ) VALUES (
+            :NEW.id_historial, v_operacion, USER, SYSDATE,
+            'Diagnóstico: ' || :NEW.diagnostico
+        );
+        
+    ELSIF UPDATING THEN
+        v_operacion := 'UPDATE';
+        INSERT INTO auditoria_historial(
+            id_historial, operacion, usuario, fecha,
+            datos_antiguos, datos_nuevos
+        ) VALUES (
+            :NEW.id_historial, v_operacion, USER, SYSDATE,
+            'Diagnóstico: ' || :OLD.diagnostico,
+            'Diagnóstico: ' || :NEW.diagnostico
+        );
+        
+    ELSIF DELETING THEN
+        v_operacion := 'DELETE';
+        INSERT INTO auditoria_historial(
+            id_historial, operacion, usuario, fecha,
+            datos_antiguos
+        ) VALUES (
+            :OLD.id_historial, v_operacion, USER, SYSDATE,
+            'Diagnóstico: ' || :OLD.diagnostico
+        );
+    END IF;
+END;
+/
+
+-- ========== TRIGGER 2: Validación de horarios (BEFORE + STATEMENT) ==========
+CREATE OR REPLACE TRIGGER trg_validar_conflicto_citas
+BEFORE INSERT ON citas
+DECLARE
+    v_conflictos NUMBER;
+BEGIN
+    -- Este trigger se ejecuta UNA VEZ por cada sentencia INSERT
+    -- Útil para validaciones globales
+    
+    SELECT COUNT(*) INTO v_conflictos
+    FROM citas c1
+    WHERE EXISTS (
+        SELECT 1 FROM citas c2
+        WHERE c1.id_veterinario = c2.id_veterinario
+        AND c1.fecha_cita = c2.fecha_cita
+        AND c1.id_cita != c2.id_cita
+    );
+    
+    IF v_conflictos > 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 
+            'Existe conflicto de horarios para uno o más veterinarios');
+    END IF;
+END;
+/
+
+-- ========== TRIGGER 3: Validación individual (BEFORE + ROW) ==========
+CREATE OR REPLACE TRIGGER trg_validar_cita_individual
+BEFORE INSERT OR UPDATE ON citas
+FOR EACH ROW
+DECLARE
+    v_hora NUMBER;
+BEGIN
+    -- Validar fecha futura
+    IF :NEW.fecha_cita < TRUNC(SYSDATE) THEN
+        RAISE_APPLICATION_ERROR(-20004, 
+            'No se pueden agendar citas en el pasado');
+    END IF;
+    
+    -- Validar horario laboral
+    v_hora := TO_NUMBER(TO_CHAR(:NEW.fecha_cita, 'HH24'));
+    IF v_hora < 8 OR v_hora >= 20 THEN
+        RAISE_APPLICATION_ERROR(-20005, 
+            'Las citas deben ser entre 8:00 y 20:00 horas');
+    END IF;
+    
+    -- Validar que la mascota existe
+    DECLARE
+        v_count NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_count
+        FROM mascotas
+        WHERE id_mascota = :NEW.id_mascota;
+        
+        IF v_count = 0 THEN
+            RAISE_APPLICATION_ERROR(-20006, 
+                'La mascota especificada no existe');
+        END IF;
+    END;
+    
+    -- Auto-asignar estado si es nuevo
+    IF INSERTING AND :NEW.estado IS NULL THEN
+        :NEW.estado := 'PENDIENTE';
+    END IF;
+END;
+/
+
+-- ========== TRIGGER 4: Alerta de vacunas (AFTER + ROW) ==========
+CREATE OR REPLACE TRIGGER trg_alerta_vacunas_vencidas
+AFTER INSERT OR UPDATE OF fecha_proxima_vacuna ON mascotas
+FOR EACH ROW
+WHEN (NEW.fecha_proxima_vacuna <= SYSDATE + 7)
+BEGIN
+    -- Insertar alerta si la vacuna vence en menos de 7 días
+    INSERT INTO alertas(
+        tipo_alerta, id_mascota, mensaje, fecha_creacion, estado
+    ) VALUES (
+        'VACUNA_PROXIMA',
+        :NEW.id_mascota,
+        'La mascota ' || :NEW.nombre || ' tiene vacuna próxima a vencer',
+        SYSDATE,
+        'PENDIENTE'
+    );
+    
+    DBMS_OUTPUT.PUT_LINE('⚠️ Alerta generada para mascota: ' || :NEW.nombre);
+END;
+/
+
+-- Prueba de triggers:
+INSERT INTO citas(id_cita, id_mascota, id_veterinario, fecha_cita, motivo)
+VALUES(1, 101, 5, SYSDATE + 1, 'Consulta general');
+
+UPDATE historial_clinico 
+SET diagnostico = 'Gastroenteritis leve'
+WHERE id_historial = 50;
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">❓ Preguntas Frecuentes</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="accordion-btn w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-50" onclick="toggleAccordion(this)">
+                        <span>¿Cuántos procedures/functions debe tener cada package?</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content px-6 pb-4">
+                        <p class="text-gray-700">No hay un número fijo, lo importante es la <strong>cohesión</strong>. Un package debe contener solo procedimientos y funciones que estén relacionados con UN concepto de negocio específico. Por ejemplo:</p>
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            <li><strong>PKG_GESTION_PEDIDOS:</strong> Puede tener 5-8 proc/func relacionados con pedidos</li>
+                            <li><strong>PKG_REPORTERIA:</strong> Puede tener 3-6 funciones de reportes</li>
+                        </ul>
+                        <p class="mt-2 text-gray-700">Si tu package tiene más de 15 procedimientos/funciones, probablemente deberías dividirlo en packages más pequeños.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="accordion-btn w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-50" onclick="toggleAccordion(this)">
+                        <span>¿Puedo usar packages de otros compañeros en mi código?</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content px-6 pb-4">
+                        <p class="text-gray-700">Si trabajan en equipo (máximo 3 personas), <strong>SÍ pueden y DEBEN</strong> usar los packages de sus compañeros. De hecho, esa es la ventaja del bajo acoplamiento:</p>
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            <li>Compañero A crea PKG_INVENTARIO</li>
+                            <li>Compañero B usa procedimientos de PKG_INVENTARIO en su PKG_VENTAS</li>
+                            <li>Compañero C usa funciones de ambos packages en PKG_REPORTERIA</li>
+                        </ul>
+                        <p class="mt-2 text-red-600 font-semibold">⚠️ Importante: Aunque el código sea grupal, cada uno debe dominar TODO el proyecto para la presentación individual.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="accordion-btn w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-50" onclick="toggleAccordion(this)">
+                        <span>¿Qué pasa si mi base de datos es pequeña?</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content px-6 pb-4">
+                        <p class="text-gray-700">El tamaño de la BD no importa, lo que evalúan es:</p>
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            <li><strong>Calidad del diseño:</strong> ¿Tu código está bien organizado en packages cohesivos?</li>
+                            <li><strong>Funcionalidad:</strong> ¿Tus proc/func/triggers resuelven problemas reales de tu negocio?</li>
+                            <li><strong>Justificación:</strong> ¿Puedes explicar POR QUÉ usaste cada elemento?</li>
+                        </ul>
+                        <p class="mt-2 text-gray-700">Una BD pequeña pero con código bien estructurado vale más que una BD grande con código desordenado.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="accordion-btn w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-50" onclick="toggleAccordion(this)">
+                        <span>¿Los triggers cuentan dentro o fuera de los packages?</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content px-6 pb-4">
+                        <p class="text-gray-700">Los <strong>triggers son objetos independientes</strong>, NO van dentro de packages. Sin embargo:</p>
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            <li>✅ Los triggers PUEDEN llamar a procedimientos de packages</li>
+                            <li>✅ Esto es una buena práctica para mantener el trigger simple</li>
+                            <li>❌ No puedes poner un trigger "dentro" de un package</li>
+                        </ul>
+                        <div class="bg-gray-100 p-3 rounded mt-2">
+                            <code class="text-sm">
+                                -- Buena práctica:<br>
+                                CREATE TRIGGER trg_validar_stock<br>
+                                BEFORE INSERT ON ventas<br>
+                                FOR EACH ROW<br>
+                                BEGIN<br>
+                                &nbsp;&nbsp;PKG_INVENTARIO.validar_stock(:NEW.id_producto, :NEW.cantidad);<br>
+                                END;
+                            </code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="accordion-btn w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-50" onclick="toggleAccordion(this)">
+                        <span>¿Cómo demuestro que mi código procesa "información masiva"?</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content px-6 pb-4">
+                        <p class="text-gray-700">"Información masiva" significa que tu código procesa <strong>múltiples registros</strong>, no solo uno. Ejemplos:</p>
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            <li>✅ Procedimiento que actualiza stock de TODOS los productos bajo un criterio</li>
+                            <li>✅ Función que calcula totales agregados de ventas del mes</li>
+                            <li>✅ Procedimiento que genera reportes procesando múltiples filas</li>
+                            <li>✅ Trigger que valida reglas de negocio sobre conjuntos de datos</li>
+                        </ul>
+                        <p class="mt-2 text-gray-700">En tu informe, muestra ejemplos de ejecución donde se procesen varios registros a la vez.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="accordion-btn w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-50" onclick="toggleAccordion(this)">
+                        <span>¿Debo usar TODOS los tipos de triggers (BEFORE/AFTER, sentencia/fila)?</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content px-6 pb-4">
+                        <p class="text-gray-700">Sí, la rúbrica especifica que debes demostrar triggers a <strong>nivel de sentencia Y nivel de fila</strong>. Ejemplo de distribución:</p>
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            <li><strong>BEFORE + Fila:</strong> Validar datos antes de insertar/actualizar cada registro</li>
+                            <li><strong>AFTER + Fila:</strong> Auditoría, log de cambios por cada registro</li>
+                            <li><strong>BEFORE + Sentencia:</strong> Validaciones globales antes de ejecutar el INSERT/UPDATE completo</li>
+                            <li><strong>AFTER + Sentencia:</strong> Procesamiento posterior (ej: enviar notificación después de insertar múltiples registros)</li>
+                        </ul>
+                        <p class="mt-2 text-blue-600 font-semibold">💡 No necesitas un trigger de cada combinación, pero sí demostrar que entiendes la diferencia.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="accordion-btn w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-50" onclick="toggleAccordion(this)">
+                        <span>¿Puedo usar código generado por IA (ChatGPT, Copilot, etc.)?</span>
+                        <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content px-6 pb-4">
+                        <p class="text-gray-700">Puedes usar IA como <strong>herramienta de apoyo</strong>, pero:</p>
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            <li>❌ NO copies y pegues código gigante sin entenderlo</li>
+                            <li>✅ USA la IA para entender conceptos y generar ejemplos</li>
+                            <li>✅ ADAPTA el código a tu contexto de negocio específico</li>
+                            <li>✅ REFACTORIZA el código en packages modulares</li>
+                            <li>⚠️ DEBES poder explicar cada línea en la presentación</li>
+                        </ul>
+                        <p class="mt-2 text-red-600 font-semibold">Si no puedes explicar tu código, el docente se dará cuenta en la presentación individual.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculadora de Cohesión -->
+        <section id="cohesion" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">🎯 Test de Cohesión de tu Package</h2>
+            
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-lg shadow-md">
+                <p class="text-gray-700 mb-6">Usa este checklist para verificar si tu package tiene <strong>ALTA COHESIÓN</strong>. Marca las casillas que apliquen:</p>
+                
+                <div class="space-y-4">
+                    <label class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                        <input type="checkbox" class="cohesion-check mt-1 mr-4 w-5 h-5 text-blue-600" onchange="calcularCohesion()">
+                        <span class="text-gray-700">¿Puedo explicar el propósito del package en UNA frase sin usar "Y" ni "O"?</span>
+                    </label>
+
+                    <label class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                        <input type="checkbox" class="cohesion-check mt-1 mr-4 w-5 h-5 text-blue-600" onchange="calcularCohesion()">
+                        <span class="text-gray-700">¿Todas las funciones/procedimientos del package se relacionan con UN SOLO concepto de negocio?</span>
+                    </label>
+
+                    <label class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                        <input type="checkbox" class="cohesion-check mt-1 mr-4 w-5 h-5 text-blue-600" onchange="calcularCohesion()">
+                        <span class="text-gray-700">¿Si elimino una función, las demás siguen teniendo sentido juntas?</span>
+                    </label>
+
+                    <label class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                        <input type="checkbox" class="cohesion-check mt-1 mr-4 w-5 h-5 text-blue-600" onchange="calcularCohesion()">
+                        <span class="text-gray-700">¿El nombre del package describe claramente su responsabilidad única? (No es "PKG_TODO" ni "PKG_GENERAL")</span>
+                    </label>
+
+                    <label class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                        <input type="checkbox" class="cohesion-check mt-1 mr-4 w-5 h-5 text-blue-600" onchange="calcularCohesion()">
+                        <span class="text-gray-700">¿Otro desarrollador entendería qué hace el package solo leyendo su nombre y viendo los procedimientos públicos?</span>
+                    </label>
+
+                    <label class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                        <input type="checkbox" class="cohesion-check mt-1 mr-4 w-5 h-5 text-blue-600" onchange="calcularCohesion()">
+                        <span class="text-gray-700">¿El package tiene menos de 15 procedimientos/funciones?</span>
+                    </label>
+
+                    <label class="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                        <input type="checkbox" class="cohesion-check mt-1 mr-4 w-5 h-5 text-blue-600" onchange="calcularCohesion()">
+                        <span class="text-gray-700">¿Las funciones privadas (en el body) son realmente helpers internos y no deberían ser públicas?</span>
+                    </label>
+                </div>
+
+                <div id="resultado-cohesion" class="mt-8 p-6 rounded-lg text-center text-xl font-bold hidden">
+                    <div id="resultado-texto"></div>
+                    <div id="resultado-consejo" class="text-sm font-normal mt-2"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips de Arquitectura -->
+        <section id="tips" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">💡 Tips de Arquitectura: Evita estos Errores</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Lado MALO -->
+                <div class="bg-red-50 border-2 border-red-300 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl mr-4">❌</div>
+                        <h3 class="text-xl font-bold text-red-700">EVITA ESTO</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-red-600 mb-2">Package Monolítico</h4>
+                            <p class="text-sm text-gray-700 mb-2">Un único package con TODAS las funcionalidades:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+PKG_TODO<br>
+├─ registrar_pedido()<br>
+├─ actualizar_inventario()<br>
+├─ generar_factura()<br>
+├─ enviar_email()<br>
+├─ calcular_impuestos()<br>
+├─ crear_usuario()<br>
+├─ validar_login()<br>
+├─ generar_reporte_ventas()<br>
+└─ ... (50+ procedimientos más)
+                            </div>
+                            <p class="text-red-600 text-sm mt-2">⚠️ Bajo cohesión, difícil de mantener</p>
+                        </div>
+
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-red-600 mb-2">Procedimientos Gigantes</h4>
+                            <p class="text-sm text-gray-700 mb-2">Un procedimiento de 500+ líneas que hace TODO:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+PROCEDURE sp_procesar_todo<br>
+BEGIN<br>
+&nbsp;&nbsp;-- 100 líneas de validaciones<br>
+&nbsp;&nbsp;-- 150 líneas de cálculos<br>
+&nbsp;&nbsp;-- 200 líneas de inserts<br>
+&nbsp;&nbsp;-- 50 líneas de envío email<br>
+END;<br>
+-- ❌ 500 líneas = imposible de entender
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-red-600 mb-2">Sin Separación Público/Privado</h4>
+                            <p class="text-sm text-gray-700">Todo es público, no hay encapsulación:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+PKG SPEC:<br>
+├─ calcular_subtotal() -- ¿público?<br>
+├─ validar_formato_rut() -- ¿público?<br>
+├─ helper_interno_123() -- ¿público?<br>
+└─ log_debug() -- ¿público?<br>
+<br>
+❌ Todo expuesto = alto acoplamiento
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-red-600 mb-2">Triggers que hacen Demasiado</h4>
+                            <p class="text-sm text-gray-700">Trigger con 200 líneas de lógica compleja:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+CREATE TRIGGER trg_hacer_todo<br>
+AFTER INSERT ON ventas<br>
+FOR EACH ROW<br>
+BEGIN<br>
+&nbsp;&nbsp;-- lógica compleja 200+ líneas<br>
+&nbsp;&nbsp;-- difícil de debuggear<br>
+&nbsp;&nbsp;-- lento en ejecución<br>
+END;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lado BUENO -->
+                <div class="bg-green-50 border-2 border-green-300 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl mr-4">✅</div>
+                        <h3 class="text-xl font-bold text-green-700">PREFIERE ESTO</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-green-600 mb-2">Packages Modulares</h4>
+                            <p class="text-sm text-gray-700 mb-2">Cada package con UNA responsabilidad clara:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+PKG_GESTION_PEDIDOS<br>
+├─ crear_pedido()<br>
+├─ cancelar_pedido()<br>
+└─ consultar_estado()<br>
+<br>
+PKG_GESTION_INVENTARIO<br>
+├─ actualizar_stock()<br>
+├─ verificar_disponibilidad()<br>
+└─ alertar_stock_critico()<br>
+<br>
+PKG_FACTURACION<br>
+├─ generar_factura()<br>
+└─ calcular_impuestos()<br>
+<br>
+✅ Alta cohesión, fácil de mantener
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-green-600 mb-2">Procedimientos Pequeños</h4>
+                            <p class="text-sm text-gray-700 mb-2">Divide la lógica en funciones específicas:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+PROCEDURE sp_procesar_pedido<br>
+BEGIN<br>
+&nbsp;&nbsp;validar_datos();<br>
+&nbsp;&nbsp;calcular_totales();<br>
+&nbsp;&nbsp;registrar_pedido();<br>
+&nbsp;&nbsp;enviar_confirmacion();<br>
+END;<br>
+<br>
+✅ Cada función hace UNA cosa bien
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-green-600 mb-2">Encapsulación Correcta</h4>
+                            <p class="text-sm text-gray-700">Expone solo lo necesario:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+PKG SPEC (Público):<br>
+├─ registrar_pedido() ✓<br>
+└─ consultar_pedido() ✓<br>
+<br>
+PKG BODY (Privado):<br>
+├─ validar_datos_internos()<br>
+├─ calcular_subtotal_helper()<br>
+└─ log_operacion_interna()<br>
+<br>
+✅ Interfaz limpia, implementación oculta
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-green-600 mb-2">Triggers Simples</h4>
+                            <p class="text-sm text-gray-700">Delega lógica compleja a packages:</p>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+CREATE TRIGGER trg_procesar_venta<br>
+AFTER INSERT ON ventas<br>
+FOR EACH ROW<br>
+BEGIN<br>
+&nbsp;&nbsp;-- Simple, delega al package<br>
+&nbsp;&nbsp;PKG_VENTAS.procesar_venta(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;:NEW.id_venta<br>
+&nbsp;&nbsp;);<br>
+END;<br>
+<br>
+✅ Trigger simple, lógica en package
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-blue-100 border-l-4 border-blue-500 p-6 rounded-lg">
+                <h4 class="font-bold text-lg mb-2">🎯 Regla de Oro</h4>
+                <p class="text-gray-700">Si no puedes explicar el propósito de tu package en UNA frase simple, probablemente necesitas dividirlo en packages más pequeños.</p>
+            </div>
+        </section>
+
+        <!-- Rúbrica Simplificada -->
+        <section id="rubrica" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">📊 Rúbrica de Evaluación</h2>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h3 class="font-bold text-lg mb-4">Distribución de Puntajes</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-green-100 rounded-lg">
+                        <div class="text-3xl font-bold text-green-700">100%</div>
+                        <div class="text-sm text-gray-600">Muy buen desempeño</div>
+                    </div>
+                    <div class="text-center p-4 bg-yellow-100 rounded-lg">
+                        <div class="text-3xl font-bold text-yellow-700">80%</div>
+                        <div class="text-sm text-gray-600">Buen desempeño</div>
+                    </div>
+                    <div class="text-center p-4 bg-orange-100 rounded-lg">
+                        <div class="text-3xl font-bold text-orange-700">60%</div>
+                        <div class="text-sm text-gray-600">Desempeño aceptable</div>
+                    </div>
+                    <div class="text-center p-4 bg-red-100 rounded-lg">
+                        <div class="text-3xl font-bold text-red-700">30%</div>
+                        <div class="text-sm text-gray-600">Desempeño incipiente</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
+                    <thead class="duoc-bg text-white">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Indicador</th>
+                            <th class="px-4 py-3 text-center">Peso</th>
+                            <th class="px-4 py-3 text-left">¿Qué evalúa?</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="bg-blue-50">
+                            <td colspan="3" class="px-4 py-2 font-bold">SITUACIÓN 1: INFORME (40%)</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Construir Procedimientos</div>
+                                <div class="text-sm text-gray-600">Con y sin parámetros</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-blue-600">10%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Creaste procedimientos correctamente?<br>
+                                ¿Procesan información masiva?<br>
+                                ¿Se pueden usar en SQL y otros programas?
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Justificar Procedimientos</div>
+                                <div class="text-sm text-gray-600">Explicación en informe</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-blue-600">15%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Explicas POR QUÉ usaste procedimientos?<br>
+                                ¿Defines ventajas/desventajas?<br>
+                                ¿Justificas su uso en tu contexto?
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Construir Packages</div>
+                                <div class="text-sm text-gray-600">Públicos y privados</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-blue-600">10%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Creaste packages con spec y body?<br>
+                                ¿Separaste constructores públicos/privados?<br>
+                                ¿Son una solución integral?
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Construir Triggers</div>
+                                <div class="text-sm text-gray-600">Nivel sentencia y fila</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-blue-600">10%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Creaste triggers BEFORE/AFTER?<br>
+                                ¿Incluyes nivel sentencia Y fila?<br>
+                                ¿Resuelven problemas reales?
+                            </td>
+                        </tr>
+                        
+                        <tr class="bg-green-50">
+                            <td colspan="3" class="px-4 py-2 font-bold">SITUACIÓN 2: PRESENTACIÓN (60%)</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Construir Funciones</div>
+                                <div class="text-sm text-gray-600">Con y sin parámetros</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-green-600">10%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Creaste funciones correctamente?<br>
+                                ¿Retornan valores útiles?<br>
+                                ¿Se pueden usar en SQL?
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Justificar Funciones</div>
+                                <div class="text-sm text-gray-600">Explicación oral</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-green-600">15%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Explicas POR QUÉ usaste funciones vs procedimientos?<br>
+                                ¿Justificas sus casos de uso?<br>
+                                ¿Demuestras comprensión?
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Justificar Packages</div>
+                                <div class="text-sm text-gray-600">Explicación oral</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-green-600">15%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Explicas la organización del código?<br>
+                                ¿Justificas la separación público/privado?<br>
+                                ¿Demuestras arquitectura modular?
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold">Justificar Triggers</div>
+                                <div class="text-sm text-gray-600">Explicación oral</div>
+                            </td>
+                            <td class="px-4 py-3 text-center font-bold text-green-600">15%</td>
+                            <td class="px-4 py-3 text-sm">
+                                ¿Explicas cuándo usar triggers?<br>
+                                ¿Justificas nivel sentencia vs fila?<br>
+                                ¿Muestras casos de uso apropiados?
+                            </td>
+                        </tr>
+                        
+                        <tr class="bg-gray-100">
+                            <td class="px-4 py-3 text-right font-bold" colspan="2">TOTAL</td>
+                            <td class="px-4 py-3 text-center text-2xl font-bold duoc-blue">100%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                <p class="text-sm"><strong>⚠️ Recuerda:</strong> Aunque trabajes en equipo, la presentación es <strong>individual</strong>. Debes poder explicar y justificar TODO el proyecto, no solo "tu parte".</p>
+            </div>
+        </section>
+
+        <!-- Checklist Descargable -->
+        <section id="checklist" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 duoc-blue">✅ Checklist de Verificación</h2>
+            
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-lg shadow-md">
+                <p class="text-gray-700 mb-6">Usa esta checklist para asegurarte de que no te falta nada antes de entregar:</p>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Checklist Informe -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-bold text-lg mb-4 duoc-blue">📄 INFORME</h3>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Introducción completa (descripción, alcance, tecnologías)</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Procedimientos definidos, explicados y demostrados</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Funciones definidas, explicadas y demostradas</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Packages con spec y body explicados</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Relación entre packages, proc y func explicada</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Triggers documentados (nivel sentencia Y fila)</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Ventajas y desventajas de cada elemento</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Conclusión con impacto y recomendaciones</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Código completo en anexos</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Diagramas y modelos incluidos</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Checklist Presentación -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-bold text-lg mb-4 duoc-blue">🎤 PRESENTACIÓN</h3>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Problema del proyecto claramente explicado</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Justificación de procedimientos preparada</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Justificación de funciones preparada</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Justificación de packages preparada</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Justificación de triggers preparada</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Conclusión estructurada</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Diapositivas claras (sin sobrecarga de texto)</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Diagramas y gráficos incluidos</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Ejemplos de código legibles y enfocados</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Timing practicado y ajustado</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Preparado para preguntas del docente</span>
+                            </label>
+                            <label class="flex items-start cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                <input type="checkbox" class="mt-1 mr-3">
+                                <span>Domino TODO el proyecto (no solo "mi parte")</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="window.print()" class="duoc-bg text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                        🖨️ Imprimir Checklist
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="duoc-bg text-white py-8 mt-16">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="mb-2"><strong>BDY1103 - Taller de Base de Datos</strong></p>
+            <p class="text-sm opacity-90">DuocUC Puerto Montt | Docente: Carlos Orellana</p>
+            <p class="text-sm opacity-75 mt-4">Evaluación Parcial N°2 - 40% de la nota final</p>
+        </div>
+    </footer>
+
+    <!-- Botón Volver Arriba -->
+    <button id="btnVolverArriba" class="fixed bottom-8 right-8 duoc-bg text-white w-12 h-12 rounded-full shadow-lg hover:bg-blue-700 transition hidden" onclick="scrollToTop()">
+        ↑
+    </button>
+
+    <script>
+        // Función para mostrar/ocultar tabs
+        function showTab(group, tabName) {
+            // Ocultar todos los contenidos del grupo
+            const contents = document.querySelectorAll(`[id^="${group}-"]`);
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remover clase activa de todos los botones del grupo
+            const buttons = document.querySelectorAll(`button[onclick*="showTab('${group}"]`);
+            buttons.forEach(btn => {
+                btn.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('text-gray-600');
+            });
+
+            // Mostrar el contenido seleccionado
+            document.getElementById(`${group}-${tabName}`).classList.add('active');
+
+            // Activar el botón seleccionado
+            event.target.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
+            event.target.classList.remove('text-gray-600');
+        }
+
+        // Función para toggle de acordeón
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('svg');
+            
+            content.classList.toggle('active');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Calculadora de cohesión
+        function calcularCohesion() {
+            const checkboxes = document.querySelectorAll('.cohesion-check');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const total = checkboxes.length;
+            const resultado = document.getElementById('resultado-cohesion');
+            const texto = document.getElementById('resultado-texto');
+            const consejo = document.getElementById('resultado-consejo');
+
+            resultado.classList.remove('hidden');
+
+            if (checked === total) {
+                resultado.className = 'mt-8 p-6 rounded-lg text-center text-xl font-bold bg-green-100 text-green-700';
+                texto.textContent = `✅ ${checked}/${total} - ¡EXCELENTE COHESIÓN!`;
+                consejo.textContent = 'Tu package tiene alta cohesión. Está bien estructurado y modular.';
+            } else if (checked >= total * 0.7) {
+                resultado.className = 'mt-8 p-6 rounded-lg text-center text-xl font-bold bg-yellow-100 text-yellow-700';
+                texto.textContent = `⚠️ ${checked}/${total} - COHESIÓN ACEPTABLE`;
+                consejo.textContent = 'Tu package está bien, pero revisa los puntos no marcados para mejorar.';
+            } else if (checked >= total * 0.5) {
+                resultado.className = 'mt-8 p-6 rounded-lg text-center text-xl font-bold bg-orange-100 text-orange-700';
+                texto.textContent = `⚠️ ${checked}/${total} - COHESIÓN BAJA`;
+                consejo.textContent = 'Necesitas revisar el diseño de tu package. Considera dividirlo en packages más pequeños.';
+            } else {
+                resultado.className = 'mt-8 p-6 rounded-lg text-center text-xl font-bold bg-red-100 text-red-700';
+                texto.textContent = `❌ ${checked}/${total} - COHESIÓN MUY BAJA`;
+                consejo.textContent = 'Tu package tiene problemas de diseño. Debes reestructurarlo completamente.';
+            }
+        }
+
+        // Botón volver arriba
+        window.addEventListener('scroll', function() {
+            const btn = document.getElementById('btnVolverArriba');
+            if (window.pageYOffset > 300) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Smooth scroll para navegación
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

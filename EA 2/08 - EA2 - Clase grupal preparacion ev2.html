@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura PL/SQL - Sesión Colaborativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .timer-large { font-size: 8rem; line-height: 1; }
+        .proyecto-card { transition: all 0.3s; }
+        .proyecto-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header Fixed -->
+    <header class="bg-[#003DA5] text-white py-4 px-8 shadow-lg fixed top-0 w-full z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">Arquitectura PL/SQL - Sesión Colaborativa</h1>
+                <p class="text-blue-200 text-sm">Preparación para EP2 | 60 minutos</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-blue-200">Fase Actual</div>
+                <div id="faseActual" class="text-3xl font-bold">1/4</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-28 pb-12 px-8 max-w-7xl mx-auto">
+        
+        <!-- FASE 0: Inicio -->
+        <section id="fase0" class="fase-content">
+            <div class="text-center py-12">
+                <div class="inline-block bg-[#003DA5] text-white px-6 py-3 rounded-full text-sm font-semibold mb-8">
+                    BIENVENIDA
+                </div>
+                <h2 class="text-6xl font-bold text-gray-800 mb-6">¡Preparemos la EP2 juntos!</h2>
+                <p class="text-2xl text-gray-600 mb-12 max-w-3xl mx-auto">
+                    Hoy diseñaremos la arquitectura PL/SQL de cada proyecto de forma colaborativa
+                </p>
+                
+                <div class="grid grid-cols-4 gap-6 max-w-5xl mx-auto mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="text-4xl font-bold text-[#003DA5] mb-2">10min</div>
+                        <div class="text-sm text-gray-600">Contextualización</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="text-4xl font-bold text-[#003DA5] mb-2">5min</div>
+                        <div class="text-sm text-gray-600">Preparación</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="text-4xl font-bold text-[#003DA5] mb-2">40min</div>
+                        <div class="text-sm text-gray-600">Peer Review</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="text-4xl font-bold text-[#003DA5] mb-2">5min</div>
+                        <div class="text-sm text-gray-600">Consolidación</div>
+                    </div>
+                </div>
+
+                <button onclick="iniciarClase()" class="bg-green-600 hover:bg-green-700 text-white px-12 py-6 rounded-xl text-2xl font-bold shadow-xl transition-all transform hover:scale-105">
+                    🚀 Iniciar Clase
+                </button>
+            </div>
+        </section>
+
+        <!-- FASE 1: Contextualización (10 min) -->
+        <section id="fase1" class="fase-content hidden">
+            <div class="fade-in">
+                <div class="bg-white rounded-2xl shadow-xl p-10 mb-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <div class="inline-block bg-blue-100 text-[#003DA5] px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                                FASE 1 | 10 MINUTOS
+                            </div>
+                            <h2 class="text-4xl font-bold text-gray-800">Contextualización: Cohesión y Modularidad</h2>
+                        </div>
+                        <div class="text-center">
+                            <div id="timer1" class="text-6xl font-bold text-[#003DA5]">10:00</div>
+                            <button onclick="iniciarTimer(1, 600)" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm">
+                                ▶ Iniciar Timer
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Slides de contenido -->
+                    <div class="space-y-8">
+                        <!-- Slide 1 -->
+                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-8 rounded-xl">
+                            <h3 class="text-3xl font-bold text-gray-800 mb-6">¿Qué es un Package?</h3>
+                            <div class="text-xl text-gray-700 space-y-4">
+                                <p>📦 <strong>Es como una carpeta</strong> que agrupa procedimientos y funciones relacionados</p>
+                                <p>🎯 <strong>Propósito:</strong> Organizar el código por <em>responsabilidades de negocio</em></p>
+                                <p>💡 <strong>Analogía:</strong> Como organizar tu ropa en cajones (calcetines, camisas, pantalones)</p>
+                            </div>
+                        </div>
+
+                        <!-- Slide 2: Comparación Visual -->
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-red-50 border-4 border-red-400 p-6 rounded-xl">
+                                <div class="text-3xl font-bold text-red-600 mb-4">❌ EVITA ESTO</div>
+                                <div class="bg-white p-4 rounded-lg mb-4">
+                                    <div class="font-mono text-sm text-gray-800">
+                                        <div class="font-bold text-red-600">PKG_TODO</div>
+                                        <div class="ml-4 space-y-1 text-xs">
+                                            <div>- registrar_pedido()</div>
+                                            <div>- actualizar_stock()</div>
+                                            <div>- generar_factura()</div>
+                                            <div>- enviar_email()</div>
+                                            <div>- calcular_comision()</div>
+                                            <div>- validar_usuario()</div>
+                                            <div>- crear_reporte()</div>
+                                            <div>... 43 funciones más</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-red-700">⚠️ <strong>Baja cohesión:</strong> hace de todo</p>
+                            </div>
+
+                            <div class="bg-green-50 border-4 border-green-400 p-6 rounded-xl">
+                                <div class="text-3xl font-bold text-green-600 mb-4">✅ PREFIERE ESTO</div>
+                                <div class="space-y-3">
+                                    <div class="bg-white p-3 rounded-lg">
+                                        <div class="font-mono text-sm">
+                                            <div class="font-bold text-green-600">PKG_GESTION_PEDIDOS</div>
+                                            <div class="ml-4 text-xs">- registrar_pedido()</div>
+                                            <div class="ml-4 text-xs">- cancelar_pedido()</div>
+                                            <div class="ml-4 text-xs">- consultar_estado()</div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg">
+                                        <div class="font-mono text-sm">
+                                            <div class="font-bold text-green-600">PKG_INVENTARIO</div>
+                                            <div class="ml-4 text-xs">- actualizar_stock()</div>
+                                            <div class="ml-4 text-xs">- validar_disponibilidad()</div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg">
+                                        <div class="font-mono text-sm">
+                                            <div class="font-bold text-green-600">PKG_REPORTERIA</div>
+                                            <div class="ml-4 text-xs">- generar_reporte_ventas()</div>
+                                            <div class="ml-4 text-xs">- calcular_estadisticas()</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-green-700 mt-3">✨ <strong>Alta cohesión:</strong> cada uno con propósito claro</p>
+                            </div>
+                        </div>
+
+                        <!-- Regla de Oro -->
+                        <div class="bg-yellow-50 border-l-8 border-yellow-500 p-8 rounded-r-xl">
+                            <div class="text-2xl font-bold text-yellow-800 mb-4">🏆 REGLA DE ORO</div>
+                            <p class="text-xl text-gray-800">
+                                "Si no puedes explicar el propósito del package en <strong>UNA FRASE</strong> sin usar '<strong>Y</strong>', probablemente necesitas dividirlo"
+                            </p>
+                            <div class="mt-6 space-y-3">
+                                <div class="flex items-start">
+                                    <span class="text-2xl mr-3">✅</span>
+                                    <span class="text-lg">"Este package <strong>gestiona las citas médicas</strong>"</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-2xl mr-3">❌</span>
+                                    <span class="text-lg">"Este package gestiona citas <strong>Y</strong> inventario <strong>Y</strong> facturación"</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button onclick="siguienteFase(2)" class="bg-[#003DA5] hover:bg-blue-800 text-white px-10 py-4 rounded-xl text-xl font-bold shadow-lg transition-all">
+                        Siguiente Fase →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FASE 2: Preparación (5 min) -->
+        <section id="fase2" class="fase-content hidden">
+            <div class="fade-in">
+                <div class="bg-white rounded-2xl shadow-xl p-10 mb-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <div class="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                                FASE 2 | 5 MINUTOS
+                            </div>
+                            <h2 class="text-4xl font-bold text-gray-800">Preparación Individual</h2>
+                        </div>
+                        <div class="text-center">
+                            <div id="timer2" class="text-6xl font-bold text-green-600">5:00</div>
+                            <button onclick="iniciarTimer(2, 300)" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm">
+                                ▶ Iniciar Timer
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6">📝 Completa en tu hoja:</h3>
+                            <div class="bg-gray-50 p-8 rounded-xl border-2 border-gray-300 space-y-6">
+                                <div>
+                                    <label class="block text-lg font-bold text-gray-700 mb-2">PROYECTO:</label>
+                                    <div class="bg-white p-4 rounded border-2 border-dashed border-gray-400 text-gray-400">
+                                        [Nombre de tu proyecto]
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-lg font-bold text-gray-700 mb-2">FUNCIONALIDADES PRINCIPALES:</label>
+                                    <div class="space-y-2">
+                                        <div class="bg-white p-3 rounded border-2 border-dashed border-gray-400 text-gray-400">1. ___________________</div>
+                                        <div class="bg-white p-3 rounded border-2 border-dashed border-gray-400 text-gray-400">2. ___________________</div>
+                                        <div class="bg-white p-3 rounded border-2 border-dashed border-gray-400 text-gray-400">3. ___________________</div>
+                                        <div class="bg-white p-3 rounded border-2 border-dashed border-gray-400 text-gray-400">4. ___________________</div>
+                                        <div class="bg-white p-3 rounded border-2 border-dashed border-gray-400 text-gray-400">5. ___________________</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6">💡 Ejemplos de funcionalidades:</h3>
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <div class="font-bold text-blue-800">🏥 Veterinaria:</div>
+                                    <ul class="text-sm text-gray-700 mt-2 space-y-1 ml-4">
+                                        <li>• Registrar citas médicas</li>
+                                        <li>• Gestionar historial clínico</li>
+                                        <li>• Controlar inventario de medicamentos</li>
+                                        <li>• Generar recetas médicas</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-purple-50 p-4 rounded-lg">
+                                    <div class="font-bold text-purple-800">🎯 Airsoft Store:</div>
+                                    <ul class="text-sm text-gray-700 mt-2 space-y-1 ml-4">
+                                        <li>• Procesar pedidos online</li>
+                                        <li>• Actualizar stock de productos</li>
+                                        <li>• Notificar stock crítico</li>
+                                        <li>• Calcular costos de envío</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <div class="font-bold text-green-800">👕 Tienda de Ropa:</div>
+                                    <ul class="text-sm text-gray-700 mt-2 space-y-1 ml-4">
+                                        <li>• Gestionar ventas y devoluciones</li>
+                                        <li>• Controlar tallas y colores</li>
+                                        <li>• Aplicar descuentos y promociones</li>
+                                        <li>• Generar reportes de tendencias</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button onclick="siguienteFase(3)" class="bg-[#003DA5] hover:bg-blue-800 text-white px-10 py-4 rounded-xl text-xl font-bold shadow-lg transition-all">
+                        Siguiente Fase →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FASE 3: Peer Review (40 min) -->
+        <section id="fase3" class="fase-content hidden">
+            <div class="fade-in">
+                <div class="bg-white rounded-2xl shadow-xl p-10 mb-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <div class="inline-block bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                                FASE 3 | 40 MINUTOS (5 rondas × 8 min)
+                            </div>
+                            <h2 class="text-4xl font-bold text-gray-800">Peer Review Rotativo</h2>
+                            <p class="text-xl text-gray-600 mt-2">Ronda <span id="rondaActual">1</span> de 5</p>
+                        </div>
+                        <div class="text-center">
+                            <div id="timer3" class="text-6xl font-bold text-orange-600">8:00</div>
+                            <div class="mt-4 space-x-3">
+                                <button onclick="iniciarTimer(3, 480)" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm">
+                                    ▶ Iniciar Ronda
+                                </button>
+                                <button onclick="siguienteRonda()" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg text-sm">
+                                    Siguiente Ronda →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matriz de Rotación -->
+                    <div class="bg-gradient-to-r from-orange-50 to-yellow-50 p-8 rounded-xl mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">🔄 ¿Quién va dónde ahora?</h3>
+                        <div id="matrizRotacion" class="grid grid-cols-2 gap-6">
+                            <!-- Se genera dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Proyectos disponibles -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">📋 Proyectos de la Clase</h3>
+                        <div class="grid grid-cols-4 gap-4">
+                            <div class="proyecto-card bg-blue-50 p-4 rounded-xl text-center border-2 border-blue-200">
+                                <div class="text-3xl mb-2">🏥</div>
+                                <div class="font-bold text-blue-800">Veterinaria</div>
+                            </div>
+                            <div class="proyecto-card bg-purple-50 p-4 rounded-xl text-center border-2 border-purple-200">
+                                <div class="text-3xl mb-2">🎯</div>
+                                <div class="font-bold text-purple-800">Airsoft Store</div>
+                            </div>
+                            <div class="proyecto-card bg-green-50 p-4 rounded-xl text-center border-2 border-green-200">
+                                <div class="text-3xl mb-2">👕</div>
+                                <div class="font-bold text-green-800">Tienda Ropa</div>
+                            </div>
+                            <div class="proyecto-card bg-red-50 p-4 rounded-xl text-center border-2 border-red-200">
+                                <div class="text-3xl mb-2">🚔</div>
+                                <div class="font-bold text-red-800">PDI</div>
+                            </div>
+                            <div class="proyecto-card bg-yellow-50 p-4 rounded-xl text-center border-2 border-yellow-200">
+                                <div class="text-3xl mb-2">🍽️</div>
+                                <div class="font-bold text-yellow-800">Restaurante</div>
+                            </div>
+                            <div class="proyecto-card bg-indigo-50 p-4 rounded-xl text-center border-2 border-indigo-200">
+                                <div class="text-3xl mb-2">💻</div>
+                                <div class="font-bold text-indigo-800">Serv. Técnico</div>
+                            </div>
+                            <div class="proyecto-card bg-pink-50 p-4 rounded-xl text-center border-2 border-pink-200">
+                                <div class="text-3xl mb-2">🏎️</div>
+                                <div class="font-bold text-pink-800">Hot Wheels</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guía de trabajo -->
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-xl border-l-4 border-blue-500">
+                            <div class="text-xl font-bold text-blue-800 mb-3">⏱️ Min 1-3: PRESENTACIÓN</div>
+                            <p class="text-sm text-gray-700">El equipo presenta su proyecto y funcionalidades principales</p>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-xl border-l-4 border-green-500">
+                            <div class="text-xl font-bold text-green-800 mb-3">💬 Min 4-7: BRAINSTORMING</div>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• ¿Qué packages necesitas?</li>
+                                <li>• ¿Qué proc/func en cada uno?</li>
+                                <li>• ¿Qué triggers ves?</li>
+                            </ul>
+                        </div>
+                        <div class="bg-orange-50 p-6 rounded-xl border-l-4 border-orange-500">
+                            <div class="text-xl font-bold text-orange-800 mb-3">📝 Min 8: REGISTRO</div>
+                            <p class="text-sm text-gray-700">El equipo anota todas las sugerencias recibidas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button onclick="siguienteFase(4)" class="bg-[#003DA5] hover:bg-blue-800 text-white px-10 py-4 rounded-xl text-xl font-bold shadow-lg transition-all">
+                        Siguiente Fase →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FASE 4: Consolidación (5 min) -->
+        <section id="fase4" class="fase-content hidden">
+            <div class="fade-in">
+                <div class="bg-white rounded-2xl shadow-xl p-10 mb-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <div class="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                                FASE 4 | 5 MINUTOS
+                            </div>
+                            <h2 class="text-4xl font-bold text-gray-800">Consolidación y Entrega</h2>
+                        </div>
+                        <div class="text-center">
+                            <div id="timer4" class="text-6xl font-bold text-purple-600">5:00</div>
+                            <button onclick="iniciarTimer(4, 300)" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm">
+                                ▶ Iniciar Timer
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6">✅ Checklist de Entrega</h3>
+                            <div class="bg-green-50 p-6 rounded-xl space-y-4">
+                                <div class="flex items-start">
+                                    <input type="checkbox" class="mt-1 mr-3 w-5 h-5">
+                                    <span class="text-lg">Lista de PACKAGES identificados</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <input type="checkbox" class="mt-1 mr-3 w-5 h-5">
+                                    <span class="text-lg">Propósito de cada package (1 frase)</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <input type="checkbox" class="mt-1 mr-3 w-5 h-5">
+                                    <span class="text-lg">Procedimientos por package</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <input type="checkbox" class="mt-1 mr-3 w-5 h-5">
+                                    <span class="text-lg">Funciones por package</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <input type="checkbox" class="mt-1 mr-3 w-5 h-5">
+                                    <span class="text-lg">Lista de TRIGGERS identificados</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <input type="checkbox" class="mt-1 mr-3 w-5 h-5">
+                                    <span class="text-lg">Cuándo se dispara cada trigger</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6">📄 Formato de Entrega</h3>
+                            <div class="bg-gray-50 p-6 rounded-xl border-2 border-gray-300 font-mono text-sm space-y-4">
+                                <div>
+                                    <div class="font-bold text-blue-800 mb-2">PACKAGES IDENTIFICADOS:</div>
+                                    <div class="ml-4 space-y-2 text-gray-700">
+                                        <div>1. PKG_[nombre] → [propósito]</div>
+                                        <div class="ml-4">- Procedimientos: [lista]</div>
+                                        <div class="ml-4">- Funciones: [lista]</div>
+                                        <div class="mt-2">2. PKG_[nombre] → [propósito]</div>
+                                        <div class="ml-4">- Procedimientos: [lista]</div>
+                                        <div class="ml-4">- Funciones: [lista]</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-orange-800 mb-2">TRIGGERS IDENTIFICADOS:</div>
+                                    <div class="ml-4 space-y-1 text-gray-700">
+                                        <div>1. TRG_[nombre] → [cuándo y para qué]</div>
+                                        <div>2. TRG_[nombre] → [cuándo y para qué]</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+                                <p class="text-sm text-yellow-800">
+                                    💡 <strong>Recuerda:</strong> Este documento será tu guía para desarrollar la EP2
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-green-100 border-2 border-green-500 rounded-xl p-8 mb-8 inline-block">
+                        <div class="text-4xl font-bold text-green-800 mb-2">🎉 ¡Clase Completada!</div>
+                        <p class="text-xl text-green-700">Ahora tienen las bases para enfrentar la EP2 con confianza</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let currentFase = 0;
+        let rondaActual = 1;
+        let timerInterval = null;
+
+        // Proyectos y estudiantes
+        const proyectos = [
+            { nombre: 'Veterinaria', icono: '🏥', color: 'blue' },
+            { nombre: 'Airsoft Store', icono: '🎯', color: 'purple' },
+            { nombre: 'Tienda Ropa', icono: '👕', color: 'green' },
+            { nombre: 'PDI', icono: '🚔', color: 'red' },
+            { nombre: 'Restaurante', icono: '🍽️', color: 'yellow' },
+            { nombre: 'Serv. Técnico', icono: '💻', color: 'indigo' },
+            { nombre: 'Hot Wheels', icono: '🏎️', color: 'pink' }
+        ];
+
+        // Matriz de rotación (5 rondas)
+        const rotaciones = [
+            // Ronda 1
+            [
+                { grupo: 'Grupo A', proyecto: 'Veterinaria' },
+                { grupo: 'Grupo B', proyecto: 'Airsoft Store' },
+                { grupo: 'Grupo C', proyecto: 'Tienda Ropa' }
+            ],
+            // Ronda 2
+            [
+                { grupo: 'Grupo A', proyecto: 'PDI' },
+                { grupo: 'Grupo B', proyecto: 'Restaurante' },
+                { grupo: 'Grupo C', proyecto: 'Serv. Técnico' }
+            ],
+            // Ronda 3
+            [
+                { grupo: 'Grupo A', proyecto: 'Hot Wheels' },
+                { grupo: 'Grupo B', proyecto: 'Veterinaria' },
+                { grupo: 'Grupo C', proyecto: 'Airsoft Store' }
+            ],
+            // Ronda 4
+            [
+                { grupo: 'Grupo A', proyecto: 'Tienda Ropa' },
+                { grupo: 'Grupo B', proyecto: 'PDI' },
+                { grupo: 'Grupo C', proyecto: 'Restaurante' }
+            ],
+            // Ronda 5
+            [
+                { grupo: 'Grupo A', proyecto: 'Serv. Técnico' },
+                { grupo: 'Grupo B', proyecto: 'Hot Wheels' },
+                { grupo: 'Grupo C', proyecto: 'Veterinaria' }
+            ]
+        ];
+
+        function iniciarClase() {
+            siguienteFase(1);
+        }
+
+        function siguienteFase(fase) {
+            // Ocultar todas las fases
+            document.querySelectorAll('.fase-content').forEach(el => el.classList.add('hidden'));
+            
+            // Mostrar fase actual
+            document.getElementById('fase' + fase).classList.remove('hidden');
+            currentFase = fase;
+            
+            // Actualizar indicador
+            document.getElementById('faseActual').textContent = fase + '/4';
+            
+            // Detener timer anterior
+            if (timerInterval) clearInterval(timerInterval);
+
+            // Generar matriz si es fase 3
+            if (fase === 3) {
+                generarMatrizRotacion();
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function iniciarTimer(fase, segundos) {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            let restante = segundos;
+            const timerId = 'timer' + fase;
+            
+            timerInterval = setInterval(() => {
+                restante--;
+                
+                const minutos = Math.floor(restante / 60);
+                const segs = restante % 60;
+                document.getElementById(timerId).textContent = 
+                    minutos + ':' + (segs < 10 ? '0' : '') + segs;
+                
+                // Alerta a los 2 minutos
+                if (restante === 120 && fase === 3) {
+                    document.getElementById(timerId).classList.add('text-red-600', 'pulse-slow');
+                }
+                
+                if (restante <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById(timerId).textContent = '0:00';
+                    // Sonido o alerta
+                    if (fase === 3 && rondaActual < 5) {
+                        alert('⏰ ¡Tiempo! Cambio de estación');
+                    }
+                }
+            }, 1000);
+        }
+
+        function generarMatrizRotacion() {
+            const matriz = document.getElementById('matrizRotacion');
+            const ronda = rotaciones[rondaActual - 1];
+            
+            matriz.innerHTML = ronda.map(item => `
+                <div class="bg-white p-6 rounded-xl shadow-md border-2 border-orange-400">
+                    <div class="text-2xl font-bold text-gray-800 mb-2">${item.grupo}</div>
+                    <div class="text-lg text-gray-600">→</div>
+                    <div class="text-xl font-semibold text-orange-600 mt-2">${item.proyecto}</div>
+                </div>
+            `).join('');
+        }
+
+        function siguienteRonda() {
+            if (rondaActual < 5) {
+                rondaActual++;
+                document.getElementById('rondaActual').textContent = rondaActual;
+                generarMatrizRotacion();
+                
+                // Reiniciar timer
+                if (timerInterval) clearInterval(timerInterval);
+                document.getElementById('timer3').textContent = '8:00';
+                document.getElementById('timer3').classList.remove('text-red-600', 'pulse-slow');
+            } else {
+                alert('✅ ¡Todas las rondas completadas! Pasar a Fase 4');
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mostrar fase inicial
+            document.getElementById('fase0').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
