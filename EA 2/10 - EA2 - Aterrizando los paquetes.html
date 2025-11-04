@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller DB — Del Problema al Código</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #ffffff;
+            color: #1a1a1a;
+            overflow: hidden;
+        }
+        .slide {
+            display: none;
+            min-height: 100vh;
+            padding: 80px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .slide.active {
+            display: flex;
+        }
+        .content {
+            max-width: 1200px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 4em;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+        }
+        h2 {
+            font-size: 3em;
+            margin-bottom: 50px;
+            color: #667eea;
+            font-weight: 800;
+        }
+        .big {
+            font-size: 2.5em;
+            line-height: 1.5;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .highlight {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 5px 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 900;
+        }
+        .purple {
+            color: #764ba2;
+            font-weight: 800;
+        }
+        .pink {
+            color: #f5576c;
+            font-weight: 800;
+        }
+        .box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 3px solid #667eea;
+            padding: 50px;
+            margin: 40px 0;
+            border-radius: 20px;
+            font-size: 1.8em;
+            line-height: 1.8;
+        }
+        .code {
+            background: #f8f9ff;
+            border-left: 6px solid #f5576c;
+            padding: 30px;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #1a1a1a;
+            border-radius: 10px;
+        }
+        .step {
+            font-size: 2em;
+            margin: 30px 0;
+            padding-left: 40px;
+            position: relative;
+            font-weight: 600;
+        }
+        .step::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #f5576c;
+            font-weight: 900;
+        }
+        .timer {
+            font-size: 6em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.4em;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+        .slide-number {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            font-size: 2em;
+            color: #667eea;
+            font-weight: 700;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        .card {
+            background: white;
+            border: 3px solid #667eea;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        .card h3 {
+            font-size: 2em;
+            color: #764ba2;
+            margin-bottom: 25px;
+            font-weight: 800;
+        }
+        ul {
+            list-style: none;
+            font-size: 1.5em;
+            line-height: 2;
+        }
+        ul li::before {
+            content: "◆ ";
+            color: #f5576c;
+            font-weight: 900;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide active">
+        <div class="content">
+            <h1>TALLER DB</h1>
+            <div class="big">
+                Hoy: <span class="highlight">1 función dentro de tu package</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h2>El problema real</h2>
+            <div class="box">
+                No sabes <span class="pink">por dónde empezar</span> a programar
+            </div>
+            <div class="big" style="text-align: center; margin-top: 60px;">
+                Solución: <span class="purple">Descomponer en pasos</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h2>3 pasos simples</h2>
+            <div class="step">1. Elige la función más SIMPLE de tu proyecto</div>
+            <div class="step">2. Escribe pasos en español (pseudocódigo)</div>
+            <div class="step">3. Traduce paso a paso a PL/SQL</div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h2>PASO 1: Elige algo simple</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>✓ Funciones fáciles</h3>
+                    <ul>
+                        <li>Calcular subtotal</li>
+                        <li>Validar stock</li>
+                        <li>Obtener descuento</li>
+                        <li>Verificar estado</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>✗ NO elijas (todavía)</h3>
+                    <ul>
+                        <li>Procesar venta completa</li>
+                        <li>Con validaciones múltiples</li>
+                        <li>Con triggers</li>
+                        <li>Con 10 tablas</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="timer">5 min</div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h2>PASO 2: Define entrada/salida</h2>
+            <div class="code">
+FUNCIÓN: calcular_descuento
+<br><br>
+ENTRADA:<br>
+- cliente_id (NUMBER)<br>
+- monto (NUMBER)
+<br><br>
+SALIDA:<br>
+- descuento (NUMBER)
+<br><br>
+EJEMPLO:<br>
+Input:  cliente_id=101, monto=1000<br>
+Output: 150
+            </div>
+            <div class="timer">5 min</div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h2>PASO 3: Pasos en español</h2>
+            <div class="code">
+1. Obtener categoría del cliente<br>
+2. Si es PREMIUM → 15% descuento<br>
+3. Si es NORMAL → 5% descuento<br>
+4. Sino → 0% descuento<br>
+5. Calcular: monto × porcentaje<br>
+6. Retornar resultado
+            </div>
+            <div class="big" style="text-align: center; margin-top: 50px;">
+                Si un paso es confuso → <span class="pink">divídelo más</span>
+            </div>
+            <div class="timer">10 min</div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h2>PASO 4: Traduce a PL/SQL</h2>
+            <div class="code">
+FUNCTION calcular_descuento(<br>
+&nbsp;&nbsp;p_cliente_id NUMBER,<br>
+&nbsp;&nbsp;p_monto NUMBER<br>
+) RETURN NUMBER IS<br>
+&nbsp;&nbsp;v_categoria VARCHAR2(20);<br>
+&nbsp;&nbsp;v_porcentaje NUMBER := 0;<br>
+BEGIN<br>
+&nbsp;&nbsp;-- Paso 1: Obtener categoría<br>
+&nbsp;&nbsp;SELECT categoria INTO v_categoria<br>
+&nbsp;&nbsp;FROM clientes WHERE id = p_cliente_id;<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;-- Pasos 2-4: Determinar porcentaje<br>
+&nbsp;&nbsp;IF v_categoria = 'PREMIUM' THEN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;v_porcentaje := 15;<br>
+&nbsp;&nbsp;ELSIF v_categoria = 'NORMAL' THEN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;v_porcentaje := 5;<br>
+&nbsp;&nbsp;END IF;<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;-- Paso 5-6: Calcular y retornar<br>
+&nbsp;&nbsp;RETURN p_monto * (v_porcentaje / 100);<br>
+END;
+            </div>
+            <div class="timer">20 min</div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h2>PASO 5: Pruébalo</h2>
+            <div class="code">
+BEGIN<br>
+&nbsp;&nbsp;DBMS_OUTPUT.PUT_LINE(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pkg_ventas.calcular_descuento(101, 1000)<br>
+&nbsp;&nbsp;);<br>
+&nbsp;&nbsp;-- Esperado: 150<br>
+END;<br>
+/
+            </div>
+            <div class="big" style="text-align: center; margin-top: 50px;">
+                Escribe <span class="purple">3 casos de prueba</span> mínimo
+            </div>
+            <div class="timer">10 min</div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h1>ENTREGABLE</h1>
+            <div class="box">
+                <div class="step">Pseudocódigo (pasos en español)</div>
+                <div class="step">Código PL/SQL de 1 función</div>
+                <div class="step">3 casos de prueba</div>
+            </div>
+            <div class="big" style="text-align: center; margin-top: 60px;">
+                <span class="highlight">Sube a tu repo antes de irte</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="content">
+            <h1 style="font-size: 5em;">¡A TRABAJAR!</h1>
+            <div class="big" style="text-align: center; margin-top: 80px;">
+                <span class="purple">50 minutos</span> para completar tu función
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number" id="slideNumber">1 / 10</div>
+    
+    <div class="controls">
+        <button onclick="prevSlide()">←</button>
+        <button onclick="nextSlide()">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('slideNumber').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>
