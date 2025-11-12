@@ -23,9 +23,8 @@ BEGIN
     );
 
 EXCEPTION
-    -- Captura la excepción predefinida cuando se intenta insertar un valor duplicado en una columna con restricción UNIQUE o PRIMARY KEY
     WHEN DUP_VAL_ON_INDEX THEN
-        DBMS_OUTPUT.PUT_LINE('Excepción capturada: DUP_VAL_ON_INDEX -> ID de usuario duplicado.');
+        DBMS_OUTPUT.PUT_LINE('Excepción capturada: DUP_VAL_ON_INDEX -> ID de usuario duplicado.'); -- Captura la excepción predefinida cuando se intenta insertar un valor duplicado en una columna con restricción UNIQUE o PRIMARY KEY
 END;
 /
 
