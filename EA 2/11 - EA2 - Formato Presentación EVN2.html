@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Presentación EP2 - Taller de Base de Datos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px 80px;
+            display: none;
+            flex-direction: column;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 30px;
+            right: 80px;
+            font-size: 120px;
+            font-weight: 900;
+            color: #003DA5;
+            opacity: 0.1;
+            line-height: 1;
+        }
+
+        .slide-title {
+            font-size: 48px;
+            color: #003DA5;
+            font-weight: 700;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        .slide-subtitle {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 20px;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #003DA5;
+            border-radius: 10px;
+        }
+
+        .bullet-point {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 5px solid #003DA5;
+            border-radius: 8px;
+            position: relative;
+            cursor: help;
+            transition: all 0.3s ease;
+        }
+
+        .bullet-point:hover {
+            background: #e8f4f8;
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 61, 165, 0.1);
+            z-index: 9999;
+
+        }
+
+        .bullet-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #003DA5;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .bullet-title::before {
+            content: "▸";
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .bullet-description {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #003DA5;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            width: 350px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .bullet-point:hover .tooltip {
+            opacity: 1;
+        }
+
+        .tooltip::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #003DA5;
+            
+        }
+
+        .time-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 80px;
+            background: #FFC107;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .nav-button {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 3px solid #003DA5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            color: #003DA5;
+            font-weight: bold;
+        }
+
+        .nav-button:hover {
+            background: #003DA5;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-button:disabled:hover {
+            background: white;
+            color: #003DA5;
+            transform: scale(1);
+        }
+
+        .slide-dots {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid #003DA5;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #003DA5;
+            transform: scale(1.3);
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .warning-box strong {
+            color: #856404;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .success-box strong {
+            color: #155724;
+        }
+
+        .danger-box {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .danger-box strong {
+            color: #721c24;
+        }
+
+        .question-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .question-list li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .question-list li::before {
+            content: "❓";
+            margin-right: 10px;
+        }
+
+        .intro-slide {
+            background: linear-gradient(135deg, #003DA5 0%, #0052cc 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .intro-slide .slide-title {
+            color: white;
+            font-size: 64px;
+            margin-bottom: 30px;
+        }
+
+        .intro-slide .slide-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 28px;
+        }
+
+        .help-text {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            color: #666;
+        }
+
+        .help-text kbd {
+            background: #003DA5;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 0 3px;
+        }
+
+        .section-marker {
+            display: inline-block;
+            background: #003DA5;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="help-text">
+        Navegar: <kbd>←</kbd> <kbd>→</kbd> o clic en botones
+    </div>
+
+    <div class="presentation-container">
+        <!-- SLIDE 0: PORTADA -->
+        <div class="slide active intro-slide">
+            <div class="slide-title">Guía de Presentación EP2</div>
+            <div class="slide-subtitle">Implementación de Programas PL/SQL</div>
+            <p style="margin-top: 40px; font-size: 18px; opacity: 0.8;">20 minutos máximo | Evaluación Individual</p>
+            <p style="margin-top: 60px; font-size: 16px; opacity: 0.7;">Presiona → para comenzar</p>
+        </div>
+
+        <!-- SLIDE 1: PROBLEMA DEL PROYECTO -->
+        <div class="slide">
+            <div class="slide-number">1</div>
+            <div class="section-marker">CONTEXTO | 3-4 minutos</div>
+            <div class="slide-title">Problema del Proyecto</div>
+            <div class="slide-subtitle">Establece el contexto y relevancia de tu solución</div>
+            
+            <div class="slide-content">
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Qué problema resuelve tu proyecto?</div>
+                    <div class="bullet-description">Describe el problema de negocio real que abordas</div>
+                    <div class="tooltip">
+                        💡 <strong>Debes explicar:</strong><br>
+                        • El contexto del negocio (veterinaria, tienda, PDI, etc.)<br>
+                        • Los procesos manuales o ineficientes actuales<br>
+                        • Las consecuencias de NO resolver este problema<br>
+                        • Por qué PL/SQL es la solución adecuada
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Por qué es relevante?</div>
+                    <div class="bullet-description">Justifica la importancia y el impacto del problema</div>
+                    <div class="tooltip">
+                        💡 <strong>Menciona:</strong><br>
+                        • A quién afecta (usuarios, clientes, empleados)<br>
+                        • Qué se pierde sin automatización (tiempo, dinero, precisión)<br>
+                        • Cómo mejora el proceso con tu solución<br>
+                        • Métricas o beneficios esperados
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Alcance de la solución</div>
+                    <div class="bullet-description">Define qué procesos específicos automatizas con PL/SQL</div>
+                    <div class="tooltip">
+                        💡 <strong>Sé específico:</strong><br>
+                        • Lista los 3-5 procesos principales que automatizas<br>
+                        • Explica qué hace tu sistema vs qué NO hace<br>
+                        • Menciona limitaciones o mejoras futuras<br>
+                        • Conecta con los packages que desarrollaste
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ IMPORTANTE:</strong> No hables aún de código. Esta sección es SOLO contexto de negocio. El docente necesita entender QUÉ resuelves antes de VER cómo lo resuelves.
+                </div>
+            </div>
+
+            <div class="time-indicator">⏱️ 3-4 minutos</div>
+        </div>
+
+        <!-- SLIDE 2: JUSTIFICAR PROCEDIMIENTOS Y FUNCIONES -->
+        <div class="slide">
+            <div class="slide-number">2</div>
+            <div class="section-marker">FUNDAMENTOS | 3-4 minutos</div>
+            <div class="slide-title">Procedimientos y Funciones</div>
+            <div class="slide-subtitle">Justifica tu decisión de usar estos elementos</div>
+            
+            <div class="slide-content">
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Por qué usaste procedimientos?</div>
+                    <div class="bullet-description">Explica el valor que aportan vs SQL simple</div>
+                    <div class="tooltip">
+                        💡 <strong>Debes argumentar:</strong><br>
+                        • Qué operaciones complejas encapsulan<br>
+                        • Cómo facilitan el mantenimiento del código<br>
+                        • Por qué es mejor tenerlos en BD vs aplicación<br>
+                        • Ventajas de reutilización en múltiples contextos
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Por qué usaste funciones?</div>
+                    <div class="bullet-description">Justifica cuándo es mejor retornar un valor vs modificar datos</div>
+                    <div class="tooltip">
+                        💡 <strong>Explica la diferencia:</strong><br>
+                        • Qué cálculos o consultas necesitas reutilizar<br>
+                        • Por qué necesitas el valor de retorno en SQL<br>
+                        • Ventajas de usar funciones en WHERE/SELECT<br>
+                        • Ejemplos concretos de tu proyecto
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Ventajas en tu contexto específico</div>
+                    <div class="bullet-description">Conecta los beneficios con tu problema de negocio</div>
+                    <div class="tooltip">
+                        💡 <strong>Demuestra comprensión:</strong><br>
+                        • Cómo mejoran el rendimiento de tu sistema<br>
+                        • Qué reglas de negocio centralizan<br>
+                        • Cómo facilitan auditoría y trazabilidad<br>
+                        • Por qué eligiste proc vs func en cada caso
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Desventajas que consideraste</div>
+                    <div class="bullet-description">Demuestra que evaluaste alternativas</div>
+                    <div class="tooltip">
+                        💡 <strong>Sé crítico:</strong><br>
+                        • Complejidad de debugging vs código en app<br>
+                        • Dependencia de la base de datos<br>
+                        • Posibles problemas de portabilidad<br>
+                        • Por qué aún así los usaste
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ CLAVE:</strong> No digas "los usé porque el proyecto lo pedía". Justifica con criterio técnico y de negocio. El docente evaluará tu capacidad de análisis.
+                </div>
+            </div>
+
+            <div class="time-indicator">⏱️ 3-4 minutos</div>
+        </div>
+
+        <!-- SLIDE 3: JUSTIFICAR PACKAGES -->
+        <div class="slide">
+            <div class="slide-number">3</div>
+            <div class="section-marker">ARQUITECTURA | 3-4 minutos</div>
+            <div class="slide-title">Organización en Packages</div>
+            <div class="slide-subtitle">Defiende tu arquitectura modular</div>
+            
+            <div class="slide-content">
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Cómo organizaste tu código?</div>
+                    <div class="bullet-description">Explica la estructura de packages que diseñaste</div>
+                    <div class="tooltip">
+                        💡 <strong>Describe tu arquitectura:</strong><br>
+                        • Cuántos packages creaste y por qué<br>
+                        • Qué criterio usaste para agrupar proc/func<br>
+                        • Cómo se relacionan entre sí los packages<br>
+                        • Por qué NO hiciste un package gigante con todo
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Alta cohesión: un propósito por package</div>
+                    <div class="bullet-description">Justifica que cada package tiene UNA responsabilidad clara</div>
+                    <div class="tooltip">
+                        💡 <strong>Demuestra cohesión:</strong><br>
+                        • Explica en 1 frase qué hace cada package<br>
+                        • Por qué todas sus funciones están relacionadas<br>
+                        • Cómo elegiste los nombres (deben ser descriptivos)<br>
+                        • Qué pasaría si mezclas responsabilidades
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Bajo acoplamiento: mínima dependencia</div>
+                    <div class="bullet-description">Explica cómo los packages se comunican sin estar "atados"</div>
+                    <div class="tooltip">
+                        💡 <strong>Arquitectura desacoplada:</strong><br>
+                        • Qué packages usan a otros y por qué<br>
+                        • Cómo evitaste dependencias circulares<br>
+                        • Por qué puedes modificar uno sin romper otros<br>
+                        • Beneficios de esta modularidad
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Separación público/privado</div>
+                    <div class="bullet-description">Justifica qué expones y qué ocultas</div>
+                    <div class="tooltip">
+                        💡 <strong>Encapsulación correcta:</strong><br>
+                        • Qué está en SPEC (público) y por qué<br>
+                        • Qué está solo en BODY (privado) y por qué<br>
+                        • Ventajas de esta separación<br>
+                        • Cómo protege tu implementación interna
+                    </div>
+                </div>
+
+                <div class="danger-box">
+                    <strong>🚨 ERROR COMÚN:</strong> Decir "hice 3 packages porque el proyecto pedía packages". Debes justificar CADA decisión de diseño con criterio técnico. ¿Por qué estos packages y no otros? ¿Por qué esta distribución?
+                </div>
+            </div>
+
+            <div class="time-indicator">⏱️ 3-4 minutos</div>
+        </div>
+
+        <!-- SLIDE 4: JUSTIFICAR TRIGGERS -->
+        <div class="slide">
+            <div class="slide-number">4</div>
+            <div class="section-marker">AUTOMATIZACIÓN | 2-3 minutos</div>
+            <div class="slide-title">Triggers</div>
+            <div class="slide-subtitle">Defiende qué automatizas y por qué</div>
+            
+            <div class="slide-content">
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Qué procesos automatizan tus triggers?</div>
+                    <div class="bullet-description">Describe qué operaciones se ejecutan automáticamente</div>
+                    <div class="tooltip">
+                        💡 <strong>Sé específico:</strong><br>
+                        • Lista cada trigger y su propósito de negocio<br>
+                        • Qué tabla monitorea y qué evento dispara<br>
+                        • Qué operación ejecuta cuando se activa<br>
+                        • Por qué es necesario que sea automático
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Nivel sentencia vs nivel fila</div>
+                    <div class="bullet-description">Justifica por qué elegiste cada tipo</div>
+                    <div class="tooltip">
+                        💡 <strong>Diferencia claramente:</strong><br>
+                        • Cuándo usas FOR EACH ROW y por qué<br>
+                        • Cuándo usas nivel sentencia y por qué<br>
+                        • Ventajas de cada uno en tu contexto<br>
+                        • Ejemplos concretos de ambos tipos
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">BEFORE vs AFTER</div>
+                    <div class="bullet-description">Explica cuándo necesitas actuar antes o después</div>
+                    <div class="tooltip">
+                        💡 <strong>Momento correcto:</strong><br>
+                        • BEFORE: validaciones, modificar valores antes de guardar<br>
+                        • AFTER: auditoría, notificaciones, cálculos posteriores<br>
+                        • Por qué elegiste cada timing<br>
+                        • Qué pasaría si te equivocas de momento
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Por qué NO en lógica de aplicación?</div>
+                    <div class="bullet-description">Defiende por qué estos procesos están en BD</div>
+                    <div class="tooltip">
+                        💡 <strong>Justificación clave:</strong><br>
+                        • Por qué debe ser automático e inevitable<br>
+                        • Ventajas de tenerlo en la capa de datos<br>
+                        • Garantías de integridad que no puedes lograr en app<br>
+                        • Casos donde SÍ sería mejor en aplicación
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ COMÚN EN PREGUNTAS:</strong> El docente podría cuestionar "¿por qué no hiciste esto en Java/Python/C#?". Debes tener una respuesta sólida sobre POR QUÉ la base de datos es el lugar correcto para esta lógica.
+                </div>
+            </div>
+
+            <div class="time-indicator">⏱️ 2-3 minutos</div>
+        </div>
+
+        <!-- SLIDE 5: MODELO DE BASE DE DATOS -->
+        <div class="slide">
+            <div class="slide-number">5</div>
+            <div class="section-marker">MODELO FÍSICO | 2-3 minutos</div>
+            <div class="slide-title">Tu Base de Datos</div>
+            <div class="slide-subtitle">Defiende tu modelo físico normalizado</div>
+            
+            <div class="slide-content">
+                <div class="warning-box">
+                    <strong>⚠️ ESTA ES LA SLIDE VISUAL:</strong> Aquí FINALMENTE muestras tu MER, diagrama de tablas, Excel con estructura, etc. Pero NO solo lo proyectas, debes DEFENDERLO.
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Muestra tu esquema de base de datos</div>
+                    <div class="bullet-description">Proyecta MER, diagrama de tablas, o representación visual</div>
+                    <div class="tooltip">
+                        💡 <strong>Prepara tu diagrama:</strong><br>
+                        • Debe ser legible (no miniaturas)<br>
+                        • Muestra tablas, relaciones, PKs, FKs<br>
+                        • Puede ser MER, diagrama físico, o incluso Excel estructurado<br>
+                        • Si es complejo, resalta solo las tablas principales
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Cómo llegaste a este diseño?</div>
+                    <div class="bullet-description">Explica tu proceso de diseño y normalización</div>
+                    <div class="tooltip">
+                        💡 <strong>PREGUNTA CRÍTICA del docente:</strong><br>
+                        • ¿Solo le pediste a ChatGPT que te lo generara?<br>
+                        • ¿O analizaste el problema, definiste entidades, validaste relaciones?<br>
+                        • ¿Qué criterios usaste para separar tablas?<br>
+                        • ¿Iteraste el diseño o te quedaste con la primera versión?
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Está en 3ra Forma Normal?</div>
+                    <div class="bullet-description">Justifica que tu modelo está normalizado correctamente</div>
+                    <div class="tooltip">
+                        💡 <strong>Demuestra que lo validaste:</strong><br>
+                        • ¿Hay dependencias transitivas? ¿Las eliminaste?<br>
+                        • ¿Hay redundancia? ¿Por qué o por qué no?<br>
+                        • ¿Aplicaste alguna desnormalización consciente?<br>
+                        • ¿Puedes explicar cada tabla y su propósito?
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">¿Cómo este modelo resuelve tu problema?</div>
+                    <div class="bullet-description">Conecta el diseño con el problema de negocio del inicio</div>
+                    <div class="tooltip">
+                        💡 <strong>Cierra el círculo:</strong><br>
+                        • Vuelve al problema de la Slide 1<br>
+                        • Muestra cómo estas tablas soportan los procesos<br>
+                        • Explica qué datos necesitas capturar y por qué<br>
+                        • Relaciona con los packages que operan sobre este modelo
+                    </div>
+                </div>
+
+                <div class="danger-box">
+                    <strong>🚨 SI NO PUEDES DEFENDER TU MODELO:</strong> El docente asumirá que solo copiaste un diseño de IA sin entenderlo. Debes poder explicar CADA decisión: por qué esta tabla existe, por qué esta FK, por qué esta cardinalidad.
+                </div>
+            </div>
+
+            <div class="time-indicator">⏱️ 2-3 minutos</div>
+        </div>
+
+        <!-- SLIDE 6: EJECUCIÓN DE CÓDIGO -->
+        <div class="slide">
+            <div class="slide-number">6</div>
+            <div class="section-marker">DEMOSTRACIÓN | 3-4 minutos</div>
+            <div class="slide-title">Ejecución de Packages</div>
+            <div class="slide-subtitle">Ahora SÍ: muestra tu código en acción</div>
+            
+            <div class="slide-content">
+                <div class="success-box">
+                    <strong>✅ FINALMENTE:</strong> Después de 15 minutos de justificación y contexto, ahora ejecutas tu código. El docente ya entiende el PORQUÉ, ahora quiere ver el CÓMO funciona.
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Prepara bloques anónimos para ejecutar</div>
+                    <div class="bullet-description">Ten listos scripts de prueba para cada procedimiento/función</div>
+                    <div class="tooltip">
+                        💡 <strong>Organización previa:</strong><br>
+                        • Bloques anónimos ya escritos y probados<br>
+                        • Datos de prueba realistas (no id=1, nombre='test')<br>
+                        • Scripts ordenados lógicamente<br>
+                        • Comentarios que expliquen qué hace cada bloque
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Elige el orden de ejecución</div>
+                    <div class="bullet-description">Tú decides qué mostrar primero según tu narrativa</div>
+                    <div class="tooltip">
+                        💡 <strong>Sugerencias de orden:</strong><br>
+                        • Orden lógico del proceso de negocio (lo más natural)<br>
+                        • O de simple a complejo (funciones → proc → triggers)<br>
+                        • O por packages (primero PKG_A completo, luego PKG_B)<br>
+                        • Lo importante: que tenga sentido para tu historia
+                        </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Por cada ejecución: Explica → Ejecuta → Muestra resultado</div>
+                    <div class="bullet-description">No solo corras código, narra lo que está pasando</div>
+                    <div class="tooltip">
+                        💡 <strong>Patrón a seguir:</strong><br>
+                        1. "Voy a ejecutar [nombre_proc/func] que hace [propósito]"<br>
+                        2. Ejecutas el bloque anónimo<br>
+                        3. "Como ven, el resultado es X porque Y"<br>
+                        4. Muestras consultas de validación si aplica
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Valida los resultados visualmente</div>
+                    <div class="bullet-description">Demuestra que tu código hace lo que prometiste</div>
+                    <div class="tooltip">
+                        💡 <strong>Validación efectiva:</strong><br>
+                        • Si insertas, haz SELECT para mostrar el registro<br>
+                        • Si actualizas, muestra antes y después<br>
+                        • Si es función, muestra el valor retornado en contexto<br>
+                        • Si dispara trigger, muestra la tabla de auditoría/log
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ NO MUESTRES TODO EL CÓDIGO:</strong> No proyectes 500 líneas de PL/SQL. Solo ejecuta bloques anónimos limpios y muestra resultados. El código completo está en el informe, aquí solo demuestras que FUNCIONA.
+                </div>
+
+                <div class="danger-box">
+                    <strong>🚨 ERRORES COMUNES:</strong><br>
+                    • Ejecutar todo de corrido sin explicar nada<br>
+                    • Código que falla en vivo por falta de pruebas<br>
+                    • Datos de prueba absurdos (cliente_id=999, producto='asdf')<br>
+                    • No mostrar los resultados de las operaciones
+                </div>
+            </div>
+
+            <div class="time-indicator">⏱️ 3-4 minutos</div>
+        </div>
+
+        <!-- SLIDE 7: PREGUNTAS DEL DOCENTE -->
+        <div class="slide">
+            <div class="slide-number">7</div>
+            <div class="section-marker">EVALUACIÓN INDIVIDUAL | Variable</div>
+            <div class="slide-title">Sección de Preguntas</div>
+            <div class="slide-subtitle">Aquí se define tu nota individual</div>
+            
+            <div class="slide-content">
+                <div class="danger-box">
+                    <strong>🚨 ESTO ES CRÍTICO:</strong> Aunque el código sea grupal, si NO puedes explicar o manejar tu código a cabalidad, esta sección te pondrá en JAQUE. El docente evaluará TU comprensión individual.
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">Debes dominar TODO el proyecto</div>
+                    <div class="bullet-description">No solo "tu parte", TODAS las partes</div>
+                    <div class="tooltip">
+                        💡 <strong>Por qué es importante:</strong><br>
+                        • El docente puede preguntar sobre cualquier procedimiento<br>
+                        • Aunque lo haya hecho tu compañero, TÚ debes explicarlo<br>
+                        • "No sé, eso lo hizo mi compañero" = nota baja<br>
+                        • Revisen juntos TODO el código antes de presentar
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3 style="color: #003DA5; font-size: 22px; margin-bottom: 15px;">📋 Preguntas Típicas del Docente:</h3>
+                    
+                    <ul class="question-list">
+                        <li><strong>Sobre diseño:</strong> "¿Por qué esta función está en este package y no en otro?"</li>
+                        <li><strong>Sobre alternativas:</strong> "¿Por qué no usaste un trigger en lugar de este procedimiento?"</li>
+                        <li><strong>Sobre decisiones:</strong> "¿Por qué esta función es pública y esta otra es privada?"</li>
+                        <li><strong>Sobre arquitectura:</strong> "Si tuvieras que agregar [funcionalidad X], ¿dónde la pondrías?"</li>
+                        <li><strong>Sobre normalización:</strong> "¿Por qué esta tabla tiene esta estructura? ¿Consideraste otras opciones?"</li>
+                        <li><strong>Sobre lógica:</strong> "Explícame línea por línea qué hace este procedimiento"</li>
+                        <li><strong>Sobre rendimiento:</strong> "¿Este trigger afecta el rendimiento? ¿Cómo?"</li>
+                        <li><strong>Sobre integridad:</strong> "¿Qué pasa si dos usuarios ejecutan esto al mismo tiempo?"</li>
+                        <li><strong>Sobre manejo de errores:</strong> "¿Qué ocurre si falla en la línea 45?"</li>
+                    </ul>
+                </div>
+
+                <div class="bullet-point" style="margin-top: 30px;">
+                    <div class="bullet-title">Cómo prepararte para preguntas difíciles</div>
+                    <div class="bullet-description">Estrategias para responder con seguridad</div>
+                    <div class="tooltip">
+                        💡 <strong>Técnicas efectivas:</strong><br>
+                        • Lee TODO el código al menos 3 veces antes de presentar<br>
+                        • Practica explicar cada decisión de diseño<br>
+                        • Haz una sesión de "preguntas trampa" con tu equipo<br>
+                        • Identifica las partes más complejas y domínalas<br>
+                        • Si usaste IA, asegúrate de entender cada línea
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ RESPUESTA CORRECTA ante duda:</strong> "No estoy 100% seguro, pero mi razonamiento es [explicas tu lógica]. ¿Es correcto?" - Esto demuestra pensamiento crítico vs simplemente no saber nada.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ SEÑALES DE ALERTA para el docente:</strong><br>
+                    • Vacilas al explicar tu propio código<br>
+                    • No puedes justificar decisiones de diseño<br>
+                    • Dices "porque así salió" o "porque lo encontré así"<br>
+                    • No entiendes preguntas básicas sobre PL/SQL<br>
+                    • Contradicciones entre lo que dices y lo que hace el código
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: CHECKLIST FINAL -->
+        <div class="slide">
+            <div class="slide-number">8</div>
+            <div class="section-marker">PREPARACIÓN FINAL</div>
+            <div class="slide-title">Checklist Pre-Presentación</div>
+            <div class="slide-subtitle">Verifica esto antes de presentar</div>
+            
+            <div class="slide-content">
+                <div class="success-box">
+                    <strong>✅ TIMING Y ESTRUCTURA</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>Ensayé y mi presentación dura entre 15-18 minutos (dejo 2-5 min para preguntas)</li>
+                        <li>Cada sección tiene una duración balanceada (no 2 min en problema y 10 min en código)</li>
+                        <li>Tengo transiciones claras entre secciones</li>
+                        <li>Puedo ajustar el ritmo si veo que me paso de tiempo</li>
+                    </ul>
+                </div>
+
+                <div class="success-box" style="margin-top: 20px;">
+                    <strong>✅ CONTENIDO Y JUSTIFICACIÓN</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>Puedo explicar el problema de negocio sin ver mis notas</li>
+                        <li>Tengo argumentos técnicos sólidos para cada decisión de diseño</li>
+                        <li>Puedo defender por qué mi modelo de BD está en 3FN</li>
+                        <li>No dependo de frases como "porque el proyecto pedía X"</li>
+                        <li>Puedo explicar ventajas Y desventajas de cada elemento</li>
+                    </ul>
+                </div>
+
+                <div class="success-box" style="margin-top: 20px;">
+                    <strong>✅ CÓDIGO Y EJECUCIÓN</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>Todos los bloques anónimos están probados y funcionan</li>
+                        <li>Los datos de prueba son realistas y representativos</li>
+                        <li>Tengo consultas preparadas para validar resultados</li>
+                        <li>Sé qué hace cada línea de TODOS los procedimientos/funciones</li>
+                        <li>Puedo explicar cualquier trigger aunque no lo haya escrito yo</li>
+                    </ul>
+                </div>
+
+                <div class="success-box" style="margin-top: 20px;">
+                    <strong>✅ DOMINIO DEL PROYECTO</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>Leí TODO el código del proyecto (no solo mi parte)</li>
+                        <li>Puedo explicar por qué cada función está en su package</li>
+                        <li>Entiendo las relaciones entre todos los packages</li>
+                        <li>Puedo justificar qué es público vs privado</li>
+                        <li>Sé responder "¿qué pasa si falla X?" para cada componente</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box" style="margin-top: 20px;">
+                    <strong>⚠️ MATERIALES TÉCNICOS</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>Tengo backup del código (por si falla la conexión)</li>
+                        <li>Mi diagrama de BD es legible cuando se proyecta</li>
+                        <li>Las diapositivas no tienen bloques gigantes de código</li>
+                        <li>Probé la presentación en el equipo donde voy a presentar</li>
+                    </ul>
+                </div>
+
+                <div class="danger-box" style="margin-top: 20px;">
+                    <strong>🚨 MENTALIDAD CORRECTA</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>Entiendo que aunque trabajé en equipo, la evaluación es INDIVIDUAL</li>
+                        <li>No voy a decir "eso lo hizo mi compañero" como excusa</li>
+                        <li>Estoy preparado para defender CUALQUIER decisión del proyecto</li>
+                        <li>Si usé IA, puedo explicar y justificar cada línea que generó</li>
+                        <li>Veo las preguntas como oportunidad de demostrar conocimiento, no como trampa</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: CONSEJOS FINALES -->
+        <div class="slide">
+            <div class="slide-number">9</div>
+            <div class="section-marker">TIPS FINALES</div>
+            <div class="slide-title">Consejos del Docente</div>
+            <div class="slide-subtitle">Lo que marca la diferencia entre una buena y excelente presentación</div>
+            
+            <div class="slide-content">
+                <div class="bullet-point">
+                    <div class="bullet-title">🎯 Sé conciso pero completo</div>
+                    <div class="bullet-description">20 minutos pasan rápido, cada palabra debe aportar valor</div>
+                    <div class="tooltip">
+                        💡 <strong>Balance perfecto:</strong><br>
+                        • No des contexto innecesario del negocio (2 min, no 8 min)<br>
+                        • Pero SÍ justifica profundamente tus decisiones técnicas<br>
+                        • Evita divagaciones: cada frase debe tener propósito<br>
+                        • Si algo no aporta, córtalo
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">🎯 Conecta todo con el problema inicial</div>
+                    <div class="bullet-description">Tu presentación debe ser una historia coherente</div>
+                    <div class="tooltip">
+                        💡 <strong>Narrativa sólida:</strong><br>
+                        • Slide 1: Presentas el problema<br>
+                        • Slides 2-4: Explicas TU solución técnica<br>
+                        • Slide 5: Muestras cómo el modelo soporta la solución<br>
+                        • Slide 6: Demuestras que funciona<br>
+                        • Todo conectado, todo tiene sentido
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">🎯 No memorices, ENTIENDE</div>
+                    <div class="bullet-description">El docente nota cuando recitas vs cuando comprendes</div>
+                    <div class="tooltip">
+                        💡 <strong>Comprensión real:</strong><br>
+                        • Si memorizas un speech, fallarás en preguntas<br>
+                        • Si ENTIENDES tu proyecto, puedes hablar naturalmente<br>
+                        • Practica explicando de 3 formas diferentes<br>
+                        • El nerviosismo se nota menos cuando dominas el tema
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">🎯 Demuestra pensamiento crítico</div>
+                    <div class="bullet-description">No todo es perfecto, reconoce limitaciones</div>
+                    <div class="tooltip">
+                        💡 <strong>Madurez técnica:</strong><br>
+                        • "Elegí X pero consideré Y y Z" (análisis)<br>
+                        • "Esta solución tiene la limitación de..." (honestidad)<br>
+                        • "Si tuviera más tiempo, mejoraría..." (visión)<br>
+                        • Esto impresiona más que fingir perfección
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">🎯 Lenguaje técnico preciso</div>
+                    <div class="bullet-description">Usa términos correctos, no jerga casual</div>
+                    <div class="tooltip">
+                        💡 <strong>Profesionalismo:</strong><br>
+                        • "Procedimiento" no "cosa que hace X"<br>
+                        • "Encapsulación" no "guardar código junto"<br>
+                        • "Trigger nivel fila" no "el que se ejecuta varias veces"<br>
+                        • "3ra Forma Normal" no "bien normalizado"<br>
+                        • El vocabulario técnico suma puntos
+                    </div>
+                </div>
+
+                <div class="bullet-point">
+                    <div class="bullet-title">🎯 Actitud profesional en preguntas</div>
+                    <div class="bullet-description">Cómo respondes es tan importante como qué respondes</div>
+                    <div class="tooltip">
+                        💡 <strong>Manejo de preguntas:</strong><br>
+                        • No te pongas defensivo si te cuestionan<br>
+                        • "Buen punto, no lo había considerado así"<br>
+                        • Si no sabes: "No estoy seguro, pero mi lógica es..."<br>
+                        • Nunca inventes, mejor admite duda con razonamiento<br>
+                        • El docente valora honestidad + pensamiento crítico
+                    </div>
+                </div>
+
+                <div class="success-box" style="margin-top: 30px;">
+                    <strong>✅ EL SECRETO DEL 7.0:</strong> No es tener el código más complejo, es ENTENDER profundamente lo que hiciste y poder JUSTIFICAR cada decisión con criterio técnico y de negocio. Eso marca la diferencia.
+                </div>
+
+                <div class="warning-box" style="margin-top: 20px;">
+                    <strong>⚠️ RECUERDA:</strong> Esta presentación vale 60% de la EP2, y la EP2 vale 40% de tu nota final. Son ~24% de tu calificación total del ramo. Tómalo en serio, prepárate bien, y domina tu proyecto. ¡Éxito! 🚀
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: CIERRE -->
+        <div class="slide intro-slide">
+            <div class="slide-title" style="font-size: 48px;">¿Listo para presentar?</div>
+            <div class="slide-subtitle" style="margin-top: 30px;">
+                Recuerda: No estás vendiendo código,<br>
+                estás defendiendo DECISIONES DE DISEÑO
+            </div>
+            <div style="margin-top: 60px; font-size: 18px; line-height: 2;">
+                <p>✅ Domino TODO el proyecto</p>
+                <p>✅ Puedo justificar cada decisión</p>
+                <p>✅ Entiendo mi modelo de BD</p>
+                <p>✅ Mi código funciona y está probado</p>
+                <p>✅ Estoy preparado para preguntas</p>
+            </div>
+            <div style="margin-top: 60px; font-size: 20px; color: #FFC107; font-weight: 600;">
+                ¡Mucho éxito en tu presentación! 🎓
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn" onclick="changeSlide(-1)">←</button>
+        <div class="slide-dots" id="dotsContainer"></div>
+        <button class="nav-button" id="nextBtn" onclick="changeSlide(1)">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        // Crear dots de navegación
+        const dotsContainer = document.getElementById('dotsContainer');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            if (i === 0) dot.classList.add('active');
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            document.querySelectorAll('.dot').forEach(dot => dot.classList.remove('active'));
+
+            if (n >= totalSlides) currentSlide = totalSlides - 1;
+            if (n < 0) currentSlide = 0;
+
+            slides[currentSlide].classList.add('active');
+            document.querySelectorAll('.dot')[currentSlide].classList.add('active');
+
+            // Actualizar botones
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+
+            // Scroll al top del contenido
+            const content = slides[currentSlide].querySelector('.slide-content');
+            if (content) content.scrollTop = 0;
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            showSlide(currentSlide);
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+            if (e.key === 'Home') goToSlide(0);
+            if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+
+        // Inicializar
+        showSlide(0);
+
+        // Posicionar tooltips dinámicamente
+        document.querySelectorAll('.bullet-point').forEach(bullet => {
+            const tooltip = bullet.querySelector('.tooltip');
+            if (tooltip) {
+                bullet.addEventListener('mouseenter', (e) => {
+                    const rect = bullet.getBoundingClientRect();
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    
+                    // Posicionar tooltip debajo del elemento
+                    tooltip.style.top = '100%';
+                    tooltip.style.left = '0';
+                    tooltip.style.marginTop = '10px';
+                    
+                    // Si se sale por la derecha, ajustar
+                    if (rect.left + tooltipRect.width > window.innerWidth) {
+                        tooltip.style.left = 'auto';
+                        tooltip.style.right = '0';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
