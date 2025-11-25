@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación 3: CRUD MongoDB | Taller de BD</title>
+
+    <!-- CDNs -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        mongo: {
+                            green: '#00ED64',
+                            leaf: '#001E2B',
+                            slate: '#001E2B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark body {
+            background-color: #0f172a;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00ED64 0%, #00684A 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 dark:text-slate-100 min-h-screen selection:bg-mongo-green selection:text-mongo-leaf">
+    <div id="app" class="flex flex-col min-h-screen">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-50 glass-panel border-b shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-green-500/30">
+                        EV3
+                    </div>
+                    <h1 class="font-bold text-lg tracking-tight">INSTRUCCIONES EV 3 <span class="gradient-text">CRUD
+                            MongoDB</span></h1>
+                </div>
+
+                <div class="flex items-center gap-4">
+
+                    <button @click="toggleTheme"
+                        class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <span v-if="isDark">🌞</span>
+                        <span v-else>🌙</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main
+            class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Sidebar Navigation -->
+            <aside class="lg:col-span-3 space-y-6">
+                <nav class="space-y-1 sticky top-24">
+                    <button v-for="(step, index) in steps" :key="index" @click="currentStep = index" :class="['w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 group', 
+                            currentStep === index 
+                                ? 'bg-white dark:bg-slate-800 shadow-lg border-l-4 border-green-500 text-green-600 dark:text-green-400 font-bold' 
+                                : 'hover:bg-white/50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400']">
+                        <div
+                            :class="['w-6 h-6 rounded-full flex items-center justify-center text-xs border transition-colors',
+                            currentStep === index ? 'bg-green-500 border-green-500 text-white' : 'border-slate-400 group-hover:border-slate-500']">
+                            {{ index + 1 }}
+                        </div>
+                        {{ step.title }}
+                    </button>
+
+                    <!-- Progress Card -->
+                    <div class="mt-8 glass-panel p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <h3 class="text-xs font-bold uppercase text-slate-500 mb-3">Tu Progreso</h3>
+                        <div class="space-y-3">
+                            <div v-for="(item, idx) in checklist" :key="idx" @click="item.done = !item.done"
+                                class="flex items-start gap-3 cursor-pointer group">
+                                <div
+                                    :class="['w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center transition-colors', 
+                                    item.done ? 'bg-green-500 border-green-500' : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900']">
+                                    <svg v-if="item.done" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span
+                                    :class="['text-xs leading-tight transition-colors', item.done ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300']">{{
+                                    item.text }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span>Completado</span>
+                                <span class="font-bold text-green-600">{{ progress }}%</span>
+                            </div>
+                            <div class="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 transition-all duration-500"
+                                    :style="{ width: progress + '%' }"></div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="lg:col-span-9 space-y-6">
+
+                <!-- Step 1: Introducción y Selección -->
+                <section v-if="currentStep === 0" class="animate-fade-in space-y-6">
+                    <div class="glass-panel p-8 rounded-2xl border-l-4 border-blue-500 shadow-sm">
+                        <h2 class="text-2xl font-bold mb-4">🎯 Objetivo de la Evaluación N3</h2>
+                        <p class="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+                            En esta evaluación final deberás diseñar, implementar y defender una solución CRUD completa
+                            en MongoDB que responda a una necesidad real de tu base de datos relacional actual (Oracle).
+                            El objetivo es demostrar que puedes:
+                        <ul class="list-disc list-inside ml-4">
+                            <li>Identificar un “dolor” o limitación de tu modelo relacional (por ejemplo, consultas con
+                                múltiples JOINs, rigidez de esquemas, o dificultad para manejar datos jerárquicos).</li>
+                            <li>Proponer una alternativa basada en MongoDB que resuelva ese problema, justificando la
+                                elección de documentos embebidos, arrays o referencias.</li>
+                            <li>Implementar las operaciones CRUD (insertOne/insertMany, find, update, delete) usando las
+                                mejores prácticas de MongoDB.</li>
+                            <li>Presentar y defender tu solución en una exposición de 5 minutos, incluyendo evidencia de
+                                ejecución y una rúbrica de auto‑evaluación.</li>
+                        </ul>
+
+                        </p>
+                    </div>
+
+                    <!-- Scenario Selection Introduction -->
+                    <div class="glass-panel p-6 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+                        <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                            <span
+                                class="bg-slate-200 dark:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+                            Paso 1: Elige tu Escenario
+                        </h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
+                            Debes elegir <strong>uno de los 6 escenarios</strong> propuestos a continuación (o proponer
+                            uno propio, previa aprobación del docente).
+                            Cada escenario representa un <strong>"dolor"</strong> típico de bases de datos relacionales
+                            que MongoDB resuelve de manera elegante.
+                            Tu trabajo es implementar la solución CRUD completa y justificar por qué MongoDB es superior
+                            para ese caso específico.
+                        </p>
+                        <div
+                            class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 text-sm">
+                            <strong>⚠️ Importante:</strong> No copies y pegues el ejemplo tal cual. Debes adaptarlo a tu
+                            contexto,
+                            agregar al menos 2-3 documentos de prueba realistas, y demostrar que comprendes cada
+                            operador que usas.
+                        </div>
+                    </div>
+
+                    <!-- Scenario Cards Grid -->
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Scenario 1: Blog Comments -->
+                        <div @click="selectedOption = 'blog'"
+                            :class="['cursor-pointer relative p-6 rounded-xl border-2 transition-all duration-300 hover:-translate-y-1', 
+                            selectedOption === 'blog' ? 'border-green-500 bg-green-50/50 dark:bg-green-900/10 shadow-lg shadow-green-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-green-300']">
+                            <div v-if="selectedOption === 'blog'"
+                                class="absolute -top-3 -right-3 bg-green-500 text-white px-2 py-1 rounded-full shadow-md text-xs font-bold">
+                                SELECCIONADO
+                            </div>
+                            <div class="text-4xl mb-3">💬</div>
+                            <h4 class="font-bold text-lg mb-2">Blog con Comentarios</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Dolor en Oracle:</strong> Necesitas 3 tablas (Posts, Comentarios, Respuestas)
+                                con múltiples JOINs.
+                                Cada vez que muestras un post, haces queries recursivos.
+                            </p>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Solución MongoDB:</strong> Todo vive en un solo documento. Comentarios y
+                                respuestas como arrays anidados.
+                                Una sola query trae todo.
+                            </p>
+                            <div
+                                class="text-xs font-mono bg-slate-100 dark:bg-slate-900 p-2 rounded text-slate-500 mb-2">
+                                { titulo, comentarios: [<br />
+                                &nbsp;&nbsp;{ user, text, respuestas: [] }<br />
+                                ] }
+                            </div>
+                            <div class="text-xs font-bold text-green-600 dark:text-green-400">★ Recomendado para
+                                principiantes</div>
+                        </div>
+
+                        <!-- Scenario 2: Clothing Store -->
+                        <div @click="selectedOption = 'ropa'"
+                            :class="['cursor-pointer relative p-6 rounded-xl border-2 transition-all duration-300 hover:-translate-y-1', 
+                            selectedOption === 'ropa' ? 'border-pink-500 bg-pink-50/50 dark:bg-pink-900/10 shadow-lg shadow-pink-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-pink-300']">
+                            <div v-if="selectedOption === 'ropa'"
+                                class="absolute -top-3 -right-3 bg-pink-500 text-white px-2 py-1 rounded-full shadow-md text-xs font-bold">
+                                SELECCIONADO
+                            </div>
+                            <div class="text-4xl mb-3">👗</div>
+                            <h4 class="font-bold text-lg mb-2">Tienda de Ropa</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Dolor en Oracle:</strong> Tabla de productos + tabla de variantes (talla, color,
+                                stock).
+                                Actualizar el stock de "Polera Negra Talla M" requiere un JOIN y un WHERE complejo.
+                            </p>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Solución MongoDB:</strong> Array de variantes dentro del producto.
+                                Usas <code>arrayFilters</code> para actualizar solo la talla específica sin tocar el
+                                resto.
+                            </p>
+                            <div class="text-xs font-mono bg-slate-100 dark:bg-slate-900 p-2 rounded text-slate-500">
+                                { nombre, precio, variantes: [<br />
+                                &nbsp;&nbsp;{ talla: 'M', color: 'Negro', stock: 5 }<br />
+                                ] }
+                            </div>
+                        </div>
+
+                        <!-- Scenario 3: Airsoft Store -->
+                        <div @click="selectedOption = 'airsoft'"
+                            :class="['cursor-pointer relative p-6 rounded-xl border-2 transition-all duration-300 hover:-translate-y-1', 
+                            selectedOption === 'airsoft' ? 'border-orange-500 bg-orange-50/50 dark:bg-orange-900/10 shadow-lg shadow-orange-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-orange-300']">
+                            <div v-if="selectedOption === 'airsoft'"
+                                class="absolute -top-3 -right-3 bg-orange-500 text-white px-2 py-1 rounded-full shadow-md text-xs font-bold">
+                                SELECCIONADO
+                            </div>
+                            <div class="text-4xl mb-3">🔫</div>
+                            <h4 class="font-bold text-lg mb-2">Tienda de Airsoft</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Dolor en Oracle:</strong> Armas con accesorios compatibles (miras, cargadores,
+                                silenciadores).
+                                Tabla de productos + tabla de accesorios + tabla de compatibilidad = 3 JOINs por query.
+                            </p>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Solución MongoDB:</strong> Array de accesorios embebido en cada arma.
+                                Puedes agregar/quitar accesorios con <code>$push/$pull</code> sin necesidad de tablas
+                                intermedias.
+                            </p>
+                            <div class="text-xs font-mono bg-slate-100 dark:bg-slate-900 p-2 rounded text-slate-500">
+                                { modelo, precio, accesorios: [<br />
+                                &nbsp;&nbsp;{ tipo: 'mira', nombre: 'Red Dot' }<br />
+                                ] }
+                            </div>
+                        </div>
+
+                        <!-- Scenario 4: PDI Criminal Database -->
+                        <div @click="selectedOption = 'pdi'"
+                            :class="['cursor-pointer relative p-6 rounded-xl border-2 transition-all duration-300 hover:-translate-y-1', 
+                            selectedOption === 'pdi' ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10 shadow-lg shadow-red-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-red-300']">
+                            <div v-if="selectedOption === 'pdi'"
+                                class="absolute -top-3 -right-3 bg-red-500 text-white px-2 py-1 rounded-full shadow-md text-xs font-bold">
+                                SELECCIONADO
+                            </div>
+                            <div class="text-4xl mb-3">🚔</div>
+                            <h4 class="font-bold text-lg mb-2">Sistema PDI (Criminales)</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Dolor en Oracle:</strong> Tabla de criminales + tabla de delitos + tabla de
+                                antecedentes + tabla de cómplices.
+                                Consultar el historial completo de un criminal requiere 4+ JOINs.
+                            </p>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Solución MongoDB:</strong> Perfil del criminal con arrays de delitos,
+                                antecedentes y cómplices embebidos.
+                                Una sola query trae todo el expediente.
+                            </p>
+                            <div class="text-xs font-mono bg-slate-100 dark:bg-slate-900 p-2 rounded text-slate-500">
+                                { rut, nombre, delitos: [<br />
+                                &nbsp;&nbsp;{ fecha, tipo, condena }<br />
+                                ], complices: [...] }
+                            </div>
+                        </div>
+
+                        <!-- Scenario 5: User Activity Profile -->
+                        <div @click="selectedOption = 'perfil'"
+                            :class="['cursor-pointer relative p-6 rounded-xl border-2 transition-all duration-300 hover:-translate-y-1', 
+                            selectedOption === 'perfil' ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-900/10 shadow-lg shadow-purple-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-purple-300']">
+                            <div v-if="selectedOption === 'perfil'"
+                                class="absolute -top-3 -right-3 bg-purple-500 text-white px-2 py-1 rounded-full shadow-md text-xs font-bold">
+                                SELECCIONADO
+                            </div>
+                            <div class="text-4xl mb-3">👤</div>
+                            <h4 class="font-bold text-lg mb-2">Perfil con Actividades</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Dolor en Oracle:</strong> Tabla de usuarios + tabla de sesiones/actividades.
+                                Consultar "últimas 50 acciones de usuario X" requiere JOIN + ORDER BY + LIMIT.
+                            </p>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Solución MongoDB:</strong> Array de actividades dentro del usuario.
+                                Puedes usar <code>$slice</code> para obtener solo las últimas N actividades, o
+                                <code>$filter</code> por rango de fechas.
+                            </p>
+                            <div class="text-xs font-mono bg-slate-100 dark:bg-slate-900 p-2 rounded text-slate-500">
+                                { email, actividades: [<br />
+                                &nbsp;&nbsp;{ fecha, accion, ip }<br />
+                                ] }
+                            </div>
+                        </div>
+
+                        <!-- Scenario 6: Custom Option -->
+                        <div @click="selectedOption = 'custom'"
+                            :class="['cursor-pointer relative p-6 rounded-xl border-2 transition-all duration-300 hover:-translate-y-1', 
+                            selectedOption === 'custom' ? 'border-cyan-500 bg-cyan-50/50 dark:bg-cyan-900/10 shadow-lg shadow-cyan-500/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-cyan-300']">
+                            <div v-if="selectedOption === 'custom'"
+                                class="absolute -top-3 -right-3 bg-cyan-500 text-white px-2 py-1 rounded-full shadow-md text-xs font-bold">
+                                SELECCIONADO
+                            </div>
+                            <div class="text-4xl mb-3">💡</div>
+                            <h4 class="font-bold text-lg mb-2">Propuesta Propia</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>¿Tienes una idea mejor?</strong> Puedes proponer tu propio escenario basado en
+                                tu proyecto de Oracle actual.
+                                Debe cumplir: (1) tener un "dolor" claro de JOINs o rigidez, (2) resolverse mejor con
+                                MongoDB.
+                            </p>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                                <strong>Ejemplos válidos:</strong> Sistema de reservas con disponibilidad por horario,
+                                catálogo de cursos con prerrequisitos anidados, red social con seguidores y posts
+                                embebidos.
+                            </p>
+                            <div class="text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                                ⚠️ Requiere aprobación previa del docente
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Explanation Panel -->
+                    <div v-if="selectedOption"
+                        class="mt-6 glass-panel p-6 rounded-xl border border-slate-200 dark:border-slate-700 animate-fade-in">
+                        <h4 class="font-bold mb-3 text-lg">📋 Qué debes entregar para este escenario</h4>
+
+                        <!-- Blog -->
+                        <div v-if="selectedOption === 'blog'">
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                                <strong>Escenario:</strong> Sistema de blog donde los posts tienen comentarios, y los
+                                comentarios pueden tener respuestas.
+                            </p>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Insertar 2-3 posts con al
+                                    menos 2 comentarios cada uno, y 1-2 respuestas anidadas.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Hacer un
+                                    <code>find()</code> que traiga todos los posts, y otro filtrado por título o tag.
+                                </li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$push</code>
+                                    para agregar un comentario nuevo a un post existente.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$push</code> con
+                                    operador posicional <code>$</code> para agregar una respuesta a un comentario
+                                    específico.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$pull</code>
+                                    para eliminar un comentario ofensivo por su _id.</li>
+                            </ul>
+                            <p class="text-xs text-slate-500 mt-3 italic">
+                                En tu defensa, explica por qué esto sería 3 tablas con JOINs en Oracle y cómo MongoDB lo
+                                simplifica.
+                            </p>
+                        </div>
+
+                        <!-- Clothing Store -->
+                        <div v-if="selectedOption === 'ropa'">
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                                <strong>Escenario:</strong> Tienda de ropa donde cada producto tiene múltiples variantes
+                                (talla, color, stock).
+                            </p>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Insertar 2-3 productos con
+                                    al menos 3 variantes cada uno (ej: Polera en S/M/L, Negro/Blanco).</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Hacer un
+                                    <code>find()</code> de todos los productos, y otro filtrado por rango de precio.
+                                </li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>updateOne</code>
+                                    con <code>arrayFilters</code> para actualizar el stock de "Polera Negra Talla M" sin
+                                    tocar las demás variantes.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$push</code>
+                                    para agregar una nueva variante (ej: nueva talla XL).</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$pull</code>
+                                    para eliminar una variante agotada permanentemente.</li>
+                            </ul>
+                            <p class="text-xs text-slate-500 mt-3 italic">
+                                Demuestra cómo arrayFilters es superior a UPDATE con WHERE en SQL para estos casos.
+                            </p>
+                        </div>
+
+                        <!-- Airsoft Store -->
+                        <div v-if="selectedOption === 'airsoft'">
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                                <strong>Escenario:</strong> Tienda de airsoft donde cada réplica puede tener múltiples
+                                accesorios compatibles.
+                            </p>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Insertar 2-3 réplicas con
+                                    al menos 2 accesorios cada una (miras, cargadores, silenciadores).</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Hacer un
+                                    <code>find()</code> de todas las réplicas, y otro filtrado por marca o calibre.
+                                </li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$push</code>
+                                    para agregar un nuevo accesorio a una réplica.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$set</code> para
+                                    modificar el precio o stock de un accesorio específico dentro del array.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$pull</code>
+                                    para eliminar un accesorio descontinuado.</li>
+                            </ul>
+                            <p class="text-xs text-slate-500 mt-3 italic">
+                                Explica cómo evitas la tabla de compatibilidad que necesitarías en Oracle.
+                            </p>
+                        </div>
+
+                        <!-- PDI System -->
+                        <div v-if="selectedOption === 'pdi'">
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                                <strong>Escenario:</strong> Base de datos policial con perfiles de criminales, sus
+                                delitos y cómplices.
+                            </p>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Insertar 2-3 perfiles de
+                                    criminales con al menos 2 delitos cada uno y 1-2 cómplices.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Hacer un
+                                    <code>find()</code> de todos los criminales, y otro filtrado por tipo de delito o
+                                    rango de condena.
+                                </li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$push</code>
+                                    para agregar un nuevo delito al expediente de un criminal.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$set</code> para
+                                    actualizar el estado de condena de un delito específico (ej: "En proceso" →
+                                    "Cumplida").</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$pull</code>
+                                    para eliminar un cómplice que fue absuelto.</li>
+                            </ul>
+                            <p class="text-xs text-slate-500 mt-3 italic">
+                                Demuestra cómo una sola query trae el expediente completo vs múltiples JOINs en Oracle.
+                            </p>
+                        </div>
+
+                        <!-- User Profile -->
+                        <div v-if="selectedOption === 'perfil'">
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                                <strong>Escenario:</strong> Perfil de usuario con historial de actividades (logins,
+                                compras, acciones).
+                            </p>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Insertar 2-3 usuarios con
+                                    al menos 5 actividades cada uno (con fecha, tipo, metadata).</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Hacer un
+                                    <code>find()</code> de todos los usuarios, y otro filtrado por email o rango de
+                                    fechas en actividades.
+                                </li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$push</code>
+                                    para agregar una nueva actividad (ej: login desde nueva IP).</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$slice</code> o
+                                    proyección para obtener solo las últimas 10 actividades.</li>
+                                <li class="flex gap-2"><span class="text-green-500">✓</span> Usar <code>$pull</code>
+                                    para eliminar actividades antiguas (ej: mayores a 1 año).</li>
+                            </ul>
+                            <p class="text-xs text-slate-500 mt-3 italic">
+                                Muestra cómo MongoDB maneja series de tiempo y logs mejor que tablas separadas en
+                                Oracle.
+                            </p>
+                        </div>
+
+                        <!-- Custom -->
+                        <div v-if="selectedOption === 'custom'">
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                                <strong>Escenario personalizado:</strong> Debes presentar tu propuesta al docente antes
+                                de comenzar.
+                            </p>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex gap-2"><span class="text-orange-500">!</span> Define claramente cuál es
+                                    el "dolor" en tu BD relacional actual.</li>
+                                <li class="flex gap-2"><span class="text-orange-500">!</span> Explica cómo MongoDB lo
+                                    resolvería con documentos embebidos o arrays.</li>
+                                <li class="flex gap-2"><span class="text-orange-500">!</span> Asegúrate de cumplir los
+                                    mismos requisitos CRUD que los demás escenarios.</li>
+                            </ul>
+                            <p class="text-xs text-red-500 mt-3 font-bold">
+                                ⚠️ No comiences a codificar hasta que el docente apruebe tu propuesta por escrito
+                                (email/plataforma).
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 2: Desarrollo Técnico -->
+                <section v-if="currentStep === 1" class="animate-fade-in space-y-6">
+                    <div class="flex justify-between items-end">
+                        <h2 class="text-2xl font-bold">🛠️ Tu Archivo <code>proyecto_mongo.js</code></h2>
+                        <button @click="copyCode(exampleCode)"
+                            class="text-xs bg-slate-200 dark:bg-slate-700 px-3 py-1 rounded hover:bg-slate-300 transition-colors">
+                            📋 Copiar Ejemplo Base
+                        </button>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold mb-4 text-sm uppercase text-slate-500">Requisitos del Script</h3>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex gap-3">
+                                <span
+                                    class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 flex items-center justify-center text-xs font-bold">1</span>
+                                <span><strong>Insertar:</strong> Al menos 2-3 documentos con estructura anidada.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span
+                                    class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 flex items-center justify-center text-xs font-bold">2</span>
+                                <span><strong>Leer (Find):</strong> Una consulta general y una filtrada (ej. por título
+                                    o fecha).</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span
+                                    class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 flex items-center justify-center text-xs font-bold">3</span>
+                                <span><strong>Actualizar (Update):</strong> Usar <code>$push</code> para agregar a un
+                                    array o <code>$set</code> para modificar un campo anidado.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span
+                                    class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 flex items-center justify-center text-xs font-bold">4</span>
+                                <span><strong>Eliminar (Delete):</strong> Usar <code>$pull</code> para sacar algo de un
+                                    array o <code>deleteOne</code> para borrar un documento.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="relative group">
+                        <div
+                            class="absolute -inset-1 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200">
+                        </div>
+                        <div class="relative bg-slate-900 rounded-lg p-4 overflow-hidden">
+                            <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-2">
+                                <span class="text-xs text-slate-400 font-mono">proyecto_mongo.js</span>
+                                <span class="text-xs text-slate-500">Ejemplo Opción A</span>
+                            </div>
+                            <pre
+                                class="text-sm font-mono text-green-400 overflow-x-auto"><code class="language-javascript">{{ exampleCode }}</code></pre>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700 flex gap-3">
+                        <div class="text-2xl">💡</div>
+                        <div>
+                            <h4 class="font-bold text-yellow-800 dark:text-yellow-500 text-sm">Tip Pro</h4>
+                            <p class="text-xs text-yellow-700 dark:text-yellow-400">
+                                Si usas VS Code, instala la extensión "MongoDB for VS Code". Te permite crear un
+                                "Playground" donde puedes escribir este código y ejecutarlo con un botón de "Play" para
+                                ver los resultados al instante.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 3: Presentación y Defensa -->
+                <section v-if="currentStep === 2" class="animate-fade-in space-y-6">
+                    <h2 class="text-2xl font-bold">🎤 La Presentación (5 min)</h2>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Slide Structure -->
+                        <div class="glass-panel p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <span>📺</span> Estructura de Slides
+                            </h3>
+                            <div class="space-y-4">
+                                <div
+                                    class="p-3 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
+                                    <div class="text-xs font-bold text-slate-400 uppercase mb-1">Slide 1 (30s)</div>
+                                    <div class="font-bold">Portada & Contexto</div>
+                                    <div class="text-xs text-slate-500">Tu nombre, opción elegida y qué problema
+                                        resuelve.</div>
+                                </div>
+                                <div
+                                    class="p-3 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
+                                    <div class="text-xs font-bold text-slate-400 uppercase mb-1">Slide 2 (60s)</div>
+                                    <div class="font-bold">¿Por qué MongoDB?</div>
+                                    <div class="text-xs text-slate-500">Justifica tu modelo. "Elegí anidar comentarios
+                                        porque..."</div>
+                                </div>
+                                <div
+                                    class="p-3 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
+                                    <div class="text-xs font-bold text-slate-400 uppercase mb-1">Slide 3 (2 min)</div>
+                                    <div class="font-bold">Demo Técnica</div>
+                                    <div class="text-xs text-slate-500">Capturas de pantalla o video mostrando tu código
+                                        funcionando.</div>
+                                </div>
+                                <div
+                                    class="p-3 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
+                                    <div class="text-xs font-bold text-slate-400 uppercase mb-1">Slide 4 (60s)</div>
+                                    <div class="font-bold">Conclusiones</div>
+                                    <div class="text-xs text-slate-500">Limitaciones encontradas y cómo escalarías a
+                                        futuro.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Defense Questions -->
+                        <div
+                            class="glass-panel p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <span>🛡️</span> Preguntas de Defensa
+                            </h3>
+                            <p class="text-sm mb-4 text-slate-600 dark:text-slate-400">Prepárate para responder esto:
+                            </p>
+                            <ul class="space-y-3 text-sm">
+                                <li class="flex gap-2">
+                                    <span class="text-red-500 font-bold">?</span>
+                                    <span>¿Cómo modelarías esto mismo en SQL (Oracle)? ¿Cuántos JOINs
+                                        necesitarías?</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-red-500 font-bold">?</span>
+                                    <span>Explica la línea donde usas <code>$push</code> o <code>$pull</code>. ¿Qué hace
+                                        exactamente?</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-red-500 font-bold">?</span>
+                                    <span>¿Qué pasa si el array de comentarios crece a 1 millón? (Pista: Límite de 16MB
+                                        por documento).</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-red-500 font-bold">?</span>
+                                    <span>¿Cómo aseguras que los datos sean válidos sin un esquema rígido? (Pista:
+                                        Schema Validation).</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 4: Entrega y Rúbrica -->
+                <section v-if="currentStep === 3" class="animate-fade-in space-y-6">
+                    <h2 class="text-2xl font-bold">📤 Entrega Final</h2>
+
+                    <div
+                        class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="font-bold mb-4">Checklist de Entrega</h3>
+                        <div class="grid md:grid-cols-3 gap-4 text-center">
+                            <div
+                                class="p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div class="text-3xl mb-2">📄</div>
+                                <div class="font-bold text-sm">proyecto_mongo.js</div>
+                                <div class="text-xs text-slate-500">Tu código comentado</div>
+                            </div>
+                            <div
+                                class="p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div class="text-3xl mb-2">📸</div>
+                                <div class="font-bold text-sm">Evidencia</div>
+                                <div class="text-xs text-slate-500">Video o capturas de la demo</div>
+                            </div>
+                            <div
+                                class="p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div class="text-3xl mb-2">📊</div>
+                                <div class="font-bold text-sm">Presentación</div>
+                                <div class="text-xs text-slate-500">PDF con tus slides</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold mb-4">Rúbrica Interactiva</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Marca lo que crees que has cumplido
+                            para estimar tu nota.</p>
+
+                        <div class="space-y-2">
+                            <div v-for="(criterion, idx) in rubric" :key="idx"
+                                @click="criterion.checked = !criterion.checked"
+                                :class="['flex justify-between items-center p-3 rounded-lg cursor-pointer transition-colors', 
+                                criterion.checked ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-slate-50 dark:bg-slate-900 border border-transparent hover:bg-slate-100']">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        :class="['w-5 h-5 rounded border flex items-center justify-center', criterion.checked ? 'bg-green-500 border-green-500' : 'border-slate-300']">
+                                        <svg v-if="criterion.checked" class="w-3 h-3 text-white" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium">{{ criterion.text }}</span>
+                                </div>
+                                <span class="text-sm font-bold">{{ criterion.points }} pts</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="mt-6 flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <span class="text-sm font-bold text-slate-500">Puntaje Estimado:</span>
+                            <div class="text-2xl font-bold gradient-text">{{ totalScore }} / 25 pts</div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const isDark = ref(false);
+                const currentStep = ref(0);
+                const selectedOption = ref(null);
+
+                const steps = [
+                    { title: "1. Elige tu Escenario" },
+                    { title: "2. Desarrolla el Código" },
+                    { title: "3. Prepara la Defensa" },
+                    { title: "4. Entrega y Rúbrica" }
+                ];
+
+                const checklist = ref([
+                    { text: "Elegir escenario (A, B o C)", done: false },
+                    { text: "Crear archivo proyecto_mongo.js", done: false },
+                    { text: "Implementar Insert (anidado)", done: false },
+                    { text: "Implementar Find (filtros)", done: false },
+                    { text: "Implementar Update ($push/$set)", done: false },
+                    { text: "Implementar Delete ($pull)", done: false },
+                    { text: "Probar en Mongosh/Playground", done: false },
+                    { text: "Crear presentación (4 slides)", done: false }
+                ]);
+
+                const rubric = ref([
+                    { text: "Implementación CRUD Completa", points: 5, checked: false },
+                    { text: "Código limpio y comentado", points: 5, checked: false },
+                    { text: "Defensa sólida (argumentos)", points: 5, checked: false },
+                    { text: "Uso correcto de operadores complejos", points: 5, checked: false },
+                    { text: "Calidad de presentación y tiempo", points: 5, checked: false }
+                ]);
+
+                const exampleCode = `// 1. Conexión y Limpieza
+use('taller_mongo');
+db.posts.drop(); // Limpiar para probar desde cero
+
+// 2. CREATE: Insertar Post con Comentarios
+db.posts.insertOne({
+  titulo: "Aprendiendo MongoDB",
+  autor: "Estudiante",
+  tags: ["db", "nosql"],
+  comentarios: [
+    { 
+      _id: 1, 
+      user: "Profe", 
+      text: "Excelente elección", 
+      respuestas: [] 
+    }
+  ]
+});
+
+// 3. READ: Buscar posts con tag 'nosql'
+const posts = db.posts.find({ tags: "nosql" });
+printjson(posts);
+
+// 4. UPDATE: Agregar un nuevo comentario ($push)
+db.posts.updateOne(
+  { titulo: "Aprendiendo MongoDB" },
+  { 
+    $push: { 
+      comentarios: {
+        _id: 2,
+        user: "Compañero",
+        text: "Me sirve el código",
+        respuestas: []
+      }
+    } 
+  }
+);
+
+// 5. UPDATE AVANZADO: Responder a un comentario específico
+// Usamos "comentarios._id" para filtrar y "$" para apuntar a ese índice
+db.posts.updateOne(
+  { titulo: "Aprendiendo MongoDB", "comentarios._id": 1 },
+  { 
+    $push: { 
+      "comentarios.$.respuestas": { 
+        user: "Estudiante", 
+        text: "Gracias profe!" 
+      } 
+    } 
+  }
+);
+
+// 6. DELETE: Eliminar un comentario ofensivo ($pull)
+db.posts.updateOne(
+  { titulo: "Aprendiendo MongoDB" },
+  { $pull: { comentarios: { _id: 2 } } }
+);`;
+
+                const progress = computed(() => {
+                    const done = checklist.value.filter(i => i.done).length;
+                    return Math.round((done / checklist.value.length) * 100);
+                });
+
+                const totalScore = computed(() => {
+                    return rubric.value.filter(r => r.checked).reduce((acc, curr) => acc + curr.points, 0);
+                });
+
+                const toggleTheme = () => {
+                    isDark.value = !isDark.value;
+                    if (isDark.value) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                };
+
+                const copyCode = (code) => {
+                    navigator.clipboard.writeText(code);
+                    alert('Código copiado al portapapeles');
+                };
+
+                onMounted(() => {
+                    // Check system preference
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        isDark.value = true;
+                        document.documentElement.classList.add('dark');
+                    }
+                    Prism.highlightAll();
+                });
+
+                return {
+                    isDark, toggleTheme,
+                    currentStep, steps,
+                    selectedOption,
+                    checklist, progress,
+                    exampleCode, copyCode,
+                    rubric, totalScore
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

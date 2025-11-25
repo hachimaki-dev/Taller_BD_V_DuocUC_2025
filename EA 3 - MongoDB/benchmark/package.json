@@ -1,0 +1,16 @@
+{
+  "name": "benchmark-oracle-mongo",
+  "version": "1.0.0",
+  "description": "Benchmark Oracle vs MongoDB for Nested Comments",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "mongoose": "^7.6.3",
+    "oracledb": "^6.2.0"
+  }
+}

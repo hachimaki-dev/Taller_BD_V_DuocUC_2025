@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark: Oracle vs MongoDB</title>
+    <style>
+        :root {
+            --oracle-color: #c74634;
+            --mongo-color: #00ED64;
+            --dark: #1e272e;
+            --light: #f5f6fa;
+            --gray: #dcdde1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Switch Styles */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--oracle-color);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--mongo-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+        }
+
+        #comments-list {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 200px;
+        }
+
+        /* Comment Styles */
+        .comment-item {
+            padding: 10px;
+            border-left: 2px solid #eee;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .comment-meta {
+            font-size: 0.8em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .comment-content {
+            font-size: 1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        /* Dynamic Colors */
+        .oracle-mode .stat-value {
+            color: var(--oracle-color);
+        }
+
+        .mongo-mode .stat-value {
+            color: var(--mongo-color);
+        }
+    </style>
+</head>
+
+<body class="oracle-mode">
+
+    <div class="container">
+        <header>
+            <h1>Benchmark: Comentarios Anidados</h1>
+            <p>Comparativa de rendimiento en tiempo real</p>
+        </header>
+
+        <div class="controls">
+            <div class="switch-container">
+                <span>Oracle 19c</span>
+                <label class="switch">
+                    <input type="checkbox" id="dbSwitch">
+                    <span class="slider"></span>
+                </label>
+                <span>MongoDB Atlas</span>
+            </div>
+            <button onclick="runBenchmark()"
+                style="padding: 10px 20px; cursor: pointer; background: #333; color: white; border: none; border-radius: 5px;">
+                🔄 Ejecutar Prueba
+            </button>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-value" id="timeDisplay">0 ms</div>
+                <div class="stat-label">Tiempo de Respuesta</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="countDisplay">0</div>
+                <div class="stat-label">Registros Recuperados</div>
+            </div>
+        </div>
+
+        <div id="comments-list">
+            <div style="text-align: center; color: #aaa;">Presiona "Ejecutar Prueba" para comenzar</div>
+        </div>
+    </div>
+
+    <script>
+        const switchEl = document.getElementById('dbSwitch');
+        const bodyEl = document.body;
+
+        switchEl.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                bodyEl.classList.remove('oracle-mode');
+                bodyEl.classList.add('mongo-mode');
+            } else {
+                bodyEl.classList.remove('mongo-mode');
+                bodyEl.classList.add('oracle-mode');
+            }
+            // Limpiar resultados al cambiar
+            document.getElementById('comments-list').innerHTML = '<div style="text-align: center; color: #aaa;">Presiona "Ejecutar Prueba" para comenzar</div>';
+            document.getElementById('timeDisplay').innerText = '0 ms';
+            document.getElementById('countDisplay').innerText = '0';
+        });
+
+        async function runBenchmark() {
+            const isMongo = switchEl.checked;
+            const endpoint = isMongo ? '/api/mongo' : '/api/oracle';
+            const listEl = document.getElementById('comments-list');
+
+            listEl.innerHTML = '<div class="loading">Cargando datos masivos... ⏳</div>';
+
+            try {
+                const res = await fetch(endpoint);
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error);
+
+                // Actualizar Stats
+                document.getElementById('timeDisplay').innerText = data.timeMs + ' ms';
+                document.getElementById('countDisplay').innerText = data.count;
+
+                // Renderizar
+                listEl.innerHTML = '';
+
+                if (isMongo) {
+                    renderMongoData(data.data, listEl);
+                } else {
+                    renderOracleData(data.data, listEl);
+                }
+
+            } catch (err) {
+                listEl.innerHTML = `<div style="color: red; text-align: center;">Error: ${err.message}</div>`;
+            }
+        }
+
+        function renderOracleData(rows, container) {
+            // Oracle ya viene ordenado por jerarquía (ORDER SIBLINGS) y trae el LEVEL
+            let html = '';
+            rows.forEach(row => {
+                const indent = (row.LEVEL - 1) * 40; // 40px por nivel
+                html += createCommentHTML(row.CONTENIDO || row.contenido, row.USUARIO_ID || row.usuario_id, indent);
+            });
+            container.innerHTML = html;
+        }
+
+        function renderMongoData(roots, container) {
+            // Mongo trae raíces + array de descendientes planos.
+            // Necesitamos reconstruir el árbol o imprimirlo recursivamente.
+            // Para ser justos visualmente, ordenaremos en memoria.
+
+            let html = '';
+
+            roots.forEach(root => {
+                // Renderizar raíz
+                html += createCommentHTML(root.contenido, root.user_id, 0);
+
+                // Construir árbol de sus descendientes
+                if (root.hilo_respuestas && root.hilo_respuestas.length > 0) {
+                    const tree = buildTree(root.hilo_respuestas, root._id);
+                    html += renderTree(tree, 1);
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        function buildTree(flatItems, rootId) {
+            const nodes = {};
+            // Inicializar nodos
+            flatItems.forEach(item => nodes[item._id] = { ...item, children: [] });
+
+            const tree = [];
+            flatItems.forEach(item => {
+                if (item.parent_id === rootId) {
+                    tree.push(nodes[item._id]);
+                } else if (nodes[item.parent_id]) {
+                    nodes[item.parent_id].children.push(nodes[item._id]);
+                }
+            });
+            return tree;
+        }
+
+        function renderTree(nodes, level) {
+            let html = '';
+            // Ordenar por ID o fecha si estuviera disponible para mantener consistencia
+            nodes.sort((a, b) => a._id - b._id);
+
+            nodes.forEach(node => {
+                html += createCommentHTML(node.contenido, node.user_id, level * 40);
+                if (node.children.length > 0) {
+                    html += renderTree(node.children, level + 1);
+                }
+            });
+            return html;
+        }
+
+        function createCommentHTML(content, user, indent) {
+            return `
+                <div class="comment-item" style="margin-left: ${indent}px; border-left: 4px solid ${indent > 0 ? '#ddd' : '#333'}">
+                    <div class="comment-meta">Usuario #${user}</div>
+                    <div class="comment-content">${content}</div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>

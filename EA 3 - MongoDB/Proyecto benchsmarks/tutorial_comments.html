@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller: Oracle vs MongoDB en Datos Jerárquicos</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --bg: #f4f4f9;
+            --code-bg: #282c34;
+            --code-color: #abb2bf;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+        }
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 3px solid var(--primary);
+            margin-bottom: 40px;
+        }
+        h1 { color: var(--primary); font-size: 2.5em; margin-bottom: 10px; }
+        h2 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 15px; margin-top: 40px; }
+        h3 { color: #555; margin-top: 25px; }
+        
+        article {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        code {
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #d63031;
+        }
+        
+        pre {
+            background: var(--code-bg);
+            color: var(--code-color);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: var(--primary);
+            color: white;
+        }
+        .comparison-table tr:nth-child(even) { background-color: #f2f2f2; }
+
+        .diagram {
+            text-align: center;
+            margin: 20px 0;
+            font-style: italic;
+            color: #666;
+            border: 2px dashed #ccc;
+            padding: 20px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #777;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Oracle vs MongoDB</h1>
+        <p>El Desafío de los Comentarios Anidados (Nested Comments)</p>
+    </header>
+
+    <main>
+        <!-- SECCIÓN 1: INTRODUCCIÓN -->
+        <section>
+            <article>
+                <h2>1. El Problema: Hilos de Conversación Infinitos</h2>
+                <p>
+                    Imagina una red social como Reddit o los comentarios de YouTube. Un usuario comenta, otro responde a ese comentario, un tercero responde a la respuesta, y así sucesivamente. Esto crea una estructura de datos conocida como <strong>Árbol</strong> o <strong>Jerarquía</strong>.
+                </p>
+                <p>
+                    En programación, esto es trivial. Pero en bases de datos, representar y consultar eficientemente árboles de profundidad desconocida es un desafío clásico de ingeniería.
+                </p>
+                <div class="diagram">
+                    [Raíz] <br>
+                    &nbsp; └── [Respuesta A] <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └── [Respuesta A.1] <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └── [Respuesta A.1.a] <br>
+                    &nbsp; └── [Respuesta B]
+                </div>
+            </article>
+        </section>
+
+        <!-- SECCIÓN 2: ENFOQUE RELACIONAL (ORACLE) -->
+        <section>
+            <article>
+                <h2>2. El Enfoque Relacional (Oracle)</h2>
+                <p>
+                    En SQL, el modelo estándar es la <strong>Lista de Adyacencia</strong>. Creamos una tabla donde cada fila tiene una referencia a su "padre".
+                </p>
+                
+                <h3>El Modelo Conceptual</h3>
+                <pre>
+TABLA: COMENTARIOS
+-----------------------------------------
+| ID | CONTENIDO | PARENT_ID (FK) |
+-----------------------------------------
+| 1  | Hola      | NULL           |
+| 2  | Re: Hola  | 1              |
+| 3  | Re: Re:   | 2              |
+-----------------------------------------</pre>
+
+                <h3>Ventajas</h3>
+                <ul>
+                    <li><strong>Integridad Referencial:</strong> La base de datos garantiza que no existan respuestas huérfanas (gracias a las FK).</li>
+                    <li><strong>Normalización:</strong> No hay datos duplicados.</li>
+                    <li><strong>Estándar:</strong> Todo desarrollador SQL lo entiende.</li>
+                </ul>
+
+                <h3>Desventajas y Retos</h3>
+                <ul>
+                    <li><strong>Consultas Complejas:</strong> Para reconstruir el árbol completo, no basta un simple <code>SELECT</code>. Necesitamos consultas recursivas (<code>CONNECT BY</code> en Oracle o <code>WITH RECURSIVE</code> en ANSI SQL).</li>
+                    <li><strong>Performance:</strong> Las consultas recursivas pueden ser costosas si el árbol es muy profundo, ya que implican múltiples accesos a disco o memoria para "unir" los niveles.</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- SECCIÓN 3: ENFOQUE DOCUMENTAL (MONGODB) -->
+        <section>
+            <article>
+                <h2>3. El Enfoque NoSQL (MongoDB)</h2>
+                <p>
+                    En MongoDB, aunque podemos usar el mismo patrón de "referencia al padre", tenemos herramientas más flexibles. Además, podríamos incrustar respuestas dentro del documento padre (aunque tiene límites de tamaño de 16MB) o usar el patrón de <em>Materialized Paths</em>.
+                </p>
+                <p>
+                    Para este taller, usamos el patrón de referencias (igual que SQL) pero potenciado por el <strong>Aggregation Framework</strong>.
+                </p>
+
+                <h3>GraphLookup: La Magia</h3>
+                <p>
+                    MongoDB ofrece una etapa de agregación llamada <code>$graphLookup</code>. Esta operación realiza una búsqueda recursiva en una sola colección, navegando por las relaciones padre-hijo de forma nativa y muy veloz.
+                </p>
+
+                <h3>Ventajas</h3>
+                <ul>
+                    <li><strong>Flexibilidad de Esquema:</strong> Si un comentario necesita campos extra (ej. "reacciones", "gifs"), se agregan sin alterar la tabla entera.</li>
+                    <li><strong>Velocidad de Lectura:</strong> Al no tener que hacer JOINs complejos entre tablas distintas, y usar índices en memoria, la recuperación de jerarquías suele ser muy rápida.</li>
+                    <li><strong>Escalabilidad Horizontal:</strong> Si YouTube crece, es más fácil fragmentar (shard) una colección de Mongo que una tabla relacional gigante.</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- SECCIÓN 4: COMPARATIVA -->
+        <section>
+            <article>
+                <h2>4. Comparación Directa: Oracle vs MongoDB</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th>Oracle (SQL)</th>
+                            <th>MongoDB (NoSQL)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Modelo de Datos</strong></td>
+                            <td>Rígido, Tabular, Normalizado</td>
+                            <td>Flexible, JSON (BSON), Jerárquico</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Consultas de Árbol</strong></td>
+                            <td>Requiere <code>CONNECT BY</code> o CTE Recursivos</td>
+                            <td>Nativo con <code>$graphLookup</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Integridad</strong></td>
+                            <td>Fuerte (FK, Constraints ACID)</td>
+                            <td>Responsabilidad de la App (generalmente)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Escalabilidad</strong></td>
+                            <td>Vertical (Más CPU/RAM)</td>
+                            <td>Horizontal (Sharding)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Caso de Uso Ideal</strong></td>
+                            <td>Sistemas financieros, ERPs, Datos estructurados</td>
+                            <td>Redes sociales, Catálogos, Big Data, CMS</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+        </section>
+
+        <!-- SECCIÓN 5: CONCLUSIONES -->
+        <section>
+            <article>
+                <h2>5. Conclusiones del Taller</h2>
+                <p>
+                    Hemos visto que ambos motores pueden resolver el problema. Sin embargo:
+                </p>
+                <ul>
+                    <li>Si tu prioridad es la <strong>consistencia absoluta</strong> y la estructura de tus datos rara vez cambia, <strong>Oracle</strong> es el rey.</li>
+                    <li>Si estás construyendo una red social donde la <strong>velocidad</strong>, la <strong>flexibilidad</strong> y el volumen masivo de datos son la norma, <strong>MongoDB</strong> ofrece una arquitectura más natural para este problema.</li>
+                </ul>
+                <p>
+                    <em>"No hay una mejor base de datos, solo la herramienta correcta para el trabajo correcto."</em>
+                </p>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <p>Desarrollado para el Taller de Base de Datos V - Duoc UC</p>
+        <p>&copy; 2025 Docente Experto</p>
+    </footer>
+
+</body>
+</html>

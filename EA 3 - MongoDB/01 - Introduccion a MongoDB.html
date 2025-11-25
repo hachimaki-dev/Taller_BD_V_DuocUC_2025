@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introducción a MongoDB - Primera Clase</title>
+    
+    <!-- Prism.js para syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            padding: 3rem;
+            animation: fadeIn 0.5s;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: #00ED64;
+            border-radius: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: #00ED64;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            color: #00ED64;
+        }
+
+        h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #4FC3F7;
+        }
+
+        h4 {
+            font-size: 1.6rem;
+            margin-bottom: 0.8rem;
+            color: #81D4FA;
+        }
+
+        p, li {
+            font-size: 1.6rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .box {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .box h3 {
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .box p, .box li {
+            font-size: 1.3rem;
+        }
+
+        .highlight {
+            background: rgba(0,237,100,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            color: #00ED64;
+            font-weight: bold;
+        }
+
+        .code-inline {
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li:before {
+            content: "▸ ";
+            color: #00ED64;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 1000;
+        }
+
+        button {
+            background: rgba(0,237,100,0.8);
+            border: none;
+            color: #000;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00ED64;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: rgba(255,255,255,0.2);
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            font-size: 1.2rem;
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .center-text {
+            text-align: center;
+        }
+
+        .emoji {
+            font-size: 4rem;
+            margin: 1rem 0;
+        }
+
+        .step-list {
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .step-list li {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+        }
+
+        /* Estilos para acordeones */
+        .accordion {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow: hidden;
+            border: 2px solid rgba(0,237,100,0.3);
+        }
+
+        .accordion-header {
+            background: rgba(0,237,100,0.2);
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .accordion-header:hover {
+            background: rgba(0,237,100,0.3);
+        }
+
+        .accordion-header::after {
+            content: "▼";
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .accordion-header.active::after {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 1.5rem;
+        }
+
+        .accordion-content.active {
+            max-height: 1000px;
+            padding: 1.5rem;
+        }
+
+        .accordion-content p {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+        }
+
+        /* Estilos para bloques de código con Prism */
+        pre[class*="language-"] {
+            margin: 1rem 0;
+            border-radius: 10px;
+            border-left: 4px solid #00ED64;
+            font-size: 1.2rem;
+        }
+
+        .code-toolbar {
+            margin: 1rem 0;
+        }
+
+        /* Personalizar botón de copiar */
+        div.code-toolbar > .toolbar {
+            opacity: 1;
+        }
+
+        div.code-toolbar > .toolbar > .toolbar-item > button {
+            background: #00ED64;
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        div.code-toolbar > .toolbar > .toolbar-item > button:hover {
+            background: #00ff70;
+        }
+
+        .warning-box {
+            background: rgba(255,193,7,0.2);
+            border-left: 4px solid #FFC107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .warning-box p {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        .info-box {
+            background: rgba(33,150,243,0.2);
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            h3 { font-size: 1.5rem; }
+            p, li { font-size: 1.2rem; }
+            .comparison { grid-template-columns: 1fr; }
+            .slide { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">
+        <span id="currentSlide">1</span> / <span id="totalSlides">22</span>
+    </div>
+
+    <div class="slide-container">
+        <!-- Slide 1: Bienvenida -->
+        <div class="slide active">
+            <div class="center-text">
+                <div class="emoji">🚀</div>
+                <h1>Bienvenidos a MongoDB</h1>
+                <p style="font-size: 2rem; margin-top: 2rem;">Tu primera clase de Bases de Datos NoSQL</p>
+                <p style="font-size: 1.5rem; margin-top: 1rem; opacity: 0.8;">Del mundo estructurado de Oracle al mundo flexible de MongoDB</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Agenda -->
+        <div class="slide">
+            <h2>Agenda de Hoy (60 min)</h2>
+            <ul style="margin-top: 2rem;">
+                <li>¿Qué es NoSQL y por qué existe?</li>
+                <li>Comparación: Relacional vs NoSQL</li>
+                <li>Conceptos fundamentales de MongoDB</li>
+                <li>Modelado de datos: un nuevo paradigma</li>
+                <li>Embeber vs Referenciar (con ejemplos)</li>
+                <li>Setup: MongoDB Atlas + VS Code</li>
+                <li>Práctica: CRUD básico con usuarios</li>
+            </ul>
+        </div>
+
+        <!-- Slide 3: ¿Qué es NoSQL? -->
+        <div class="slide">
+            <h2>¿Qué es NoSQL?</h2>
+            <p style="margin-top: 2rem;"><span class="highlight">NoSQL</span> = "Not Only SQL"</p>
+            <p style="margin-top: 1.5rem;">No es un reemplazo de SQL, es una <strong>alternativa</strong> para casos específicos.</p>
+            
+            <div class="box" style="margin-top: 2rem;">
+                <h3>Características principales:</h3>
+                <ul>
+                    <li>Datos <strong>no estructurados</strong> o semi-estructurados</li>
+                    <li>Esquema <strong>flexible</strong> (sin schema rígido)</li>
+                    <li>Escalabilidad <strong>horizontal</strong></li>
+                    <li>Diseñada para <strong>alta velocidad</strong> y volumen</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 4: Relacional vs NoSQL -->
+        <div class="slide">
+            <h2>El Gran Cambio de Paradigma</h2>
+            <div class="comparison">
+                <div class="box">
+                    <h3>🏛️ Base de Datos Relacional</h3>
+                    <ul>
+                        <li><strong>Tablas</strong> con filas y columnas</li>
+                        <li>Esquema <strong>fijo</strong> y predefinido</li>
+                        <li>Relaciones con <strong>foreign keys</strong></li>
+                        <li>Lenguaje: <strong>SQL</strong></li>
+                        <li>Ejemplo: Oracle, MySQL, PostgreSQL</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <h3>🍃 MongoDB (NoSQL)</h3>
+                    <ul>
+                        <li><strong>Colecciones</strong> de documentos</li>
+                        <li>Esquema <strong>flexible</strong> y dinámico</li>
+                        <li>Relaciones <strong>embebidas o referenciadas</strong></li>
+                        <li>Lenguaje: <strong>JSON/BSON</strong></li>
+                        <li>Ejemplo: MongoDB, Cassandra, CouchDB</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Analogía Visual -->
+        <div class="slide">
+            <h2>Analogía: Excel vs Carpeta de Archivos</h2>
+            <div class="comparison">
+                <div class="box">
+                    <h3>📊 BD Relacional = Excel</h3>
+                    <p>Todo en <strong>tablas ordenadas</strong></p>
+                    <p>Cada fila tiene las <strong>mismas columnas</strong></p>
+                    <p>Para relacionar datos, usas <strong>múltiples hojas</strong> y buscas con VLOOKUP (JOIN)</p>
+                </div>
+                <div class="box">
+                    <h3>📁 MongoDB = Carpeta de JSON</h3>
+                    <p>Documentos <strong>independientes</strong></p>
+                    <p>Cada documento puede tener <strong>campos diferentes</strong></p>
+                    <p>Puedes <strong>guardar todo junto</strong> en un solo documento (menos JOINs)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Conceptos clave -->
+        <div class="slide">
+            <h2>Conceptos Fundamentales</h2>
+            <div class="comparison">
+                <div class="box">
+                    <h3>Oracle (Relacional)</h3>
+                    <ul>
+                        <li><strong>Database</strong> → Base de datos</li>
+                        <li><strong>Table</strong> → Tabla</li>
+                        <li><strong>Row</strong> → Fila</li>
+                        <li><strong>Column</strong> → Columna</li>
+                    </ul>
+                </div>
+                <div class="box">
+                    <h3>MongoDB (NoSQL)</h3>
+                    <ul>
+                        <li><strong>Database</strong> → Base de datos</li>
+                        <li><strong>Collection</strong> → Colección</li>
+                        <li><strong>Document</strong> → Documento</li>
+                        <li><strong>Field</strong> → Campo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: JSON básico -->
+        <div class="slide">
+            <h2>Introducción a JSON</h2>
+            <p>JSON = <span class="highlight">JavaScript Object Notation</span></p>
+            <p>Es el "lenguaje" que usa MongoDB para almacenar datos</p>
+            
+            <pre><code class="language-javascript">{
+  "nombre": "Juan Pérez",
+  "edad": 25,
+  "email": "juan@example.com",
+  "activo": true,
+  "hobbies": ["programar", "leer", "gaming"]
+}</code></pre>
+            
+            <div class="warning-box">
+                <p>⚠️ <strong>Nota importante:</strong> Cada documento puede tener diferentes campos. No todos necesitan tener los mismos atributos.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Ejemplo comparativo -->
+        <div class="slide">
+            <h2>Ejemplo: Tabla vs Documento</h2>
+            <div class="comparison">
+                <div class="box">
+                    <h3>Tabla USUARIOS (Oracle)</h3>
+                    <pre><code class="language-sql">ID | NOMBRE | EMAIL
+---|--------|----------
+1  | Juan   | j@e.com
+2  | Ana    | a@e.com</code></pre>
+                    <p style="margin-top: 1rem;">Todas las filas tienen las mismas columnas</p>
+                </div>
+                <div class="box">
+                    <h3>Colección usuarios (MongoDB)</h3>
+                    <pre><code class="language-javascript">{
+  "_id": 1,
+  "nombre": "Juan",
+  "email": "j@e.com"
+}
+{
+  "_id": 2,
+  "nombre": "Ana",
+  "email": "a@e.com",
+  "telefono": "555-1234"
+}</code></pre>
+                    <p style="margin-top: 1rem;">¡Ana tiene teléfono, Juan no! ✅</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Modelado de datos -->
+        <div class="slide">
+            <h2>Modelado de Datos: Nueva Forma de Pensar</h2>
+            <div class="box" style="margin-top: 1rem;">
+                <h3>🏛️ Modelo Relacional (3FN)</h3>
+                <p>1. Piensas en <strong>entidades y relaciones</strong></p>
+                <p>2. <strong>Normalizas</strong> hasta 3FN (eliminas redundancia)</p>
+                <p>3. Separas en <strong>múltiples tablas</strong></p>
+                <p>4. Unes con <strong>JOINs</strong> al consultar</p>
+            </div>
+            <div class="box" style="margin-top: 1rem;">
+                <h3>🍃 Modelo MongoDB</h3>
+                <p>1. Piensas en <strong>cómo consultarás los datos</strong></p>
+                <p>2. Decides: ¿<strong>Embeber o Referenciar</strong>?</p>
+                <p>3. Aceptas <strong>cierta redundancia</strong> por velocidad</p>
+                <p>4. Minimizas <strong>operaciones de JOIN</strong></p>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 10 - Embeber vs Referenciar -->
+        <div class="slide">
+            <h2>Embeber vs Referenciar: El Dilema de MongoDB</h2>
+            
+            <div class="info-box">
+                <p><strong>La pregunta clave:</strong> ¿Guardo los datos relacionados DENTRO del documento (embeber) o en otra colección con una referencia (como foreign key)?</p>
+            </div>
+
+            <div class="comparison" style="margin-top: 2rem;">
+                <div class="box">
+                    <h3>🔗 EMBEBER (Embed)</h3>
+                    <p>Guardas todo en un solo documento</p>
+                    <pre><code class="language-javascript">{
+  nombre: "Juan",
+  direccion: {
+    calle: "Av. Principal",
+    ciudad: "Santiago"
+  }
+}</code></pre>
+                </div>
+                <div class="box">
+                    <h3>📌 REFERENCIAR (Reference)</h3>
+                    <p>Guardas el ID de otro documento</p>
+                    <pre><code class="language-javascript">// Usuario
+{ nombre: "Juan", 
+  direccion_id: 123 }
+
+// Dirección
+{ _id: 123,
+  calle: "Av. Principal" }</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 11 - Cuándo usar cada uno -->
+        <div class="slide">
+            <h2>¿Cuándo Embeber y Cuándo Referenciar?</h2>
+            
+            <div class="box" style="background: rgba(0,237,100,0.15);">
+                <h3>✅ EMBEBER cuando:</h3>
+                <ul>
+                    <li>Los datos relacionados son <strong>pequeños</strong></li>
+                    <li>Siempre consultas los datos <strong>juntos</strong></li>
+                    <li>Los datos tienen <strong>relación 1:1 o 1:pocos</strong></li>
+                    <li>Los datos embebidos <strong>no se actualizan frecuentemente</strong></li>
+                </ul>
+                <p style="margin-top: 1rem;"><strong>Ejemplo:</strong> Usuario y su dirección</p>
+            </div>
+
+            <div class="box" style="background: rgba(255,193,7,0.15); margin-top: 1rem;">
+                <h3>✅ REFERENCIAR cuando:</h3>
+                <ul>
+                    <li>Los datos son <strong>grandes</strong> o crecen mucho</li>
+                    <li>Los datos se consultan <strong>independientemente</strong></li>
+                    <li>Relación <strong>muchos a muchos</strong></li>
+                    <li>Los datos se <strong>comparten entre documentos</strong></li>
+                </ul>
+                <p style="margin-top: 1rem;"><strong>Ejemplo:</strong> Usuarios y sus pedidos</p>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 12 - Ejemplo práctico lado a lado -->
+        <div class="slide">
+            <h2>Ejemplo Práctico: Usuario con Pedidos</h2>
+            
+            <h3 style="margin-top: 1rem;">Escenario: Un usuario hace varios pedidos</h3>
+            
+            <div class="comparison" style="margin-top: 1.5rem;">
+                <div class="box">
+                    <h4>❌ EMBEBER (No recomendado aquí)</h4>
+                    <pre><code class="language-javascript">{
+  nombre: "Juan",
+  email: "juan@mail.com",
+  pedidos: [
+    {
+      producto: "Laptop",
+      precio: 800,
+      fecha: "2024-01-15"
+    },
+    {
+      producto: "Mouse",
+      precio: 20,
+      fecha: "2024-02-10"
+    }
+    // ¿Y si tiene 1000 pedidos?
+  ]
+}</code></pre>
+                    <p style="color: #ff6b6b;">⚠️ El documento crece infinitamente</p>
+                </div>
+                
+                <div class="box">
+                    <h4>✅ REFERENCIAR (Recomendado)</h4>
+                    <pre><code class="language-javascript">// Colección: usuarios
+{
+  _id: 1,
+  nombre: "Juan",
+  email: "juan@mail.com"
+}
+
+// Colección: pedidos
+{
+  usuario_id: 1,
+  producto: "Laptop",
+  precio: 800
+}
+{
+  usuario_id: 1,
+  producto: "Mouse",
+  precio: 20
+}</code></pre>
+                    <p style="color: #51cf66;">✅ Escalable y organizado</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 13 - Ejemplo simple a implementar -->
+        <div class="slide">
+            <h2>Lo Haremos con un Ejemplo Simple</h2>
+            
+            <h3>Usuario con Perfil (Embeber) ✅</h3>
+            <pre><code class="language-javascript">// Embebemos porque perfil es 1:1 y siempre se consulta junto al usuario
+{
+  nombre: "Ana García",
+  email: "ana@bootcamp.com",
+  perfil: {
+    edad: 22,
+    ciudad: "Santiago",
+    bio: "Estudiante de ingeniería"
+  }
+}</code></pre>
+
+            <h3>Usuario con Pedidos (Referenciar) ✅</h3>
+            <pre><code class="language-javascript">// Usuario
+{ _id: 1, nombre: "Ana García" }
+
+// Pedidos (separados)
+{ usuario_id: 1, producto: "Laptop", total: 800 }
+{ usuario_id: 1, producto: "Mouse", total: 20 }</code></pre>
+
+            <div class="info-box" style="margin-top: 1rem;">
+                <p><strong>Practicaremos ambas técnicas</strong> para que veas las diferencias en acción.</p>
+            </div>
+        </div>
+
+        <!-- Slide 14: Por qué MongoDB -->
+        <div class="slide">
+            <h2>¿Cuándo Usar MongoDB?</h2>
+            <ul style="margin-top: 2rem;">
+                <li>Datos que <strong>cambian de estructura</strong> frecuentemente</li>
+                <li>Necesitas <strong>escalar horizontalmente</strong> (muchos servidores)</li>
+                <li>Trabajas con <strong>JSON/APIs REST</strong></li>
+                <li>Lecturas/escrituras de <strong>alta velocidad</strong></li>
+                <li>Aplicaciones <strong>modernas y ágiles</strong></li>
+            </ul>
+            
+            <div class="warning-box" style="margin-top: 2rem;">
+                <p><strong>No usar MongoDB si:</strong> Necesitas transacciones complejas, relaciones muy complejas, o datos altamente estructurados y estables.</p>
+            </div>
+        </div>
+
+        <!-- Slide 15: MongoDB Atlas -->
+        <div class="slide">
+            <h2>MongoDB Atlas</h2>
+            <div class="center-text">
+                <div class="emoji">☁️</div>
+                <p style="font-size: 2rem;"><span class="highlight">MongoDB en la nube</span></p>
+                <p style="margin-top: 1.5rem;">No necesitas instalar nada localmente</p>
+                <p>Tier gratuito: 512MB de almacenamiento</p>
+            </div>
+            
+            <div class="box" style="margin-top: 2rem;">
+                <h3>Vamos a configurarlo juntos ahora</h3>
+                <p>URL: <span class="code-inline">https://www.mongodb.com/cloud/atlas/register</span></p>
+            </div>
+        </div>
+
+        <!-- Slide 16: Setup Atlas - Paso 1 -->
+        <div class="slide">
+            <h2>Setup: Crear Cuenta en Atlas</h2>
+            <div class="step-list">
+                <ul>
+                    <li><strong>1.</strong> Ir a mongodb.com/cloud/atlas/register</li>
+                    <li><strong>2.</strong> Registrarse con email o Google</li>
+                    <li><strong>3.</strong> Seleccionar plan <span class="highlight">M0 (FREE)</span></li>
+                    <li><strong>4.</strong> Elegir proveedor: <strong>AWS</strong></li>
+                    <li><strong>5.</strong> Región: <strong>Oregon (us-west-2)</strong> o más cercana</li>
+                    <li><strong>6.</strong> Nombrar cluster: <span class="code-inline">Cluster0</span></li>
+                    <li><strong>7.</strong> Crear cluster (toma 3-5 minutos)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 17: Setup Atlas - Paso 2 -->
+        <div class="slide">
+            <h2>Setup: Configurar Acceso</h2>
+            <div class="step-list">
+                <ul>
+                    <li><strong>1.</strong> Security → Database Access</li>
+                    <li><strong>2.</strong> Add New Database User</li>
+                    <li><strong>3.</strong> Username: <span class="code-inline">admin</span></li>
+                    <li><strong>4.</strong> Password: (generar automáticamente y <strong>guardar</strong>)</li>
+                    <li><strong>5.</strong> Built-in Role: <span class="highlight">Atlas Admin</span></li>
+                    <li><strong>6.</strong> Add User</li>
+                </ul>
+            </div>
+            <div class="warning-box" style="margin-top: 2rem;">
+                <p><strong>Importante:</strong> Guarda el password, no se puede recuperar después.</p>
+            </div>
+        </div>
+
+        <!-- Slide 18: Setup Atlas - Paso 3 -->
+        <div class="slide">
+            <h2>Setup: Permitir Conexión</h2>
+            <div class="step-list">
+                <ul>
+                    <li><strong>1.</strong> Security → Network Access</li>
+                    <li><strong>2.</strong> Add IP Address</li>
+                    <li><strong>3.</strong> Seleccionar: <span class="highlight">Allow Access from Anywhere</span></li>
+                    <li><strong>4.</strong> Confirmar (IP: 0.0.0.0/0)</li>
+                    <li><strong>5.</strong> Confirmar cambios</li>
+                </ul>
+            </div>
+            <div class="warning-box" style="margin-top: 2rem;">
+                <p>⚠️ En producción: solo permitir IPs específicas por seguridad.</p>
+            </div>
+        </div>
+
+        <!-- Slide 19: VS Code -->
+        <div class="slide">
+            <h2>Conectar desde VS Code</h2>
+            <div class="step-list">
+                <ul>
+                    <li><strong>1.</strong> Abrir VS Code</li>
+                    <li><strong>2.</strong> Extensions → Buscar: <span class="code-inline">MongoDB for VS Code</span></li>
+                    <li><strong>3.</strong> Instalar extensión oficial de MongoDB</li>
+                    <li><strong>4.</strong> Click en ícono de MongoDB (sidebar)</li>
+                    <li><strong>5.</strong> Click en "Add Connection"</li>
+                    <li><strong>6.</strong> Pegar connection string de Atlas</li>
+                    <li><strong>7.</strong> Reemplazar <span class="code-inline">&lt;password&gt;</span> con tu password</li>
+                    <li><strong>8.</strong> Connect!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 20: CRUD Intro -->
+        <div class="slide">
+            <h2>¡Hora de Practicar! CRUD Básico</h2>
+            <p style="font-size: 1.8rem; margin-top: 2rem;">Vamos a trabajar con una colección de <span class="highlight">usuarios</span></p>
+            
+            <div class="box" style="margin-top: 2rem;">
+                <h3>Las 4 operaciones básicas:</h3>
+                <ul>
+                    <li><strong>C</strong>reate → <span class="code-inline">insertOne()</span> / <span class="code-inline">insertMany()</span></li>
+                    <li><strong>R</strong>ead → <span class="code-inline">find()</span> / <span class="code-inline">findOne()</span></li>
+                    <li><strong>U</strong>pdate → <span class="code-inline">updateOne()</span> / <span class="code-inline">updateMany()</span></li>
+                    <li><strong>D</strong>elete → <span class="code-inline">deleteOne()</span> / <span class="code-inline">deleteMany()</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 21 - CREATE con acordeones -->
+        <div class="slide">
+            <h2>CREATE: Insertando Documentos</h2>
+            
+            <h3>Insertar un usuario simple:</h3>
+            <pre><code class="language-javascript">db.usuarios.insertOne({
+  nombre: "Juan Pérez",
+  email: "juan@bootcamp.com",
+  edad: 25
+})</code></pre>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Por qué no definimos primero el schema como en Oracle?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>Razón 1:</strong> MongoDB es "schema-less" (sin esquema fijo). No necesitas hacer CREATE TABLE.</p>
+                    <p><strong>Razón 2:</strong> La colección se crea automáticamente cuando insertas el primer documento.</p>
+                    <p><strong>Razón 3:</strong> Esto te da flexibilidad para evolucionar tu estructura sin alterar tablas (no más ALTER TABLE).</p>
+                    <p><strong>En Oracle harías:</strong> CREATE TABLE usuarios (nombre VARCHAR2(50), email VARCHAR2(100)...)</p>
+                    <p><strong>En MongoDB:</strong> Simplemente insertas y listo. La colección se crea sola.</p>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Qué es ese _id que aparece automáticamente?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>MongoDB genera automáticamente un campo _id</strong> si no lo proporcionas.</p>
+                    <p><strong>Es como el PRIMARY KEY en Oracle,</strong> pero no lo defines tú, MongoDB lo hace.</p>
+                    <p><strong>Tipo de dato:</strong> ObjectId (es un identificador único de 12 bytes).</p>
+                    <p><strong>Puedes definir tu propio _id:</strong> { _id: 1, nombre: "Juan" }</p>
+                    <p><strong>Ventaja:</strong> No necesitas secuencias (SEQUENCE en Oracle) ni auto-increment.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 22 - INSERT con datos embebidos -->
+        <div class="slide">
+            <h2>CREATE: Documento con Datos Embebidos</h2>
+            
+            <h3>Usuario con perfil embebido (técnica 1):</h3>
+            <pre><code class="language-javascript">db.usuarios.insertOne({
+  nombre: "Ana García",
+  email: "ana@bootcamp.com",
+  perfil: {
+    edad: 22,
+    ciudad: "Santiago",
+    bio: "Estudiante de ingeniería",
+    intereses: ["programación", "música", "deportes"]
+  },
+  fecha_registro: new Date()
+})</code></pre>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Por qué embeber el perfil en lugar de crear otra tabla?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>Razón 1:</strong> El perfil pertenece exclusivamente a UN usuario (relación 1:1).</p>
+                    <p><strong>Razón 2:</strong> Siempre consultarás el usuario CON su perfil, no por separado.</p>
+                    <p><strong>Razón 3:</strong> Evitas hacer JOIN. En una sola operación obtienes todo.</p>
+                    <p><strong>En Oracle necesitarías:</strong></p>
+                    <p>• Tabla USUARIOS (id, nombre, email)</p>
+                    <p>• Tabla PERFILES (id, usuario_id, edad, ciudad...)</p>
+                    <p>• SELECT * FROM usuarios u JOIN perfiles p ON u.id = p.usuario_id</p>
+                    <p><strong>En MongoDB:</strong> Un solo documento, una sola consulta. Más rápido.</p>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Qué son esos [] corchetes en intereses?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>Es un array (arreglo).</strong> MongoDB soporta arrays nativamente dentro de documentos.</p>
+                    <p><strong>En Oracle:</strong> Necesitarías otra tabla INTERESES con foreign key.</p>
+                    <p><strong>En MongoDB:</strong> Simplemente usas un array. Mucho más simple para listas pequeñas.</p>
+                    <p><strong>Puedes consultar:</strong> db.usuarios.find({ intereses: "programación" })</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 23 - INSERT múltiple -->
+        <div class="slide">
+            <h2>CREATE: Insertar Múltiples Documentos</h2>
+            
+            <pre><code class="language-javascript">db.usuarios.insertMany([
+  {
+    nombre: "Carlos López",
+    email: "carlos@bootcamp.com",
+    edad: 24,
+    ciudad: "Valparaíso"
+  },
+  {
+    nombre: "María Silva",
+    email: "maria@bootcamp.com",
+    edad: 23,
+    ciudad: "Concepción",
+    telefono: "+56912345678"  // ¡Este campo solo lo tiene María!
+  },
+  {
+    nombre: "Pedro Rojas",
+    email: "pedro@bootcamp.com",
+    edad: 26
+    // Pedro no tiene ni ciudad ni teléfono ¡y está bien!
+  }
+])</code></pre>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Por qué cada documento tiene campos diferentes?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>¡Esta es la magia de MongoDB!</strong> Esquema flexible.</p>
+                    <p><strong>En Oracle:</strong> Todas las filas DEBEN tener las mismas columnas (aunque estén en NULL).</p>
+                    <p><strong>En MongoDB:</strong> Cada documento puede tener campos únicos según lo necesite.</p>
+                    <p><strong>Ventaja:</strong> No desperdicias espacio con campos que no usas.</p>
+                    <p><strong>Desventaja:</strong> Debes tener cuidado al consultar, porque no garantizas que todos tengan el mismo campo.</p>
+                    <p><strong>Buena práctica:</strong> Mantén cierta consistencia para evitar confusión.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 24 - READ -->
+        <div class="slide">
+            <h2>READ: Consultando Documentos</h2>
+            
+            <h3>Obtener todos los usuarios:</h3>
+            <pre><code class="language-javascript">db.usuarios.find()</code></pre>
+
+            <h3>Buscar un usuario específico:</h3>
+            <pre><code class="language-javascript">db.usuarios.findOne({ nombre: "Ana García" })</code></pre>
+
+            <h3>Buscar con filtros:</h3>
+            <pre><code class="language-javascript">// Usuarios mayores o iguales a 23 años
+db.usuarios.find({ edad: { $gte: 23 } })
+
+// Usuarios de Santiago
+db.usuarios.find({ "perfil.ciudad": "Santiago" })</code></pre>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Qué es ese $gte y por qué usa puntos para perfil.ciudad?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>$gte</strong> es un operador de MongoDB que significa "greater than or equal" (mayor o igual).</p>
+                    <p><strong>Operadores comunes:</strong></p>
+                    <p>• $eq (igual), $ne (diferente), $gt (mayor), $lt (menor)</p>
+                    <p>• $in (está en array), $nin (no está en array)</p>
+                    <p><strong>Notación de punto:</strong> Para acceder a campos embebidos usas "perfil.ciudad"</p>
+                    <p><strong>En Oracle:</strong> WHERE edad >= 23</p>
+                    <p><strong>En MongoDB:</strong> { edad: { $gte: 23 } }</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 25 - UPDATE -->
+        <div class="slide">
+            <h2>UPDATE: Actualizando Documentos</h2>
+            
+            <h3>Actualizar un campo:</h3>
+            <pre><code class="language-javascript">db.usuarios.updateOne(
+  { nombre: "Ana García" },           // Filtro: ¿qué documento?
+  { $set: { edad: 23 } }              // Acción: ¿qué cambiar?
+)</code></pre>
+
+            <h3>Actualizar múltiples campos:</h3>
+            <pre><code class="language-javascript">db.usuarios.updateOne(
+  { email: "juan@bootcamp.com" },
+  { 
+    $set: { 
+      edad: 26,
+      "perfil.ciudad": "Viña del Mar",
+      actualizado: new Date()
+    } 
+  }
+)</code></pre>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Por qué usamos $set en lugar de reemplazar directamente?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>$set modifica solo los campos especificados</strong> y mantiene el resto del documento intacto.</p>
+                    <p><strong>Sin $set:</strong> Reemplazarías TODO el documento, perdiendo los demás campos.</p>
+                    <p><strong>Ejemplo del problema sin $set:</strong></p>
+                    <p>updateOne({nombre: "Ana"}, {edad: 23}) → ¡Borraría nombre, email, perfil, todo!</p>
+                    <p><strong>Con $set:</strong> Solo actualiza edad, el resto queda igual.</p>
+                    <p><strong>Otros operadores útiles:</strong></p>
+                    <p>• $unset (eliminar campo), $inc (incrementar número), $push (agregar a array)</p>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Cuál es la diferencia entre updateOne y updateMany?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>updateOne:</strong> Actualiza el PRIMER documento que coincida con el filtro.</p>
+                    <p><strong>updateMany:</strong> Actualiza TODOS los documentos que coincidan.</p>
+                    <p><strong>Ejemplo práctico:</strong></p>
+                    <p>db.usuarios.updateMany({ ciudad: "Santiago" }, { $set: { region: "RM" } })</p>
+                    <p>→ Todos los usuarios de Santiago ahora tienen región RM.</p>
+                    <p><strong>En Oracle sería:</strong> UPDATE usuarios SET region = 'RM' WHERE ciudad = 'Santiago'</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 26 - DELETE -->
+        <div class="slide">
+            <h2>DELETE: Eliminando Documentos</h2>
+            
+            <h3>Eliminar un documento:</h3>
+            <pre><code class="language-javascript">db.usuarios.deleteOne({ nombre: "Carlos López" })</code></pre>
+
+            <h3>Eliminar múltiples documentos:</h3>
+            <pre><code class="language-javascript">// Eliminar todos los usuarios menores de 18
+db.usuarios.deleteMany({ edad: { $lt: 18 } })</code></pre>
+
+            <h3>Eliminar todos los documentos de la colección:</h3>
+            <pre><code class="language-javascript">db.usuarios.deleteMany({})  // ⚠️ ¡Cuidado! Vacía la colección</code></pre>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Hay alguna forma de recuperar documentos eliminados?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>¡NO!</strong> En MongoDB no hay ROLLBACK como en Oracle.</p>
+                    <p><strong>MongoDB no tiene transacciones tradicionales</strong> en operaciones simples.</p>
+                    <p><strong>Una vez eliminado, no hay forma de recuperarlo</strong> a menos que tengas un backup.</p>
+                    <p><strong>Buenas prácticas:</strong></p>
+                    <p>1. Siempre usa filtros específicos (nunca deleteMany({}) en producción)</p>
+                    <p>2. Considera hacer "soft delete": agregar campo { eliminado: true } en lugar de borrar</p>
+                    <p>3. Haz backups regulares de tu base de datos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Slide 27 - Ejemplo embeber vs referenciar PRÁCTICA -->
+        <div class="slide">
+            <h2>Práctica: Embeber vs Referenciar</h2>
+            
+            <h3>Caso 1: Usuario con Perfil (EMBEBER) ✅</h3>
+            <pre><code class="language-javascript">// Una sola colección: usuarios
+db.usuarios.insertOne({
+  nombre: "Laura Díaz",
+  email: "laura@bootcamp.com",
+  perfil: {
+    edad: 24,
+    ciudad: "Temuco",
+    carrera: "Ingeniería Civil"
+  }
+})
+
+// Consultar TODO junto (rápido, 1 operación):
+db.usuarios.findOne({ nombre: "Laura Díaz" })</code></pre>
+
+            <h3>Caso 2: Usuario con Pedidos (REFERENCIAR) ✅</h3>
+            <pre><code class="language-javascript">// Colección 1: usuarios
+db.usuarios.insertOne({
+  _id: 100,
+  nombre: "Laura Díaz",
+  email: "laura@bootcamp.com"
+})
+
+// Colección 2: pedidos (separada)
+db.pedidos.insertMany([
+  { usuario_id: 100, producto: "Laptop", total: 800, fecha: "2024-01-15" },
+  { usuario_id: 100, producto: "Mouse", total: 20, fecha: "2024-02-10" }
+])
+
+// Consultar usuario:
+db.usuarios.findOne({ _id: 100 })
+
+// Consultar sus pedidos:
+db.pedidos.find({ usuario_id: 100 })</code></pre>
+
+            <div class="accordion">
+                <div class="accordion-header">
+                    ¿Por qué embebemos perfil pero referenciamos pedidos?
+                </div>
+                <div class="accordion-content">
+                    <p><strong>PERFIL (Embeber):</strong></p>
+                    <p>• Es información pequeña y fija (edad, ciudad, carrera)</p>
+                    <p>• Siempre consultamos usuario CON su perfil</p>
+                    <p>• Relación 1:1 (un usuario = un perfil)</p>
+                    <p>• No crece con el tiempo</p>
+                    <p><strong>PEDIDOS (Referenciar):</strong></p>
+                    <p>• Pueden ser MUCHOS pedidos (10, 100, 1000...)</p>
+                    <p>• A veces consultamos solo el usuario, sin los pedidos</p>
+                    <p>• Relación 1:N (un usuario = muchos pedidos)</p>
+                    <p>• Crece infinitamente con el tiempo</p>
+                    <p><strong>Regla de oro:</strong> Si embeber haría el documento muy grande (>16MB) o crece sin límite → Referenciar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 28: Práctica guiada resumen -->
+        <div class="slide">
+            <h2>Ejercicio Final: Tu Turno</h2>
+            
+            <div class="box">
+                <h3>🎯 Desafío: Crea tu propia colección</h3>
+                <p style="margin-top: 1rem;">Crea una colección <strong>estudiantes</strong> con:</p>
+                <ul style="margin-top: 1rem;">
+                    <li>Al menos 3 estudiantes diferentes</li>
+                    <li>Cada uno con: nombre, email, edad</li>
+                    <li>Agrega un perfil embebido con: carrera, ciudad</li>
+                    <li>Al menos uno debe tener un array de hobbies</li>
+                </ul>
+                
+                <p style="margin-top: 1.5rem;">Luego practica:</p>
+                <ul>
+                    <li>Buscar estudiantes de una ciudad específica</li>
+                    <li>Actualizar la edad de un estudiante</li>
+                    <li>Eliminar un estudiante</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="margin-top: 2rem;">
+                <p><strong>Tiempo:</strong> 10 minutos. ¡Manos a la obra! 🚀</p>
+            </div>
+        </div>
+
+        <!-- Slide 29: Recap -->
+        <div class="slide">
+            <h2>Recap: Lo que Aprendimos Hoy</h2>
+            
+            <div class="box">
+                <h3>✅ Conceptos Fundamentales</h3>
+                <ul>
+                    <li>NoSQL vs Relacional: diferentes paradigmas</li>
+                    <li>Database → Collection → Document → Field</li>
+                    <li>Esquema flexible (schema-less)</li>
+                </ul>
+            </div>
+
+            <div class="box" style="margin-top: 1rem;">
+                <h3>✅ Modelado de Datos</h3>
+                <ul>
+                    <li>Embeber: 1:1, datos pequeños, consulta conjunta</li>
+                    <li>Referenciar: 1:N, datos grandes, crecimiento infinito</li>
+                    <li>Aceptar redundancia por velocidad</li>
+                </ul>
+            </div>
+
+            <div class="box" style="margin-top: 1rem;">
+                <h3>✅ Operaciones CRUD</h3>
+                <ul>
+                    <li>CREATE: insertOne(), insertMany()</li>
+                    <li>READ: find(), findOne()</li>
+                    <li>UPDATE: updateOne(), updateMany() con $set</li>
+                    <li>DELETE: deleteOne(), deleteMany()</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide final -->
+        <div class="slide">
+            <div class="center-text">
+                <div class="emoji">🎉</div>
+                <h1>¡Felicitaciones!</h1>
+                <p style="font-size: 2rem; margin-top: 2rem;">Has completado tu primera clase de MongoDB</p>
+                <p style="margin-top: 1.5rem; font-size: 1.5rem;">Ahora sabes cómo trabajar con bases de datos NoSQL</p>
+                
+                <div class="box" style="margin-top: 3rem; text-align: left;">
+                    <h3>📚 Tarea para la próxima clase:</h3>
+                    <ul>
+                        <li>Crea una colección "productos" con al menos 5 productos</li>
+                        <li>Practica las 4 operaciones CRUD</li>
+                        <li>Experimenta con arrays y documentos embebidos</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 2rem; opacity: 0.8;">¿Preguntas? 🙋</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+        <button id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+    </div>
+
+    <!-- Prism.js scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function showSlide(n) {
+            if (n >= totalSlides) currentSlide = totalSlides - 1;
+            if (n < 0) currentSlide = 0;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') changeSlide(1);
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+        });
+        
+        // Funcionalidad de acordeones
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('accordion-header')) {
+                const header = e.target;
+                const content = header.nextElementSibling;
+                
+                // Toggle active class
+                header.classList.toggle('active');
+                content.classList.toggle('active');
+            }
+        });
+        
+        showSlide(0);
+    </script>
+</body>
+</html>

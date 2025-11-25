@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller MongoDB: Master Class</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-mongodb.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Verdana&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- WEB 2.0 AESTHETICS & MODERN TWEAKS --- */
+        :root {
+            --glass-shine: rgba(255, 255, 255, 0.4);
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-deep: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        body {
+            font-family: 'Verdana', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        code,
+        pre,
+        textarea.code-editor {
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+
+        /* Themes */
+        .theme-light {
+            background: #f0f2f5 url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNlNWU1ZTUiLz4KPC9zdmc+') repeat;
+            color: #333;
+        }
+
+        .theme-dark {
+            background: #1a202c url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMmQzNzQ4Ii8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxYTIwMmMiLz4KPC9zdmc+') repeat;
+            color: #e2e8f0;
+        }
+
+        /* Glossy Card */
+        .glossy-card {
+            background: linear-gradient(to bottom, #ffffff, #f9fafb);
+            border: 1px solid #e5e7eb;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .theme-dark .glossy-card {
+            background: linear-gradient(to bottom, #2d3748, #283141);
+            border: 1px solid #4a5568;
+            box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        /* Glossy Button */
+        .btn-glossy {
+            background: linear-gradient(to bottom, #60a5fa, #3b82f6);
+            border: 1px solid #2563eb;
+            color: white;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-glossy:hover {
+            background: linear-gradient(to bottom, #3b82f6, #2563eb);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-glossy:active {
+            transform: translateY(1px);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-glossy-green {
+            background: linear-gradient(to bottom, #4ade80, #22c55e);
+            border: 1px solid #16a34a;
+        }
+
+        .btn-glossy-green:hover {
+            background: linear-gradient(to bottom, #22c55e, #16a34a);
+        }
+
+        .btn-glossy-orange {
+            background: linear-gradient(to bottom, #fb923c, #f97316);
+            border: 1px solid #ea580c;
+        }
+
+        .btn-glossy-orange:hover {
+            background: linear-gradient(to bottom, #f97316, #ea580c);
+        }
+
+        /* Tabs */
+        .tab-active {
+            background: white;
+            border-bottom: 3px solid #3b82f6;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .theme-dark .tab-active {
+            background: #2d3748;
+            border-bottom: 3px solid #60a5fa;
+            color: #60a5fa;
+        }
+
+        /* Code Block Wrapper */
+        .code-window {
+            background: #272822;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            position: relative;
+        }
+
+        .code-window::before {
+            content: "● ● ●";
+            color: #555;
+            font-size: 10px;
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            letter-spacing: 2px;
+        }
+
+        .code-editor {
+            width: 100%;
+            background: transparent;
+            color: #f8f8f2;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Tooltip */
+        .tooltip-trigger {
+            border-bottom: 1px dotted #888;
+            cursor: help;
+        }
+    </style>
+</head>
+
+<body class="theme-light min-h-screen p-4 md:p-8">
+
+    <div id="app" class="max-w-6xl mx-auto">
+
+        <!-- HEADER -->
+        <header class="glossy-card p-6 mb-8 flex justify-between items-center relative overflow-hidden">
+            <div class="z-10">
+                <h1
+                    class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500 pb-2">
+                    MongoDB Master Class
+                </h1>
+                <p class="opacity-70 text-sm md:text-base">De Cero a Experto • Edición Interactiva</p>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button @click="toggleTheme"
+                class="z-10 p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:scale-110 transition-transform shadow-inner">
+                <span v-if="isDark" class="text-xl">☀️</span>
+                <span v-else class="text-xl">🌙</span>
+            </button>
+
+            <!-- Decorative background blob -->
+            <div
+                class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100 to-teal-100 dark:from-blue-900 dark:to-teal-900 rounded-full blur-3xl opacity-50 -mr-16 -mt-16">
+            </div>
+        </header>
+
+        <!-- NAVIGATION -->
+        <nav class="flex space-x-2 mb-6 overflow-x-auto pb-2">
+            <button v-for="(tab, index) in tabs" :key="index" @click="currentTab = index"
+                :class="['px-6 py-3 rounded-t-xl transition-all whitespace-nowrap', currentTab === index ? 'tab-active shadow-lg transform -translate-y-1' : 'opacity-60 hover:opacity-100']">
+                {{ tab.title }}
+            </button>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <main class="glossy-card p-6 md:p-8 min-h-[600px]">
+
+            <!-- SECCIÓN 1: TEORÍA Y FUNDAMENTOS -->
+            <div v-if="currentTab === 0" class="animate-fade-in space-y-8">
+
+                <!-- Intro -->
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">¿Por qué MongoDB?</h2>
+                        <p class="mb-4 leading-relaxed text-lg">
+                            MongoDB es una base de datos <strong>NoSQL</strong> orientada a documentos. A diferencia de
+                            SQL, no te obliga a definir tablas rígidas antes de empezar. Es como pasar de archivar en
+                            carpetas metálicas (SQL) a tirar todo en una caja mágica inteligente (MongoDB).
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 opacity-80 mb-4">
+                            <li><strong>Flexible:</strong> Tus datos pueden cambiar de estructura sin romper nada.</li>
+                            <li><strong>Escalable:</strong> Diseñada para manejar volúmenes masivos de datos.</li>
+                            <li><strong>JSON Nativo:</strong> Habla el mismo idioma que tu frontend (JavaScript).</li>
+                        </ul>
+                    </div>
+                    <div
+                        class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-100 dark:border-blue-800">
+                        <h3 class="font-bold mb-4 text-center">SQL vs NoSQL</h3>
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b dark:border-gray-600">
+                                    <th class="pb-2 text-left">Concepto</th>
+                                    <th class="pb-2 text-left text-blue-600">SQL (Relacional)</th>
+                                    <th class="pb-2 text-left text-green-600">MongoDB (NoSQL)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="opacity-90">
+                                <tr class="border-b dark:border-gray-700/50">
+                                    <td class="py-2 font-bold">Unidad de Dato</td>
+                                    <td class="py-2">Fila (Row)</td>
+                                    <td class="py-2">Documento (JSON/BSON)</td>
+                                </tr>
+                                <tr class="border-b dark:border-gray-700/50">
+                                    <td class="py-2 font-bold">Contenedor</td>
+                                    <td class="py-2">Tabla</td>
+                                    <td class="py-2">Colección</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-bold">Esquema</td>
+                                    <td class="py-2">Rígido (CREATE TABLE)</td>
+                                    <td class="py-2">Dinámico (Flexible)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200 dark:border-gray-700">
+
+                <!-- Estructura y BSON -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">La Jerarquía de Datos</h3>
+                    <div class="flex flex-col md:flex-row gap-4 justify-center items-center text-center">
+                        <div
+                            class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg w-full md:w-1/3 border-2 border-gray-300 dark:border-gray-600">
+                            <div class="text-4xl mb-2">🗄️</div>
+                            <div class="font-bold text-lg">Base de Datos</div>
+                            <div class="text-xs opacity-60">Contenedor Principal</div>
+                        </div>
+                        <div class="text-2xl text-gray-400">➔</div>
+                        <div
+                            class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg w-full md:w-1/3 border-2 border-green-300 dark:border-green-600">
+                            <div class="text-4xl mb-2">📂</div>
+                            <div class="font-bold text-lg text-green-700 dark:text-green-400">Colección</div>
+                            <div class="text-xs opacity-60">Grupo de Documentos</div>
+                        </div>
+                        <div class="text-2xl text-gray-400">➔</div>
+                        <div
+                            class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg w-full md:w-1/3 border-2 border-yellow-300 dark:border-yellow-600">
+                            <div class="text-4xl mb-2">📄</div>
+                            <div class="font-bold text-lg text-yellow-700 dark:text-yellow-400">Documento</div>
+                            <div class="text-xs opacity-60">Dato en BSON</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-sm border-l-4 border-purple-500">
+                    <h4 class="font-bold text-purple-600 mb-1">🤓 Dato Nerd: ¿Qué es BSON?</h4>
+                    <p>
+                        Aunque ves JSON, MongoDB guarda los datos en <strong>BSON</strong> (Binary JSON).
+                        Es una representación binaria que permite guardar tipos de datos que JSON no soporta, como
+                        <code>Date</code>, <code>ObjectId</code>, y datos binarios puros. Además, es más rápido de leer
+                        para la máquina.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- SECCIÓN 2: TALLER GUIADO (WIZARD) -->
+            <div v-if="currentTab === 1" class="animate-fade-in">
+
+                <!-- Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs uppercase font-bold text-gray-400 mb-2">
+                        <span>Paso {{ wizardStep }} de {{ wizardTotalSteps }}</span>
+                        <span>{{ Math.round((wizardStep / wizardTotalSteps) * 100) }}% Completado</span>
+                    </div>
+                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+                            :style="{ width: (wizardStep / wizardTotalSteps) * 100 + '%' }"></div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Instructions Panel -->
+                    <div class="md:col-span-1 space-y-4">
+                        <div
+                            class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+                            <div class="text-4xl mb-2">🧙‍♂️</div>
+                            <h3 class="font-bold text-lg mb-2 text-blue-800 dark:text-blue-300">{{
+                                wizardSteps[wizardStep-1].title }}</h3>
+                            <p class="text-sm opacity-90 mb-4">{{ wizardSteps[wizardStep-1].desc }}</p>
+
+                            <div v-if="wizardFeedback"
+                                :class="['p-3 rounded text-sm font-bold animate-pop-in', wizardSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                                {{ wizardFeedback }}
+                            </div>
+                        </div>
+
+                        <button v-if="wizardSuccess && wizardStep < wizardTotalSteps" @click="nextWizardStep"
+                            class="btn-glossy w-full py-3 rounded-xl font-bold animate-pop-in">
+                            Siguiente Paso ➔
+                        </button>
+                    </div>
+
+                    <!-- Interactive Panel -->
+                    <div class="md:col-span-2">
+                        <div class="glossy-card p-6 h-full flex flex-col">
+
+                            <!-- Step 1: Context -->
+                            <div v-if="wizardStep === 1" class="text-center py-10">
+                                <h3 class="text-2xl font-bold mb-4">Bienvenido al Gremio</h3>
+                                <p class="mb-6">Vamos a crear una base de datos para un juego RPG.<br>Tu misión es
+                                    registrar héroes, buscar aliados y filtrar enemigos.</p>
+                                <button @click="wizardSuccess = true"
+                                    class="btn-glossy-green px-8 py-3 rounded-full font-bold text-white shadow-lg text-lg">
+                                    ¡Comenzar Aventura!
+                                </button>
+                            </div>
+
+                            <!-- Step 2: Insert One -->
+                            <div v-if="wizardStep === 2">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-mono text-gray-500">// Crea tu primer héroe. Usa insertOne.
+                                    </p>
+                                    <button @click="copyCode(wizardInput.step2)"
+                                        class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">📋
+                                        Copiar</button>
+                                </div>
+                                <div class="code-window mb-4">
+                                    <textarea v-model="wizardInput.step2" class="code-editor h-32"
+                                        spellcheck="false"></textarea>
+                                </div>
+                                <button @click="checkWizardStep2"
+                                    class="btn-glossy-orange px-4 py-2 rounded text-sm font-bold text-white">Ejecutar
+                                    Código</button>
+                            </div>
+
+                            <!-- Step 3: Insert Many -->
+                            <div v-if="wizardStep === 3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-mono text-gray-500">// Recluta un equipo entero. Nota los
+                                        corchetes [ ].</p>
+                                    <button @click="copyCode(wizardInput.step3)"
+                                        class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">📋
+                                        Copiar</button>
+                                </div>
+                                <div class="code-window mb-4">
+                                    <textarea v-model="wizardInput.step3" class="code-editor h-48"
+                                        spellcheck="false"></textarea>
+                                </div>
+                                <button @click="checkWizardStep3"
+                                    class="btn-glossy-orange px-4 py-2 rounded text-sm font-bold text-white">Ejecutar
+                                    insertMany</button>
+                            </div>
+
+                            <!-- Step 4: Find All -->
+                            <div v-if="wizardStep === 4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-mono text-gray-500">// Recupera TODOS los héroes.</p>
+                                    <button @click="copyCode(wizardInput.step4)"
+                                        class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">📋
+                                        Copiar</button>
+                                </div>
+                                <div class="code-window mb-4">
+                                    <textarea v-model="wizardInput.step4" class="code-editor h-16"
+                                        spellcheck="false"></textarea>
+                                </div>
+                                <button @click="checkWizardStep4"
+                                    class="btn-glossy-orange px-4 py-2 rounded text-sm font-bold text-white">Buscar</button>
+
+                                <!-- Fake Results -->
+                                <div v-if="wizardSuccess"
+                                    class="mt-4 p-2 bg-gray-100 dark:bg-gray-900 rounded text-xs font-mono max-h-32 overflow-y-auto">
+                                    [ { "_id": "...", "name": "TuHéroe", ... }, { ... } ]
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Filter Exact ($eq) -->
+                            <div v-if="wizardStep === 5" class="space-y-4">
+                                <!-- Documentation Panel -->
+                                <div
+                                    class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-5 rounded-xl border-2 border-purple-200 dark:border-purple-700 mb-4">
+                                    <h3 class="text-xl font-bold mb-3 text-purple-700 dark:text-purple-300">📖 Operador
+                                        $eq (Equality)</h3>
+
+                                    <div class="space-y-3 text-sm">
+                                        <div>
+                                            <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-1">¿Qué hace?
+                                            </h4>
+                                            <p>El operador <code
+                                                    class="bg-purple-100 dark:bg-purple-900 px-1 rounded">$eq</code>
+                                                busca documentos donde un campo sea <strong>exactamente igual</strong> a
+                                                un valor específico. Es el operador implícito cuando no especificas
+                                                ninguno.</p>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-1">Sintaxis
+                                            </h4>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border">
+                                                { campo: { $eq: valor } }<br>
+                                                <span class="text-green-600">// O simplemente:</span><br>
+                                                { campo: valor }
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-1">Ejemplos
+                                                Concretos</h4>
+                                            <div class="space-y-2">
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.users.find({ role: "Mago" })</code><br>
+                                                    <span class="text-gray-600">→ Encuentra todos los documentos donde
+                                                        role sea exactamente "Mago"</span>
+                                                </div>
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.users.find({ level: { $eq: 50 } })</code><br>
+                                                    <span class="text-gray-600">→ Encuentra usuarios con nivel
+                                                        exactamente 50</span>
+                                                </div>
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.products.find({ active: true })</code><br>
+                                                    <span class="text-gray-600">→ Productos activos (booleano
+                                                        exacto)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-1">⚠️ Cuidado
+                                                con</h4>
+                                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                                <li><strong>Case-sensitive</strong>: "Mago" ≠ "mago"</li>
+                                                <li><strong>Tipos</strong>: "50" (string) ≠ 50 (number)</li>
+                                                <li><strong>Nulls</strong>: { campo: null } encuentra documentos con
+                                                    campo null O sin el campo</li>
+                                            </ul>
+                                        </div>
+
+                                        <div
+                                            class="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border-l-4 border-yellow-500">
+                                            <strong>💡 Tip:</strong> La mayoría del tiempo NO necesitas escribir
+                                            <code>$eq</code> explícitamente. MongoDB lo asume automáticamente.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Exercise -->
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-mono text-gray-500">// Encuentra solo a los Magos.</p>
+                                    <button @click="copyCode(wizardInput.step5)"
+                                        class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">📋
+                                        Copiar</button>
+                                </div>
+                                <div class="code-window mb-4">
+                                    <textarea v-model="wizardInput.step5" class="code-editor h-24"
+                                        spellcheck="false"></textarea>
+                                </div>
+                                <button @click="checkWizardStep5"
+                                    class="btn-glossy-orange px-4 py-2 rounded text-sm font-bold text-white">Filtrar</button>
+                            </div>
+
+                            <!-- Step 6: Comparison Operators ($gt, $lt) -->
+                            <div v-if="wizardStep === 6" class="space-y-4">
+                                <!-- Documentation Panel -->
+                                <div
+                                    class="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 p-5 rounded-xl border-2 border-green-200 dark:border-green-700 mb-4">
+                                    <h3 class="text-xl font-bold mb-3 text-green-700 dark:text-green-300">📖 Operadores
+                                        de Comparación</h3>
+
+                                    <div class="space-y-3 text-sm">
+                                        <div>
+                                            <h4 class="font-bold text-green-600 dark:text-green-400 mb-1">$gt - Greater
+                                                Than (Mayor que)</h4>
+                                            <p class="mb-2">Encuentra documentos donde el valor del campo sea
+                                                <strong>estrictamente mayor</strong> que el valor especificado.
+                                            </p>
+                                            <div
+                                                class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border mb-2">
+                                                { campo: { $gt: valor } }
+                                            </div>
+                                            <div class="space-y-1">
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.users.find({ level: { $gt: 50 } })</code><br>
+                                                    <span class="text-gray-600">→ Usuarios con nivel mayor a 50 (51, 52,
+                                                        53...)</span>
+                                                </div>
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.products.find({ price: { $gt: 100.50 } })</code><br>
+                                                    <span class="text-gray-600">→ Productos que cuestan más de
+                                                        $100.50</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="border-green-200 dark:border-green-700">
+
+                                        <div>
+                                            <h4 class="font-bold text-green-600 dark:text-green-400 mb-1">$gte - Greater
+                                                Than or Equal (Mayor o igual)</h4>
+                                            <div
+                                                class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border mb-2">
+                                                { campo: { $gte: valor } }
+                                            </div>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                <code
+                                                    class="text-blue-600">db.users.find({ level: { $gte: 50 } })</code><br>
+                                                <span class="text-gray-600">→ nivel ≥ 50 (incluye 50)</span>
+                                            </div>
+                                        </div>
+
+                                        <hr class="border-green-200 dark:border-green-700">
+
+                                        <div>
+                                            <h4 class="font-bold text-green-600 dark:text-green-400 mb-1">$lt - Less
+                                                Than (Menor que)</h4>
+                                            <div
+                                                class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border mb-2">
+                                                { campo: { $lt: valor } }
+                                            </div>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                <code
+                                                    class="text-blue-600">db.users.find({ age: { $lt: 18 } })</code><br>
+                                                <span class="text-gray-600">→ Usuarios menores de 18 años</span>
+                                            </div>
+                                        </div>
+
+                                        <hr class="border-green-200 dark:border-green-700">
+
+                                        <div>
+                                            <h4 class="font-bold text-green-600 dark:text-green-400 mb-1">$lte - Less
+                                                Than or Equal (Menor o igual)</h4>
+                                            <div
+                                                class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border mb-2">
+                                                { campo: { $lte: valor } }
+                                            </div>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                <code
+                                                    class="text-blue-600">db.users.find({ age: { $lte: 18 } })</code><br>
+                                                <span class="text-gray-600">→ 18 años o menos (incluye 18)</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-green-600 dark:text-green-400 mb-1">🎯 Combinando
+                                                Operadores (Rangos)</h4>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                <code
+                                                    class="text-blue-600">db.users.find({ level: { $gt: 10, $lt: 50 } })</code><br>
+                                                <span class="text-gray-600">→ nivel entre 11 y 49 (10 < level <
+                                                        50)</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-green-600 dark:text-green-400 mb-1">⚠️ Importante
+                                            </h4>
+                                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                                <li>Solo funcionan con <strong>números</strong> y
+                                                    <strong>fechas</strong>
+                                                </li>
+                                                <li>Con strings compara alfabéticamente: "b" > "a"</li>
+                                                <li>No uses con booleanos (true/false)</li>
+                                            </ul>
+                                        </div>
+
+                                        <div
+                                            class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded border-l-4 border-blue-500">
+                                            <strong>⚡ Performance:</strong> Si tu colección es grande, crea un
+                                            <strong>índice</strong> en el campo que estás filtrando para búsquedas más
+                                            rápidas.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Exercise -->
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-mono text-gray-500">// Héroes de nivel MAYOR a 10 ($gt).</p>
+                                    <button @click="copyCode(wizardInput.step6)"
+                                        class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">📋
+                                        Copiar</button>
+                                </div>
+                                <div class="code-window mb-4">
+                                    <textarea v-model="wizardInput.step6" class="code-editor h-24"
+                                        spellcheck="false"></textarea>
+                                </div>
+                                <button @click="checkWizardStep6"
+                                    class="btn-glossy-orange px-4 py-2 rounded text-sm font-bold text-white">Filtrar por
+                                    Nivel</button>
+                            </div>
+
+                            <!-- Step 7: $in Operator -->
+                            <div v-if="wizardStep === 7" class="space-y-4">
+                                <!-- Documentation Panel -->
+                                <div
+                                    class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 p-5 rounded-xl border-2 border-orange-200 dark:border-orange-700 mb-4">
+                                    <h3 class="text-xl font-bold mb-3 text-orange-700 dark:text-orange-300">📖 Operador
+                                        $in (In Array)</h3>
+
+                                    <div class="space-y-3 text-sm">
+                                        <div>
+                                            <h4 class="font-bold text-orange-600 dark:text-orange-400 mb-1">¿Qué hace?
+                                            </h4>
+                                            <p>El operador <code
+                                                    class="bg-orange-100 dark:bg-orange-900 px-1 rounded">$in</code>
+                                                busca documentos donde el valor de un campo <strong>coincida con
+                                                    cualquier valor dentro de un array</strong> que especifiques. Es
+                                                como un "OR" múltiple.</p>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-orange-600 dark:text-orange-400 mb-1">Sintaxis
+                                            </h4>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border">
+                                                { campo: { $in: [valor1, valor2, valor3] } }
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-orange-600 dark:text-orange-400 mb-1">Ejemplos
+                                                Concretos</h4>
+                                            <div class="space-y-2">
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.users.find({ role: { $in: ["Mago", "Arquero"] } })</code><br>
+                                                    <span class="text-gray-600">→ Encuentra usuarios que sean Magos O
+                                                        Arqueros</span>
+                                                </div>
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.products.find({ category: { $in: ["Electronics", "Gaming"] } })</code><br>
+                                                    <span class="text-gray-600">→ Productos de categoría Electronics O
+                                                        Gaming</span>
+                                                </div>
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.users.find({ level: { $in: [1, 10, 50, 100] } })</code><br>
+                                                    <span class="text-gray-600">→ Usuarios con nivel 1, 10, 50 ó 100
+                                                        exactamente</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-orange-600 dark:text-orange-400 mb-1">🔄 Opuesto:
+                                                $nin (Not In)</h4>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs mb-1">
+                                                <code
+                                                    class="text-blue-600">db.users.find({ role: { $nin: ["Guerrero", "Mago"] } })</code><br>
+                                                <span class="text-gray-600">→ Usuarios que NO sean Guerrero NI
+                                                    Mago</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-orange-600 dark:text-orange-400 mb-1">⚠️ Cuidado
+                                                con</h4>
+                                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                                <li><strong>Orden</strong>: El orden de los valores en el array no
+                                                    importa</li>
+                                                <li><strong>Tipos mezclados</strong>: Puedes mezclar tipos dentro del
+                                                    array</li>
+                                                <li><strong>Performance</strong>: Arrays muy grandes pueden ser lentos
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-orange-600 dark:text-orange-400 mb-1">🆚 vs $or
+                                            </h4>
+                                            <div class="space-y-1 text-xs">
+                                                <div class="bg-green-100 dark:bg-green-900/30 p-2 rounded">
+                                                    <strong>Usa $in cuando:</strong> Filtras UN solo campo con múltiples
+                                                    valores posibles
+                                                </div>
+                                                <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded">
+                                                    <strong>Usa $or cuando:</strong> Filtras múltiples campos diferentes
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border-l-4 border-yellow-500">
+                                            <strong>💡 Tip:</strong> $in es mucho más eficiente y legible que escribir
+                                            múltiples <code>$or</code> para el mismo campo.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Exercise -->
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-mono text-gray-500">// Encuentra Magos O Arqueros usando $in.
+                                    </p>
+                                    <button @click="copyCode(wizardInput.step7)"
+                                        class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">📋
+                                        Copiar</button>
+                                </div>
+                                <div class="code-window mb-4">
+                                    <textarea v-model="wizardInput.step7" class="code-editor h-24"
+                                        spellcheck="false"></textarea>
+                                </div>
+                                <button @click="checkWizardStep7"
+                                    class="btn-glossy-orange px-4 py-2 rounded text-sm font-bold text-white">Ejecutar</button>
+                            </div>
+
+                            <!-- Step 8: Combining Operators -->
+                            <div v-if="wizardStep === 8" class="space-y-4">
+                                <!-- Documentation Panel -->
+                                <div
+                                    class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-5 rounded-xl border-2 border-indigo-200 dark:border-indigo-700 mb-4">
+                                    <h3 class="text-xl font-bold mb-3 text-indigo-700 dark:text-indigo-300">📖
+                                        Combinando Operadores (AND Lógico)</h3>
+
+                                    <div class="space-y-3 text-sm">
+                                        <div>
+                                            <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1">¿Qué es el
+                                                AND implícito?</h4>
+                                            <p>Cuando defines múltiples condiciones en el mismo <code>{}</code>, MongoDB
+                                                las trata como un <strong>AND</strong>. TODAS las condiciones deben
+                                                cumplirse.</p>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1">Sintaxis
+                                                (AND Implícito)</h4>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border">
+                                                {
+                                                campo1: valor1,
+                                                campo2: { $operador: valor2 }
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1">Ejemplos
+                                                Concretos</h4>
+                                            <div class="space-y-2">
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.users.find({ role: "Mago", level: { $gt: 50 } })</code><br>
+                                                    <span class="text-gray-600">→ Magos <strong>Y</strong> nivel mayor a
+                                                        50 (ambas condiciones)</span>
+                                                </div>
+                                                <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                    <code
+                                                        class="text-blue-600">db.products.find({ category: "Gaming", price: { $lt: 100 }, inStock: true })</code><br>
+                                                    <span class="text-gray-600">→ Gaming <strong>Y</strong> precio < 100
+                                                            <strong>Y</strong> en stock</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1">Sintaxis
+                                                (AND Explícito con $and)</h4>
+                                            <div
+                                                class="bg-white dark:bg-gray-800 p-2 rounded font-mono text-xs border mb-2">
+                                                { $and: [
+                                                { condición1 },
+                                                { condición2 }
+                                                ]}
+                                            </div>
+                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs">
+                                                <code
+                                                    class="text-blue-600">db.users.find({ $and: [{ role: "Mago" }, { level: { $gt: 50 } }] })</code><br>
+                                                <span class="text-gray-600">→ Equivalente al ejemplo anterior (rara vez
+                                                    necesario)</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1">🆚 vs $or
+                                                (Diferencia Clave)</h4>
+                                            <div class="space-y-2 text-xs">
+                                                <div class="bg-green-100 dark:bg-green-900/30 p-2 rounded">
+                                                    <strong>$and (implícito):</strong> Todas las condiciones deben ser
+                                                    verdaderas<br>
+                                                    <code class="text-blue-600">{ a: 1, b: 2 }</code> → a=1
+                                                    <strong>Y</strong> b=2
+                                                </div>
+                                                <div class="bg-orange-100 dark:bg-orange-900/30 p-2 rounded">
+                                                    <strong>$or:</strong> Al menos UNA condición debe ser verdadera<br>
+                                                    <code class="text-blue-600">{ $or: [{a: 1}, {b: 2}] }</code> → a=1
+                                                    <strong>O</strong> b=2
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1">⚠️ Cuándo
+                                                usar $and explícito</h4>
+                                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                                <li>Cuando necesitas múltiples condiciones sobre el <strong>mismo
+                                                        campo</strong></li>
+                                                <li>Ejemplo:
+                                                    <code>{ $and: [{ price: { $gt: 10 } }, { price: { $lt: 100 } }] }</code>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div
+                                            class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded border-l-4 border-blue-500">
+                                            <strong>💡 Best Practice:</strong> Usa el AND implícito (sin
+                                            <code>$and</code>) siempre que sea posible. Es más legible y conciso.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Exercise -->
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm font-mono text-gray-500">// Magos DE nivel > 50 (AND implícito).
+                                    </p>
+                                    <button @click="copyCode(wizardInput.step8)"
+                                        class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">📋
+                                        Copiar</button>
+                                </div>
+                                <div class="code-window mb-4">
+                                    <textarea v-model="wizardInput.step8" class="code-editor h-32"
+                                        spellcheck="false"></textarea>
+                                </div>
+                                <div class="text-center">
+                                    <button @click="checkWizardStep8"
+                                        class="btn-glossy-orange px-4 py-2 rounded text-sm font-bold text-white mb-4">Ejecutar</button>
+                                    <div v-if="wizardSuccess">
+                                        <h3 class="text-xl font-bold text-green-500 mb-2">¡Felicidades!</h3>
+                                        <p class="text-sm mb-4">Has completado el taller guiado.</p>
+                                        <button @click="currentTab = 3" class="btn-glossy px-6 py-2 rounded-full">Ir al
+                                            Playground Libre</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: OPERACIONES A FONDO -->
+            <div v-if="currentTab === 2" class="animate-fade-in">
+                <h2 class="text-2xl font-bold mb-6 text-purple-600 dark:text-purple-400">Playground & Deep Dive</h2>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Controls -->
+                    <div class="md:col-span-1 space-y-4">
+                        <div class="glossy-card p-4">
+                            <h3 class="font-bold mb-4 border-b pb-2">Constructor de Consultas</h3>
+
+                            <label class="block text-xs font-bold mb-1 uppercase text-gray-500">Campo</label>
+                            <select v-model="opField"
+                                class="w-full p-2 rounded border dark:bg-gray-700 dark:border-gray-600 mb-4 text-sm">
+                                <option value="level">Nivel (level)</option>
+                                <option value="role">Rol (role)</option>
+                            </select>
+
+                            <label class="block text-xs font-bold mb-1 uppercase text-gray-500">Operador</label>
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <button @click="opType = '$eq'"
+                                    :class="['p-2 rounded text-xs font-bold transition-colors', opType === '$eq' ? 'bg-purple-500 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300']">$eq
+                                    (Igual)</button>
+                                <button @click="opType = '$gt'"
+                                    :class="['p-2 rounded text-xs font-bold transition-colors', opType === '$gt' ? 'bg-purple-500 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300']">$gt
+                                    (Mayor)</button>
+                                <button @click="opType = '$lt'"
+                                    :class="['p-2 rounded text-xs font-bold transition-colors', opType === '$lt' ? 'bg-purple-500 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300']">$lt
+                                    (Menor)</button>
+                                <button @click="opType = '$in'"
+                                    :class="['p-2 rounded text-xs font-bold transition-colors', opType === '$in' ? 'bg-purple-500 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300']">$in
+                                    (Lista)</button>
+                            </div>
+
+                            <label class="block text-xs font-bold mb-1 uppercase text-gray-500">Valor</label>
+                            <input v-if="opType !== '$in'" v-model="opValue" type="text"
+                                class="w-full p-2 rounded border dark:bg-gray-700 dark:border-gray-600 text-sm">
+                            <input v-else v-model="opValueArray" placeholder="Mago, Guerrero" type="text"
+                                class="w-full p-2 rounded border dark:bg-gray-700 dark:border-gray-600 text-sm">
+
+                            <button @click="runOpQuery"
+                                class="btn-glossy w-full mt-4 py-2 rounded-lg font-bold text-sm">Ejecutar
+                                Consulta</button>
+                        </div>
+
+                        <!-- Explanation Box -->
+                        <div
+                            class="bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 text-sm">
+                            <h4 class="font-bold text-yellow-800 dark:text-yellow-500 mb-2">💡 ¿Qué está pasando?</h4>
+                            <p v-if="opType === '$eq'">
+                                <strong>$eq</strong> busca coincidencia exacta. Es el comportamiento por defecto si no
+                                pones operador: <code>{ field: value }</code>.
+                            </p>
+                            <p v-if="opType === '$gt'">
+                                <strong>$gt</strong> (Greater Than) compara números. MongoDB revisa cada documento y si
+                                el valor es mayor, lo incluye.
+                            </p>
+                            <p v-if="opType === '$in'">
+                                <strong>$in</strong> es como un "OR" múltiple. ¿El valor está en esta lista? Si sí,
+                                ¡adentro!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Visualizer -->
+                    <div class="md:col-span-2 space-y-4">
+                        <div class="code-window relative group">
+                            <button @click="copyCode(generatedOpQuery)"
+                                class="absolute top-2 right-2 text-xs bg-gray-600 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">📋
+                                Copiar</button>
+                            <pre><code class="language-javascript">db.users.find({
+  "{{ opField }}": { "{{ opType }}": {{ formatOpValue() }} }
+})</code></pre>
+                        </div>
+
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-xl shadow-inner p-4 min-h-[300px] border border-gray-200 dark:border-gray-700 relative">
+                            <h3
+                                class="text-xs uppercase font-bold text-gray-400 mb-4 sticky top-0 bg-white dark:bg-gray-800 pb-2 z-10 border-b">
+                                Resultados en vivo ({{ opResults.length }})
+                            </h3>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                                <div v-for="user in opResults" :key="user._id"
+                                    class="animate-pop-in bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 p-3 rounded-lg border border-gray-200 dark:border-gray-500 text-center shadow-sm hover:shadow-md transition-shadow group cursor-pointer relative overflow-hidden">
+                                    <div
+                                        class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] px-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
+                                        ID: ...{{ user._id.substr(-4) }}</div>
+                                    <div class="text-3xl mb-2 transform group-hover:scale-110 transition-transform">{{
+                                        getAvatar(user.role) }}</div>
+                                    <div class="font-bold text-sm truncate text-gray-800 dark:text-gray-200">{{
+                                        user.name }}</div>
+                                    <div class="text-xs text-blue-500 font-bold">{{ user.role }}</div>
+                                    <div
+                                        class="mt-2 inline-block px-2 py-0.5 bg-gray-200 dark:bg-black/30 rounded text-xs font-mono">
+                                        Lvl {{ user.level }}</div>
+                                </div>
+                            </div>
+
+                            <div v-if="opResults.length === 0"
+                                class="absolute inset-0 flex flex-col items-center justify-center opacity-40">
+                                <div class="text-4xl mb-2">🔍</div>
+                                <p>Sin resultados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 4: PRÁCTICA LIBRE -->
+            <div v-if="currentTab === 3" class="animate-fade-in">
+                <div class="text-center mb-8">
+                    <h2
+                        class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-500">
+                        Zona de Entrenamiento
+                    </h2>
+                    <p class="opacity-80">Pon a prueba tus conocimientos sin ayuda.</p>
+                </div>
+
+
+            </div>
+
+            <!-- SECCIÓN 5: POBLAR BD -->
+            <div v-if="currentTab === 4" class="animate-fade-in">
+                <div class="text-center mb-8">
+                    <h2
+                        class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500">
+                        🌱 Poblar Base de Datos
+                    </h2>
+                    <p class="opacity-80">Script listo para copiar y ejecutar en tu MongoDB Playground</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <!-- Instructions -->
+                    <div
+                        class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border-2 border-blue-200 dark:border-blue-700">
+                        <h3 class="text-lg font-bold mb-3 text-blue-800 dark:text-blue-300">📋 Instrucciones</h3>
+                        <ol class="list-decimal list-inside space-y-2 text-sm">
+                            <li>Copia el script completo usando el botón "Copiar Todo"</li>
+                            <li>Abre tu MongoDB Playground en VS Code</li>
+                            <li>Pega el script y ejecútalo</li>
+                            <li>¡Listo! Ahora tienes una colección <code
+                                    class="bg-blue-100 dark:bg-blue-900 px-1 rounded">heroes</code> con datos de prueba
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- Script Card -->
+                    <div class="glossy-card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Script de Población</h3>
+                            <button @click="copyCode(populationScript)"
+                                class="btn-glossy-green px-4 py-2 rounded-lg font-bold text-sm shadow-lg">
+                                📋 Copiar Todo
+                            </button>
+                        </div>
+
+                        <div
+                            class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg border border-gray-300 dark:border-gray-700 mb-4">
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">📊 Este script creará:</p>
+                            <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                                <li>✅ 20 héroes de diferentes clases</li>
+                                <li>✅ Niveles variados (1-100)</li>
+                                <li>✅ Diferentes armas y habilidades</li>
+                                <li>✅ Perfecto para practicar todos los operadores</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-window max-h-96 overflow-y-auto">
+                            <pre class="text-xs"><code class="language-javascript">{{ populationScript }}</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div
+                            class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                            <div class="text-2xl mb-2">✅</div>
+                            <h4 class="font-bold mb-1 text-green-700 dark:text-green-400">Datos Listos</h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Con estos datos podrás probar
+                                inmediatamente $eq, $gt, $lt, $in y más</p>
+                        </div>
+                        <div
+                            class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                            <div class="text-2xl mb-2">🎯</div>
+                            <h4 class="font-bold mb-1 text-purple-700 dark:text-purple-400">Ejercicios Sugeridos</h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Busca guerreros nivel > 50, magos con
+                                espada, héroes con fireball</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 6: EJERCICIOS -->
+            <div v-if="currentTab === 5" class="animate-fade-in">
+                <div class="text-center mb-8">
+                    <h2
+                        class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500">
+                        🏆 Desafíos de Consultas
+                    </h2>
+                    <p class="opacity-80">Practica con los héroes de la base de datos. ¡10 ejercicios de básico a
+                        moderado!</p>
+                </div>
+
+                <div class="max-w-5xl mx-auto space-y-4">
+                    <!-- Progress Indicator -->
+                    <div
+                        class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-purple-700 dark:text-purple-300">Progreso Total</span>
+                            <span class="text-sm font-bold">{{ exercisesCompleted.length }}/{{ totalExercises }}</span>
+                        </div>
+                        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                                :style="{ width: (exercisesCompleted.length / totalExercises) * 100 + '%' }"></div>
+                        </div>
+                    </div>
+
+                    <!-- Exercise Cards -->
+                    <div v-for="(exercise, index) in exercises" :key="index"
+                        class="glossy-card p-6 relative overflow-hidden">
+                        <!-- Difficulty Badge -->
+                        <div :class="['absolute top-0 right-0 text-white text-xs font-bold px-3 py-1 rounded-bl-lg shadow', 
+                            exercise.difficulty === 'Básico' ? 'bg-green-500' : 
+                            exercise.difficulty === 'Intermedio' ? 'bg-orange-500' : 'bg-red-500']">
+                            {{ exercise.difficulty }}
+                        </div>
+
+                        <!-- Completed Badge -->
+                        <div v-if="exercisesCompleted.includes(index)"
+                            class="absolute top-0 left-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-br-lg shadow">
+                            ✅ Completado
+                        </div>
+
+                        <!-- Question -->
+                        <div class="mb-4 mt-4">
+                            <h3 class="text-lg font-bold mb-2">
+                                <span class="text-purple-600 dark:text-purple-400">{{ index + 1 }}.</span> {{
+                                exercise.title }}
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ exercise.description }}</p>
+                        </div>
+
+                        <!-- Hint Button & Content -->
+                        <div v-if="exercise.hint" class="mb-4">
+                            <button @click="toggleHint(index)"
+                                class="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-full hover:bg-yellow-200 transition-colors">
+                                {{ showHints[index] ? '👁️ Ocultar pista' : '💡 Ver pista' }}
+                            </button>
+                            <div v-if="showHints[index]"
+                                class="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-l-4 border-yellow-500 text-sm animate-fade-in">
+                                {{ exercise.hint }}
+                            </div>
+                        </div>
+
+                        <!-- Code Editor -->
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-bold uppercase text-gray-500">Tu consulta:</label>
+                                <button @click="copyCode(exerciseAnswers[index])"
+                                    class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300">
+                                    📋 Copiar
+                                </button>
+                            </div>
+                            <div class="code-window">
+                                <textarea v-model="exerciseAnswers[index]" class="code-editor h-24" spellcheck="false"
+                                    :placeholder="'db.heroes.find({ ... })'"
+                                    @input="clearExerciseFeedback(index)"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2 mb-4">
+                            <button @click="checkExercise(index)"
+                                class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow flex-1">
+                                Verificar
+                            </button>
+                            <button @click="toggleSolution(index)"
+                                class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow">
+                                {{ showSolutions[index] ? 'Ocultar' : 'Ver' }} Solución
+                            </button>
+                        </div>
+
+                        <!-- Feedback -->
+                        <div v-if="exerciseFeedback[index]"
+                            :class="['p-3 rounded-lg text-sm font-bold animate-pop-in', 
+                            exerciseFeedback[index].correct ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400']">
+                            {{ exerciseFeedback[index].message }}
+                        </div>
+
+                        <!-- Solution -->
+                        <div v-if="showSolutions[index]"
+                            class="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-700 animate-fade-in">
+                            <h4 class="text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">📝 Solución:</h4>
+                            <div class="code-window">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{{ exercise.solution }}</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2"><strong>Explicación:</strong> {{
+                                exercise.explanation }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 7: FUNDAMENTOS CRUD -->
+            <div v-if="currentTab === 6" class="animate-fade-in space-y-8">
+                <div class="text-center mb-8">
+                    <h2
+                        class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500">
+                        📚 Fundamentos MongoDB: CRUD Completo
+                    </h2>
+                    <p class="opacity-80">Todo lo que necesitas saber para dominar las operaciones CRUD en MongoDB</p>
+                </div>
+
+                <!-- Document Structure -->
+                <div class="glossy-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">📄 Estructura de un Documento
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                        En MongoDB, los datos se almacenan como <strong>documentos BSON</strong> (Binary JSON), similar
+                        a objetos JSON.
+                        Cada documento es un par clave-valor flexible que puede contener datos anidados.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold mb-2 text-gray-700 dark:text-gray-300">Anatomía de un Documento</h4>
+                            <div class="code-window">
+                                <pre class="text-xs"><code class="language-javascript">{
+  _id: ObjectId("507f1f77bcf86cd799439011"),
+  nombre: "Juan Pérez",
+  edad: 28,
+  activo: true,
+  email: "juan@example.com",
+  direccion: {
+    calle: "Av. Siempre Viva 123",
+    ciudad: "Santiago",
+    pais: "Chile"
+  },
+  hobbies: ["fútbol", "lectura", "videojuegos"],
+  fechaRegistro: new Date("2024-01-15"),
+  metadata: null
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold mb-2 text-gray-700 dark:text-gray-300">Características Clave</h4>
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                <li class="flex gap-2"><span class="text-blue-500">✓</span> <strong>_id:</strong> Campo
+                                    único y obligatorio (se genera automáticamente si no lo defines)</li>
+                                <li class="flex gap-2"><span class="text-blue-500">✓</span> <strong>Flexible:</strong>
+                                    Cada documento puede tener campos diferentes</li>
+                                <li class="flex gap-2"><span class="text-blue-500">✓</span> <strong>Anidado:</strong>
+                                    Puedes tener objetos dentro de objetos</li>
+                                <li class="flex gap-2"><span class="text-blue-500">✓</span> <strong>Arrays:</strong>
+                                    Listas de valores o documentos embebidos</li>
+                                <li class="flex gap-2"><span class="text-blue-500">✓</span> <strong>Sin esquema
+                                        rígido:</strong> No necesitas definir estructura previamente</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Types -->
+                <div class="glossy-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-teal-600 dark:text-teal-400">🔡 Tipos de Datos en MongoDB
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        MongoDB soporta todos los tipos JSON más algunos adicionales específicos de BSON.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- String -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">String (Texto)</h4>
+                            <div class="code-window mb-2">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{ nombre: "María", bio: "Desarrolladora" }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Cualquier cadena de texto UTF-8</p>
+                        </div>
+
+                        <!-- Number -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">Number (Números)</h4>
+                            <div class="code-window mb-2">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{ edad: 25, precio: 99.99, stock: 100 }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Enteros y decimales. También: NumberInt, NumberLong,
+                                NumberDecimal</p>
+                        </div>
+
+                        <!-- Boolean -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">Boolean (Booleano)</h4>
+                            <div class="code-window mb-2">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{ activo: true, verificado: false }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Valores true o false</p>
+                        </div>
+
+                        <!-- Date -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">Date (Fecha)</h4>
+                            <div class="code-window mb-2">
+                                <pre class="text-xs"><code class="language-javascript">{ createdAt: new Date(), 
+  birthday: ISODate("1995-06-15T00:00:00Z") }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Fechas en formato UTC (milisegundos desde epoch)</p>
+                        </div>
+
+                        <!-- Array -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">Array (Lista)</h4>
+                            <div class="code-window mb-2">
+                                <pre class="text-xs"><code class="language-javascript">{ tags: ["mongodb", "nosql", "db"],
+  scores: [85, 92, 78] }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Listas ordenadas de cualquier tipo</p>
+                        </div>
+
+                        <!-- Object/Embedded Document -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">Object (Documento
+                                Embebido)</h4>
+                            <div class="code-window mb-2">
+                                <pre class="text-xs"><code class="language-javascript">{ direccion: { 
+    calle: "Main St", 
+    numero: 123 
+  } }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Documentos anidados dentro de otros</p>
+                        </div>
+
+                        <!-- ObjectId -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">ObjectId</h4>
+                            <div class="code-window mb-2">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{ _id: ObjectId("507f1f77bcf86cd799439011") }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Identificador único de 12 bytes (timestamp + random)</p>
+                        </div>
+
+                        <!-- Null -->
+                        <div
+                            class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-bold text-sm mb-2 text-gray-700 dark:text-gray-300">Null</h4>
+                            <div class="code-window mb-2">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{ telefono: null, middleName: null }</code></pre>
+                            </div>
+                            <p class="text-xs text-gray-500">Representa ausencia de valor</p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                        <p class="text-xs text-yellow-800 dark:text-yellow-400"><strong>💡 Tip:</strong> También existen
+                            tipos especiales como Binary, Regex, DBRef, Code, Timestamp, MinKey, MaxKey, pero rara vez
+                            se usan directamente.</p>
+                    </div>
+                </div>
+
+                <!-- CRUD Operations -->
+                <div class="glossy-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">⚡ Operaciones CRUD
+                        Completas</h3>
+
+                    <!-- CREATE -->
+                    <div class="mb-8">
+                        <h4 class="text-xl font-bold mb-3 text-green-600 dark:text-green-400">✨ CREATE (Insertar)</h4>
+
+                        <div class="space-y-4">
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">insertOne() - Insertar un documento</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">db.users.insertOne({
+  nombre: "Ana García",
+  email: "ana@example.com",
+  edad: 30,
+  ciudad: "Santiago"
+})
+
+// Resultado:
+// { acknowledged: true, insertedId: ObjectId("...") }</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">insertMany() - Insertar múltiples documentos</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">db.users.insertMany([
+  { nombre: "Carlos", email: "carlos@example.com", edad: 25 },
+  { nombre: "Laura", email: "laura@example.com", edad: 28 },
+  { nombre: "Diego", email: "diego@example.com", edad: 32 }
+])
+
+// Resultado:
+// { acknowledged: true, insertedIds: [ ObjectId("..."), ObjectId("..."), ObjectId("...") ] }</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- READ -->
+                    <div class="mb-8">
+                        <h4 class="text-xl font-bold mb-3 text-blue-600 dark:text-blue-400">🔍 READ (Leer/Consultar)
+                        </h4>
+
+                        <div class="space-y-4">
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">find() - Buscar múltiples documentos</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">// Todos los documentos
+db.users.find()
+
+// Con filtro
+db.users.find({ edad: { $gte: 25 } })
+
+// Con proyección (solo mostrar ciertos campos)
+db.users.find(
+  { ciudad: "Santiago" }, 
+  { nombre: 1, email: 1, _id: 0 }
+)
+
+// Limit y Sort
+db.users.find({ edad: { $gte: 25 } })
+  .sort({ edad: -1 })  // -1 descendente, 1 ascendente
+  .limit(5)</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">findOne() - Buscar un solo documento</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">db.users.findOne({ email: "ana@example.com" })
+
+// Con proyección
+db.users.findOne(
+  { _id: ObjectId("...") },
+  { nombre: 1, email: 1 }
+)</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">Operadores de Query Comunes</h5>
+                                <div class="grid md:grid-cols-2 gap-3">
+                                    <div class="code-window">
+                                        <pre class="text-xs"><code class="language-javascript">// Comparación
+$eq   // igual
+$ne   // no igual
+$gt   // mayor que
+$gte  // mayor o igual
+$lt   // menor que
+$lte  // menor o igual</code></pre>
+                                    </div>
+                                    <div class="code-window">
+                                        <pre class="text-xs"><code class="language-javascript">// Lógicos
+$and  // Y lógico
+$or   // O lógico
+$not  // Negación
+$in   // En lista
+$nin  // No en lista</code></pre>
+                                    </div>
+                                </div>
+                                <div class="code-window mt-3">
+                                    <pre class="text-xs"><code class="language-javascript">// Ejemplos prácticos:
+db.users.find({ edad: { $gte: 25, $lte: 40 } })  // Entre 25 y 40
+db.users.find({ ciudad: { $in: ["Santiago", "Valparaíso"] } })  // En lista
+db.users.find({ $and: [{ edad: { $gte: 25 } }, { ciudad: "Santiago" }] })
+db.users.find({ $or: [{ edad: { $lt: 20 } }, { edad: { $gt: 60 } }] })</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPDATE -->
+                    <div class="mb-8">
+                        <h4 class="text-xl font-bold mb-3 text-orange-600 dark:text-orange-400">✏️ UPDATE (Actualizar)
+                        </h4>
+
+                        <div class="space-y-4">
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">updateOne() - Actualizar un documento</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">// Actualizar un campo
+db.users.updateOne(
+  { email: "ana@example.com" },
+  { $set: { edad: 31, ciudad: "Viña del Mar" } }
+)
+
+// Resultado:
+// { acknowledged: true, matchedCount: 1, modifiedCount: 1 }</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">updateMany() - Actualizar múltiples documentos</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">db.users.updateMany(
+  { ciudad: "Santiago" },
+  { $set: { pais: "Chile" } }
+)</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">Operadores de Update</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">// $set - Establecer valor
+db.users.updateOne({ _id: ... }, { $set: { nombre: "Nuevo Nombre" } })
+
+// $inc - Incrementar/decrementar
+db.users.updateOne({ _id: ... }, { $inc: { edad: 1 } })  // +1
+db.products.updateOne({ _id: ... }, { $inc: { stock: -5 } })  // -5
+
+// $push - Agregar a array
+db.users.updateOne({ _id: ... }, { $push: { hobbies: "natación" } })
+
+// $pull - Eliminar de array
+db.users.updateOne({ _id: ... }, { $pull: { hobbies: "fútbol" } })
+
+// $addToSet - Agregar a array solo si no existe
+db.users.updateOne({ _id: ... }, { $addToSet: { tags: "premium" } })
+
+// $unset - Eliminar campo
+db.users.updateOne({ _id: ... }, { $unset: { telefono: "" } })
+
+// $rename - Renombrar campo
+db.users.updateOne({ _id: ... }, { $rename: { "name": "nombre" } })</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">Actualizar arrays anidados con arrayFilters</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">// Actualizar un elemento específico dentro de un array
+db.products.updateOne(
+  { nombre: "Polera" },
+  { $set: { "variantes.$[elem].stock": 20 } },
+  { arrayFilters: [{ "elem.talla": "M", "elem.color": "Negro" }] }
+)
+
+// Esto actualiza solo la variante que coincida con talla=M y color=Negro</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DELETE -->
+                    <div>
+                        <h4 class="text-xl font-bold mb-3 text-red-600 dark:text-red-400">🗑️ DELETE (Eliminar)</h4>
+
+                        <div class="space-y-4">
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">deleteOne() - Eliminar un documento</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">db.users.deleteOne({ email: "ana@example.com" })
+
+// Resultado:
+// { acknowledged: true, deletedCount: 1 }</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-bold text-sm mb-2">deleteMany() - Eliminar múltiples documentos</h5>
+                                <div class="code-window">
+                                    <pre class="text-xs"><code class="language-javascript">// Eliminar por condición
+db.users.deleteMany({ edad: { $lt: 18 } })
+
+// Eliminar TODOS (¡cuidado!)
+db.users.deleteMany({})</code></pre>
+                                </div>
+                            </div>
+
+                            <div
+                                class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                                <p class="text-xs text-red-800 dark:text-red-400"><strong>⚠️ Cuidado:</strong> Las
+                                    operaciones de eliminación son permanentes. No hay "Undo". Siempre prueba con find()
+                                    primero para ver qué documentos coinciden.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cheat Sheet -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-br from-blue-50 to-teal-50 dark:from-blue-900/20 dark:to-teal-900/20">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">📝 Cheat Sheet: Flujo CRUD
+                        Típico</h3>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="code-window">
+                            <pre class="text-xs"><code class="language-javascript">// 1. Conectar (en mongosh ya estás conectado)
+use miBaseDeDatos
+
+// 2. Insertar datos iniciales
+db.usuarios.insertMany([
+  { nombre: "Ana", edad: 25, activo: true },
+  { nombre: "Luis", edad: 30, activo: true },
+  { nombre: "María", edad: 22, activo: false }
+])
+
+// 3. Consultar
+db.usuarios.find({ activo: true })
+
+// 4. Actualizar
+db.usuarios.updateOne(
+  { nombre: "Ana" },
+  { $set: { edad: 26 }, $push: { hobbies: "leer" } }
+)</code></pre>
+                        </div>
+
+                        <div class="code-window">
+                            <pre class="text-xs"><code class="language-javascript">// 5. Buscar y verificar cambio
+db.usuarios.findOne({ nombre: "Ana" })
+
+// 6. Eliminar registros inactivos
+db.usuarios.deleteMany({ activo: false })
+
+// 7. Contar documentos restantes
+db.usuarios.countDocuments()
+
+// 8. Listar todas las colecciones
+show collections
+
+// 9. Eliminar colección completa
+db.usuarios.drop()</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Best Practices -->
+                <div class="glossy-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-green-600 dark:text-green-400">💡 Mejores Prácticas</h3>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div
+                            class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                            <h4 class="font-bold mb-2 text-sm">✅ Hacer</h4>
+                            <ul class="space-y-1 text-xs">
+                                <li>✓ Usa find() antes de delete() para ver qué se eliminará</li>
+                                <li>✓ Valida tus queries con findOne() primero</li>
+                                <li>✓ Usa proyecciones para obtener solo campos necesarios</li>
+                                <li>✓ Crea índices en campos que consultas frecuentemente</li>
+                                <li>✓ Usa $set en updates para cambios parciales</li>
+                            </ul>
+                        </div>
+
+                        <div
+                            class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                            <h4 class="font-bold mb-2 text-sm">❌ Evitar</h4>
+                            <ul class="space-y-1 text-xs">
+                                <li>✗ No uses find() sin límite en colecciones grandes</li>
+                                <li>✗ No hagas deleteMany({}) sin estar 100% seguro</li>
+                                <li>✗ Evita actualizar reemplazando todo el documento</li>
+                                <li>✗ No abuses de arrays gigantes (límite 16MB por doc)</li>
+                                <li>✗ No ignores los resultados de operaciones async</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+    </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center mt-8 opacity-50 text-xs pb-8">
+        <p>Taller Interactivo MongoDB • Diseñado para Aprendizaje Rápido</p>
+    </footer>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                // --- STATE ---
+                const isDark = ref(false);
+                const currentTab = ref(0);
+                const tabs = [
+                    { title: '1. Teoría' },
+                    { title: '2. Taller Guiado' },
+                    { title: '3. Operaciones' },
+                    { title: '4. Práctica' },
+                    { title: '5. Poblar BD' },
+                    { title: '6. Ejercicios' },
+                    { title: '7. Fundamentos CRUD' }
+                ];
+
+                // Intro
+                const introView = ref('sql');
+
+                // Database Simulation (Shared)
+                const users = ref([
+                    { _id: '65f1a8b1', name: 'Aragorn', role: 'Guerrero', level: 87 },
+                    { _id: '65f1b9c2', name: 'Gandalf', role: 'Mago', level: 99 },
+                    { _id: '65f1c0d3', name: 'Legolas', role: 'Arquero', level: 75 },
+                    { _id: '65f1d1e4', name: 'Frodo', role: 'Guerrero', level: 12 },
+                    { _id: '65f1e2f5', name: 'Gimli', role: 'Guerrero', level: 80 },
+                    { _id: '65f1f3a6', name: 'Sam', role: 'Guerrero', level: 10 },
+                    { _id: '65f1g4b7', name: 'Saruman', role: 'Mago', level: 95 },
+                ]);
+
+                // Wizard State
+                const wizardStep = ref(1);
+                const wizardTotalSteps = 8;
+                const wizardSuccess = ref(false);
+                const wizardFeedback = ref('');
+                const wizardInput = ref({
+                    step2: 'db.heroes.insertOne({\n  name: "Link",\n  class: "Guerrero",\n  level: 1\n})',
+                    step3: 'db.heroes.insertMany([\n  { name: "Zelda", class: "Mago", level: 5 },\n  { name: "Ganon", class: "Guerrero", level: 99 }\n])',
+                    step4: 'db.heroes.find({})',
+                    step5: 'db.heroes.find({\n  class: "Mago"\n})',
+                    step6: 'db.heroes.find({\n  level: { $gt: 10 }\n})',
+                    step7: 'db.heroes.find({\n  class: { $in: ["Mago", "Arquero"] }\n})',
+                    step8: 'db.heroes.find({\n  class: "Mago",\n  level: { $gt: 50 }\n})'
+                });
+                const wizardSteps = [
+                    { title: "Contexto", desc: "Entiende el escenario." },
+                    { title: "Insertar Uno", desc: "Añade un solo documento." },
+                    { title: "Insertar Varios", desc: "Añade múltiples documentos." },
+                    { title: "Consultar Todo", desc: "Recupera la lista completa." },
+                    { title: "Filtro Exacto ($eq)", desc: "Busca coincidencias exactas." },
+                    { title: "Comparación ($gt, $lt)", desc: "Usa operadores matemáticos." },
+                    { title: "Operador $in", desc: "Busca dentro de listas." },
+                    { title: "Lógica Compleja", desc: "Combina condiciones." }
+                ];
+
+                // Operators
+                const opField = ref('level');
+                const opType = ref('$gt');
+                const opValue = ref('50');
+                const opValueArray = ref('Mago, Arquero');
+                const opResults = ref([]);
+
+                // Challenges
+                const activeChallenge = ref(0);
+                const challengeCode = ref('db.users.insertMany([\n  { name: "A", role: "Mago", level: 10 },\n  \n])');
+                const challengeFeedback = ref('');
+                const challengeSuccess = ref(false);
+
+                const challengeQuery = ref('db.users.find({\n  level: { $gt: 50 },\n  role: "Mago"\n})');
+                const challengeFeedback2 = ref('');
+                const challengeSuccess2 = ref(false);
+
+                // Population Script
+                const populationScript = ref(`// 🌱 Script de Población - Base de Datos Heroes
+// Copia y ejecuta esto en tu MongoDB Playground
+
+// Selecciona la base de datos
+use('rpg_game');
+
+// Elimina la colección anterior si existe
+db.heroes.drop();
+
+// Inserta héroes de ejemplo
+db.heroes.insertMany([
+  // Guerreros
+  { name: "Aragorn", class: "Guerrero", level: 87, weapon: "Espada", hp: 950, skills: ["Ataque Pesado", "Defensa"] },
+  { name: "Gimli", class: "Guerrero", level: 80, weapon: "Hacha", hp: 900, skills: ["Golpe Crítico"] },
+  { name: "Boromir", class: "Guerrero", level: 75, weapon: "Espada y Escudo", hp: 850, skills: ["Bloqueo"] },
+  { name: "Thor", class: "Guerrero", level: 95, weapon: "Martillo", hp: 1000, skills: ["Relámpago", "Fuerza Divina"] },
+  { name: "Conan", class: "Guerrero", level: 70, weapon: "Espada Ancha", hp: 800, skills: ["Berserker"] },
+  
+  // Magos
+  { name: "Gandalf", class: "Mago", level: 99, weapon: "Báculo", mana: 1500, skills: ["Fireball", "Lightning", "Teleport"] },
+  { name: "Saruman", class: "Mago", level: 95, weapon: "Báculo Negro", mana: 1400, skills: ["Dark Magic", "Mind Control"] },
+  { name: "Merlin", class: "Mago", level: 98, weapon: "Báculo Antiguo", mana: 1600, skills: ["Time Stop", "Prophecy"] },
+  { name: "Dumbledore", class: "Mago", level: 92, weapon: "Varita", mana: 1300, skills: ["Patronus", "Fireball"] },
+  { name: "Elsa", class: "Mago", level: 85, weapon: "Ninguna", mana: 1200, skills: ["Ice Blast", "Freeze"] },
+  
+  // Arqueros
+  { name: "Legolas", class: "Arquero", level: 88, weapon: "Arco Élfico", arrows: 100, skills: ["Disparo Preciso", "Lluvia de Flechas"] },
+  { name: "Katniss", class: "Arquero", level: 65, weapon: "Arco Compuesto", arrows: 50, skills: ["Disparo Explosivo"] },
+  { name: "Robin Hood", class: "Arquero", level: 78, weapon: "Arco Largo", arrows: 80, skills: ["Flecha Dividida"] },
+  { name: "Hawkeye", class: "Arquero", level: 82, weapon: "Arco Táctico", arrows: 60, skills: ["Flechas Especiales"] },
+  
+  // Asesinos
+  { name: "Ezio", class: "Asesino", level: 85, weapon: "Cuchillas Ocultas", stealth: 95, skills: ["Sigilo", "Asesinato Aéreo"] },
+  { name: "Altair", class: "Asesino", level: 80, weapon: "Hoja Oculta", stealth: 90, skills: ["Eagle Vision"] },
+  
+  // Principiantes
+  { name: "Frodo", class: "Guerrero", level: 12, weapon: "Daga", hp: 200, skills: ["Esquivar"] },
+  { name: "Sam", class: "Guerrero", level: 10, weapon: "Sartén", hp: 180, skills: ["Cocinar"] },
+  { name: "Luna", class: "Mago", level: 15, weapon: "Varita Rota", mana: 150, skills: ["Luz"] },
+  { name: "Link", class: "Guerrero", level: 1, weapon: "Espada de Madera", hp: 100, skills: [] }
+]);
+
+// Verifica la inserción
+print("✅ Insertados:", db.heroes.countDocuments(), "héroes");
+
+// Ejemplos de consultas para probar:
+print("\n📊 Ejemplos de consultas:");
+print("- Guerreros: db.heroes.find({ class: 'Guerrero' })");
+print("- Nivel > 50: db.heroes.find({ level: { $gt: 50 } })");
+print("- Magos o Arqueros: db.heroes.find({ class: { $in: ['Mago', 'Arquero'] } })");
+print("- Héroes con Fireball: db.heroes.find({ skills: 'Fireball' })");`);
+
+                // Exercises
+                const totalExercises = 10;
+                const exercisesCompleted = ref([]);
+                const exerciseAnswers = ref(Array(totalExercises).fill(''));
+                const exerciseFeedback = ref({});
+                const showHints = ref({});
+                const showSolutions = ref({});
+
+                const exercises = [
+                    {
+                        title: "Encuentra a todos los Guerreros",
+                        description: "Busca todos los héroes que sean de la clase 'Guerrero'",
+                        difficulty: "Básico",
+                        hint: "Usa find() con un filtro de igualdad exacta en el campo 'class'",
+                        solution: 'db.heroes.find({ class: "Guerrero" })',
+                        validation: (answer) => answer.includes('class') && (answer.includes('Guerrero') || answer.includes('\"Guerrero\"') || answer.includes("'Guerrero'")),
+                        explanation: "Usamos { class: 'Guerrero' } para buscar coincidencias exactas. MongoDB asume $eq implícitamente."
+                    },
+                    {
+                        title: "Héroes de alto nivel",
+                        description: "Encuentra todos los héroes con nivel mayor a 80",
+                        difficulty: "Básico",
+                        hint: "Necesitas el operador $gt (greater than) para comparar números",
+                        solution: 'db.heroes.find({ level: { $gt: 80 } })',
+                        validation: (answer) => answer.includes('$gt') && answer.includes('80'),
+                        explanation: "El operador $gt compara valores numéricos. Sintaxis: { campo: { $gt: valor } }"
+                    },
+                    {
+                        title: "Principiantes absolutos",
+                        description: "Busca héroes con nivel menor o igual a 15",
+                        difficulty: "Básico",
+                        hint: "Usa $lte (less than or equal) para 'menor o igual que'",
+                        solution: 'db.heroes.find({ level: { $lte: 15 } })',
+                        validation: (answer) => (answer.includes('$lte') || answer.includes('$lt')) && answer.includes('15'),
+                        explanation: "$lte incluye el valor límite. Si usas $lt (menor que) obtendrías solo < 15, excluyendo el 15."
+                    },
+                    {
+                        title: "Magos y Arqueros",
+                        description: "Encuentra héroes que sean Mago O Arquero",
+                        difficulty: "Básico",
+                        hint: "El operador $in te permite buscar dentro de una lista de valores",
+                        solution: 'db.heroes.find({ class: { $in: ["Mago", "Arquero"] } })',
+                        validation: (answer) => answer.includes('$in') && answer.includes('['),
+                        explanation: "$in funciona como un OR múltiple para el mismo campo. Sintaxis: { campo: { $in: [val1, val2] } }"
+                    },
+                    {
+                        title: "Rango de niveles",
+                        description: "Busca héroes con nivel entre 70 y 90 (inclusive)",
+                        difficulty: "Intermedio",
+                        hint: "Combina $gte y $lte para crear un rango",
+                        solution: 'db.heroes.find({ level: { $gte: 70, $lte: 90 } })',
+                        validation: (answer) => (answer.includes('$gte') || answer.includes('$gt')) && (answer.includes('$lte') || answer.includes('$lt')) && answer.includes('70') && answer.includes('90'),
+                        explanation: "Puedes combinar operadores en el mismo campo para crear rangos: { nivel: { $gte: min, $lte: max } }"
+                    },
+                    {
+                        title: "Guerreros experimentados",
+                        description: "Encuentra Guerreros con nivel mayor a 75",
+                        difficulty: "Intermedio",
+                        hint: "Combina dos condiciones: una para la clase y otra para el nivel",
+                        solution: 'db.heroes.find({ class: "Guerrero", level: { $gt: 75 } })',
+                        validation: (answer) => answer.includes('class') && answer.includes('Guerrero') && answer.includes('$gt') && answer.includes('75'),
+                        explanation: "AND implícito: cuando pones múltiples condiciones separadas por coma, TODAS deben cumplirse."
+                    },
+                    {
+                        title: "Héroes con Fireball",
+                        description: "Busca todos los héroes que tengan la habilidad 'Fireball'",
+                        difficulty: "Intermedio",
+                        hint: "Cuando buscas en un array, MongoDB automáticamente busca si el valor existe dentro del array",
+                        solution: 'db.heroes.find({ skills: "Fireball" })',
+                        validation: (answer) => answer.includes('skills') && answer.includes('Fireball'),
+                        explanation: "MongoDB busca automáticamente dentro de arrays. No necesitas operadores especiales para esto."
+                    },
+                    {
+                        title: "Asesinos sigilosos",
+                        description: "Encuentra Asesinos con stealth mayor a 90",
+                        difficulty: "Intermedio",
+                        hint: "Combina clase 'Asesino' con el campo stealth usando $gt",
+                        solution: 'db.heroes.find({ class: "Asesino", stealth: { $gt: 90 } })',
+                        validation: (answer) => answer.includes('class') && answer.includes('Asesino') && answer.includes('stealth') && answer.includes('$gt'),
+                        explanation: "Combinar condiciones sobre diferentes campos crea un filtro más específico."
+                    },
+                    {
+                        title: "Magos poderosos",
+                        description: "Busca Magos que tengan más de 1400 de mana Y nivel mayor a 90",
+                        difficulty: "Moderado",
+                        hint: "Necesitas combinar 3 condiciones: class, mana y level",
+                        solution: 'db.heroes.find({ class: "Mago", mana: { $gt: 1400 }, level: { $gt: 90 } })',
+                        validation: (answer) => answer.includes('class') && answer.includes('Mago') && answer.includes('mana') && answer.includes('level') && answer.includes('$gt'),
+                        explanation: "Puedes combinar tantas condiciones como necesites. Todas deben cumplirse (AND implícito)."
+                    },
+                    {
+                        title: "Héroes míticos",
+                        description: "Encuentra héroes que NO sean Guerreros Y tengan nivel 95 o superior",
+                        difficulty: "Moderado",
+                        hint: "Usa $ne (not equal) para excluir Guerreros, y $gte para nivel >= 95",
+                        solution: 'db.heroes.find({ class: { $ne: "Guerrero" }, level: { $gte: 95 } })',
+                        validation: (answer) => answer.includes('$ne') && answer.includes('Guerrero') && (answer.includes('$gte') || answer.includes('$gt')) && answer.includes('95'),
+                        explanation: "$ne (not equal) excluye valores. Aquí filtramos por 'NO es Guerrero' AND 'nivel >= 95'."
+                    }
+                ];
+
+                const toggleHint = (index) => {
+                    showHints.value[index] = !showHints.value[index];
+                };
+
+                const toggleSolution = (index) => {
+                    showSolutions.value[index] = !showSolutions.value[index];
+                };
+
+                const clearExerciseFeedback = (index) => {
+                    delete exerciseFeedback.value[index];
+                };
+
+                const checkExercise = (index) => {
+                    const answer = exerciseAnswers.value[index].trim();
+                    const exercise = exercises[index];
+
+                    if (!answer) {
+                        exerciseFeedback.value[index] = {
+                            correct: false,
+                            message: '✏️ Escribe una consulta primero'
+                        };
+                        return;
+                    }
+
+                    const isCorrect = exercise.validation(answer);
+
+                    exerciseFeedback.value[index] = {
+                        correct: isCorrect,
+                        message: isCorrect ? '✅ ¡Correcto! Excelente trabajo.' : '❌ No del todo. Revisa la pista o la solución.'
+                    };
+
+                    if (isCorrect && !exercisesCompleted.value.includes(index)) {
+                        exercisesCompleted.value.push(index);
+                    }
+                };
+
+
+                // --- METHODS ---
+                const toggleTheme = () => {
+                    isDark.value = !isDark.value;
+                    if (isDark.value) {
+                        document.body.classList.add('theme-dark');
+                        document.body.classList.remove('theme-light');
+                    } else {
+                        document.body.classList.add('theme-light');
+                        document.body.classList.remove('theme-dark');
+                    }
+                };
+
+                const copyCode = (text) => {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('¡Código copiado al portapapeles!');
+                    });
+                };
+
+                // --- WIZARD LOGIC ---
+                const nextWizardStep = () => {
+                    if (wizardStep.value < wizardTotalSteps) {
+                        wizardStep.value++;
+                        wizardSuccess.value = false;
+                        wizardFeedback.value = '';
+                    }
+                };
+
+                const checkWizardStep2 = () => {
+                    const code = wizardInput.value.step2;
+                    if (code.includes('insertOne') && code.includes('{') && code.includes('name')) {
+                        wizardSuccess.value = true;
+                        wizardFeedback.value = "¡Excelente! Has creado un documento JSON válido.";
+                    } else {
+                        wizardFeedback.value = "Asegúrate de usar insertOne({ ... }) y definir un nombre.";
+                    }
+                };
+
+                const checkWizardStep3 = () => {
+                    const code = wizardInput.value.step3;
+                    if (code.includes('insertMany') && code.includes('[') && code.includes(']')) {
+                        wizardSuccess.value = true;
+                        wizardFeedback.value = "¡Correcto! El array [] es fundamental para insertMany.";
+                    } else {
+                        wizardFeedback.value = "Asegúrate de usar insertMany([ ... ]) con corchetes.";
+                    }
+                };
+
+                const checkWizardStep4 = () => {
+                    const code = wizardInput.value.step4;
+                    if (code.includes('find') && (code.includes('{}') || code.includes('()'))) {
+                        wizardSuccess.value = true;
+                        wizardFeedback.value = "¡Así es! find() es el comando estándar de búsqueda.";
+                    } else {
+                        wizardFeedback.value = "Usa db.heroes.find({}) para buscar todo.";
+                    }
+                };
+
+                const checkWizardStep5 = () => {
+                    const code = wizardInput.value.step5;
+                    if (code.includes('find') && code.includes(':')) {
+                        wizardSuccess.value = true;
+                        wizardFeedback.value = "¡Bien! Estás filtrando por igualdad exacta.";
+                    } else {
+                        wizardFeedback.value = "Define un campo y valor, ej: { class: 'Mago' }";
+                    }
+                };
+
+                const checkWizardStep6 = () => {
+                    const code = wizardInput.value.step6;
+                    if (code.includes('$gt') || code.includes('$gte')) {
+                        wizardSuccess.value = true;
+                        wizardFeedback.value = "¡Correcto! $gt significa 'Greater Than' (Mayor que).";
+                    } else {
+                        wizardFeedback.value = "Usa el operador $gt para 'mayor que'.";
+                    }
+                };
+
+                const checkWizardStep7 = () => {
+                    const code = wizardInput.value.step7;
+                    if (code.includes('$in') && code.includes('[')) {
+                        wizardSuccess.value = true;
+                        wizardFeedback.value = "¡Correcto! El operador $in busca dentro de un array.";
+                    } else {
+                        wizardFeedback.value = "Usa $in con un array de valores: { campo: { $in: [...] } }";
+                    }
+                };
+
+                const checkWizardStep8 = () => {
+                    const code = wizardInput.value.step8;
+                    if (code.includes('class') && (code.includes('$gt') || code.includes('$gte')) && code.includes(',')) {
+                        wizardSuccess.value = true;
+                        wizardFeedback.value = "¡Perfecto! Has combinado condiciones con AND implícito.";
+                    } else {
+                        wizardFeedback.value = "Asegúrate de filtrar por clase Y nivel separados por coma.";
+                    }
+                };
+
+                // --- OPERATOR LOGIC ---
+                const formatOpValue = () => {
+                    if (opType.value === '$in') {
+                        const arr = opValueArray.value.split(',').map(s => s.trim()).map(s => `"${s}"`);
+                        return `[${arr.join(', ')}]`;
+                    }
+                    if (opField.value === 'level') return Number(opValue.value);
+                    return `"${opValue.value}"`;
+                };
+
+                const runOpQuery = () => {
+                    opResults.value = users.value.filter(user => {
+                        const fieldVal = user[opField.value];
+                        let targetVal = opField.value === 'level' ? Number(opValue.value) : opValue.value;
+
+                        if (opType.value === '$eq') return fieldVal == targetVal;
+                        if (opType.value === '$gt') return fieldVal > targetVal;
+                        if (opType.value === '$lt') return fieldVal < targetVal;
+                        if (opType.value === '$in') {
+                            const targets = opValueArray.value.split(',').map(s => s.trim());
+                            return targets.includes(String(fieldVal));
+                        }
+                        return false;
+                    });
+                    nextTick(() => Prism.highlightAll());
+                };
+
+                const generatedOpQuery = computed(() => {
+                    return `db.users.find({ "${opField.value}": { "${opType.value}": ${formatOpValue()} } })`;
+                });
+
+                const getAvatar = (role) => {
+                    if (role === 'Guerrero') return '⚔️';
+                    if (role === 'Mago') return '🧙‍♂️';
+                    if (role === 'Arquero') return '🏹';
+                    return '👤';
+                };
+
+                // --- CHALLENGE LOGIC ---
+                const startChallenge = (id) => {
+                    activeChallenge.value = id;
+                    challengeFeedback.value = '';
+                    challengeFeedback2.value = '';
+                };
+
+                const checkChallenge1 = () => {
+                    if (challengeCode.value.includes('insertMany') && challengeCode.value.includes('[')) {
+                        challengeSuccess.value = true;
+                        challengeFeedback.value = '¡Correcto! Sintaxis perfecta.';
+                    } else {
+                        challengeSuccess.value = false;
+                        challengeFeedback.value = 'Revisa: insertMany([ {obj1}, {obj2} ])';
+                    }
+                };
+
+                const checkChallenge2 = () => {
+                    const q = challengeQuery.value.replace(/\s/g, '');
+                    if (q.includes('$gt:50') && q.includes('role:"Mago"')) {
+                        challengeSuccess2.value = true;
+                        challengeFeedback2.value = '¡Excelente! Query multi-condición exitosa.';
+                    } else {
+                        challengeSuccess2.value = false;
+                        challengeFeedback2.value = 'Falta: { level: {$gt: 50}, role: "Mago" }';
+                    }
+                };
+
+                // Init
+                onMounted(() => {
+                    runOpQuery();
+                    Prism.highlightAll();
+                });
+
+                return {
+                    isDark, toggleTheme, copyCode,
+                    currentTab, tabs,
+                    introView,
+                    users,
+                    // Wizard
+                    wizardStep, wizardTotalSteps, wizardSuccess, wizardFeedback, wizardInput, wizardSteps, nextWizardStep,
+                    checkWizardStep2, checkWizardStep3, checkWizardStep4, checkWizardStep5, checkWizardStep6, checkWizardStep7, checkWizardStep8,
+                    // Ops
+                    opField, opType, opValue, opValueArray, opResults, runOpQuery, formatOpValue, generatedOpQuery,
+                    getAvatar,
+                    // Challenges
+                    activeChallenge, startChallenge,
+                    challengeCode, checkChallenge1, challengeFeedback, challengeSuccess,
+                    challengeQuery, checkChallenge2, challengeFeedback2, challengeSuccess2,
+                    // Population
+                    populationScript,
+                    // Exercises
+                    exercises, totalExercises, exercisesCompleted, exerciseAnswers, exerciseFeedback,
+                    showHints, showSolutions, toggleHint, toggleSolution, checkExercise, clearExerciseFeedback
+                };
+            }
+        }).mount('#app');
+    </script>
+
+    <style>
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,1 @@
+oracledb-6.10.0-linux-arm64.node v20.19.2 71ba4e79b3fb8ffe6191e84eb0422c9bdfbb6c9d 8b14d5980d7d6116abb8865c7baed9e458698dbf Thu, 09 Oct 2025 13:43:20 GMT
