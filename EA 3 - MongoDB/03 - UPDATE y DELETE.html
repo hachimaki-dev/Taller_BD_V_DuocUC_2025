@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB: UPDATE & DELETE - Modificando el Mundo</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Verdana&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- RETRO WEB 1.0 MODERNIZED --- */
+        :root {
+            --bg-desktop: #008080;
+            --win-bg: #c0c0c0;
+            --win-text: #000000;
+            --win-border-light: #ffffff;
+            --win-border-dark: #808080;
+            --win-border-black: #000000;
+            --header-bg: #000080;
+            --header-text: #ffffff;
+            --link-color: #0000ff;
+            --code-bg: #000000;
+            --code-text: #00ff00;
+        }
+
+        .theme-dark {
+            --bg-desktop: #000000;
+            --win-bg: #202020;
+            --win-text: #00ff00;
+            --win-border-light: #00ff00;
+            --win-border-dark: #004400;
+            --win-border-black: #002200;
+            --header-bg: #004400;
+            --header-text: #00ff00;
+            --link-color: #00ff00;
+            --code-bg: #101010;
+            --code-text: #00ff00;
+        }
+
+        body {
+            background-color: var(--bg-desktop);
+            font-family: 'Times New Roman', Times, serif;
+            color: var(--win-text);
+            background-image: url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000000' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        /* Retro Window Container */
+        .retro-window {
+            background-color: var(--win-bg);
+            border: 3px solid;
+            border-color: var(--win-border-light) var(--win-border-black) var(--win-border-black) var(--win-border-light);
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+            padding: 4px;
+        }
+
+        .window-title-bar {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 4px 8px;
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        /* Retro Buttons */
+        .retro-btn {
+            background: var(--win-bg);
+            border: 2px solid;
+            border-color: var(--win-border-light) var(--win-border-black) var(--win-border-black) var(--win-border-light);
+            color: var(--win-text);
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            font-weight: bold;
+            padding: 6px 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+            transition: transform 0.1s;
+        }
+
+        .retro-btn:active {
+            border-color: var(--win-border-black) var(--win-border-light) var(--win-border-light) var(--win-border-black);
+            transform: translate(1px, 1px);
+        }
+
+        .retro-btn:hover {
+            outline: 1px dotted var(--win-border-black);
+        }
+
+        /* Fieldset / Group Box */
+        .retro-fieldset {
+            border: 2px solid;
+            border-color: var(--win-border-dark) var(--win-border-light) var(--win-border-light) var(--win-border-dark);
+            padding: 16px;
+            margin-bottom: 16px;
+            background: var(--win-bg);
+        }
+
+        .retro-legend {
+            padding: 0 8px;
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            font-weight: bold;
+        }
+
+        /* Tabs */
+        .retro-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: -2px;
+            padding-left: 8px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .retro-tab {
+            background: var(--win-bg);
+            border: 2px solid;
+            border-color: var(--win-border-light) var(--win-border-black) var(--win-bg) var(--win-border-light);
+            padding: 6px 12px;
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            margin-bottom: 0;
+            position: relative;
+            top: 2px;
+        }
+
+        .retro-tab.active {
+            border-bottom-color: var(--win-bg);
+            top: 0;
+            padding-bottom: 8px;
+            font-weight: bold;
+            z-index: 20;
+        }
+
+        /* Code Editor */
+        .retro-editor {
+            background: var(--code-bg);
+            color: var(--code-text);
+            font-family: 'Courier New', monospace;
+            border: 2px solid;
+            border-color: var(--win-border-dark) var(--win-border-light) var(--win-border-light) var(--win-border-dark);
+            padding: 10px;
+            width: 100%;
+            resize: vertical;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 16px;
+            background: var(--win-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--win-bg);
+            border: 2px solid;
+            border-color: var(--win-border-light) var(--win-border-black) var(--win-border-black) var(--win-border-light);
+        }
+
+        ::-webkit-scrollbar-button {
+            background: var(--win-bg);
+            border: 2px solid;
+            border-color: var(--win-border-light) var(--win-border-black) var(--win-border-black) var(--win-border-light);
+            height: 16px;
+        }
+
+        /* Alerts */
+        .retro-alert {
+            border: 2px solid;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .retro-alert-info {
+            border-color: var(--win-border-dark);
+            background: var(--win-bg);
+        }
+
+        .retro-alert-warning {
+            border-color: #808000;
+            background: #ffffcc;
+            color: black;
+        }
+
+        .retro-alert-danger {
+            background: #ffcccc;
+            border-color: #800000;
+            color: black;
+        }
+
+        .retro-alert-success {
+            background: #ccffcc;
+            border-color: #008000;
+            color: black;
+        }
+
+        /* Animations */
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        /* Utility overrides */
+        .text-shadow {
+            text-shadow: 1px 1px 0px white;
+        }
+
+        .theme-dark .text-shadow {
+            text-shadow: 1px 1px 0px black;
+        }
+    </style>
+</head>
+
+<body class="theme-light p-4">
+
+    <div id="app" class="max-w-6xl mx-auto">
+
+        <!-- HEADER -->
+        <header class="retro-window mb-4">
+            <div class="window-title-bar">
+                <span>MongoDB: UPDATE & DELETE</span>
+                <div class="flex gap-1">
+                    <button class="retro-btn" style="padding: 0 4px; min-width: 20px;">_</button>
+                    <button class="retro-btn" style="padding: 0 4px; min-width: 20px;">□</button>
+                    <button class="retro-btn" style="padding: 0 4px; min-width: 20px;">×</button>
+                </div>
+            </div>
+            <div class="p-4 flex justify-between items-center bg-[var(--win-bg)]">
+                <div class="flex items-center gap-4">
+                    <div class="text-4xl">💾</div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-shadow">UPDATE & DELETE</h1>
+                        <p class="text-sm">Modificando el Mundo • Tutorial Interactivo</p>
+                    </div>
+                </div>
+
+                <!-- Theme Toggle -->
+                <button @click="toggleTheme" class="retro-btn">
+                    <span v-if="isDark">☀ Light Mode</span>
+                    <span v-else>🌙 Dark Mode</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- NAVIGATION -->
+        <nav class="retro-tabs">
+            <button v-for="(tab, index) in tabs" :key="index" @click="currentTab = index"
+                :class="['retro-tab', currentTab === index ? 'active' : '']">
+                {{ tab.title }}
+            </button>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <main class="retro-window min-h-[600px]">
+
+            <!-- TAB 0: INTRODUCCIÓN -->
+            <div v-if="currentTab === 0" class="space-y-8">
+                <div class="text-center py-8">
+                    <div class="text-8xl mb-4 blink">⚔️</div>
+                    <h2 class="text-4xl font-bold mb-4" style="font-family: 'Times New Roman', serif;">
+                        Bienvenido al Campo de Batalla
+                    </h2>
+                    <p class="text-lg opacity-80 mb-6 font-mono">
+                        Ya sabes cómo <strong>crear</strong> y <strong>buscar</strong> héroes.<br>
+                        Ahora aprenderás a <strong class="text-blue-800 dark:text-blue-400">modificarlos</strong> y
+                        <strong class="text-red-800 dark:text-red-400">eliminarlos</strong>.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- UPDATE Card -->
+                    <div class="retro-fieldset">
+                        <legend class="retro-legend">UPDATE</legend>
+                        <div class="text-4xl mb-3">🔄</div>
+                        <p class="mb-4">
+                            Modifica documentos existentes. Cambia niveles, actualiza equipamiento, añade habilidades.
+                        </p>
+                        <ul class="list-disc pl-5 space-y-2 text-sm">
+                            <li><strong>updateOne()</strong> - Actualiza un documento</li>
+                            <li><strong>updateMany()</strong> - Actualiza múltiples</li>
+                            <li><strong>$set, $inc, $push</strong> - Operadores</li>
+                        </ul>
+                    </div>
+
+                    <!-- DELETE Card -->
+                    <div class="retro-fieldset">
+                        <legend class="retro-legend">DELETE</legend>
+                        <div class="text-4xl mb-3">💀</div>
+                        <p class="mb-4">
+                            Elimina documentos de la base de datos. ⚠️ Operación irreversible.
+                        </p>
+                        <ul class="list-disc pl-5 space-y-2 text-sm">
+                            <li><strong>deleteOne()</strong> - Elimina un documento</li>
+                            <li><strong>deleteMany()</strong> - Elimina múltiples</li>
+                            <li>⚠️ Siempre hacer <code>find()</code> antes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="retro-alert retro-alert-danger">
+                    <h4 class="font-bold mb-2 flex items-center gap-2">
+                        <span class="text-2xl">⚠️</span> Regla de Oro
+                    </h4>
+                    <p class="text-sm">
+                        Antes de ejecutar <code>updateMany()</code> o <code>deleteMany()</code>,
+                        <strong>SIEMPRE</strong> ejecuta primero un <code>find()</code> con el mismo filtro.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <button @click="currentTab = 1" class="retro-btn text-lg">
+                        ¡Comenzar Tutorial! 🚀
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: UPDATE BÁSICO -->
+            <div v-if="currentTab === 1" class="space-y-6">
+                <h2 class="text-3xl font-bold mb-4">🔄 UPDATE Básico: updateOne()</h2>
+
+                <!-- Documentación $set -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">Operador $set</legend>
+                    <p class="mb-3">
+                        El operador <code>$set</code> establece el valor de un campo. Si no existe, lo crea.
+                    </p>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">db.collection.updateOne(
+  { filtro },           // ¿Qué documento actualizar?
+  { $set: { campo: nuevoValor } }  // ¿Qué cambiar?
+)</code></pre>
+                    </div>
+                    <div class="retro-alert retro-alert-info">
+                        <strong>Ejemplo:</strong> Cambiar el arma de Link
+                    </div>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">db.heroes.updateOne(
+  { name: "Link" },
+  { $set: { weapon: "Master Sword" } }
+)</code></pre>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 1: $set -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 1: Cambiar el arma de Link</legend>
+                    <p class="text-sm mb-3">
+                        Link acaba de encontrar la <strong>Master Sword</strong>.
+                        Actualiza su campo <code>weapon</code> de "Espada de Madera" a "Master Sword".
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex1" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex1')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex1"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex1.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex1.message }}
+                    </div>
+                </div>
+
+                <!-- Documentación $inc -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">Operador $inc</legend>
+                    <p class="mb-3">
+                        El operador <code>$inc</code> <strong>incrementa</strong> (o decrementa) un valor numérico.
+                    </p>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">db.collection.updateOne(
+  { filtro },
+  { $inc: { campo: cantidad } }  // Positivo suma, negativo resta
+)</code></pre>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div class="retro-alert retro-alert-success">
+                            <strong>Incrementar:</strong>
+                            <code>{ $inc: { level: 1 } }</code>
+                        </div>
+                        <div class="retro-alert retro-alert-danger">
+                            <strong>Decrementar:</strong>
+                            <code>{ $inc: { hp: -50 } }</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 2: $inc -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 2: Frodo sube de nivel</legend>
+                    <p class="text-sm mb-3">
+                        Frodo completó una misión. Incrementa su <code>level</code> en <strong>1</strong> usando
+                        <code>$inc</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex2" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex2')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex2"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex2.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex2.message }}
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button @click="currentTab = 2" class="retro-btn">
+                        Siguiente: updateMany() →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: UPDATE MÚLTIPLE -->
+            <div v-if="currentTab === 2" class="space-y-6">
+                <h2 class="text-3xl font-bold mb-4">🔄 UPDATE Múltiple: updateMany()</h2>
+
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">updateMany()</legend>
+                    <p class="mb-3">
+                        Actualiza <strong>TODOS</strong> los documentos que coincidan con el filtro.
+                    </p>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">db.collection.updateMany(
+  { filtro },           // Todos los que cumplan esto
+  { $operador: { ... } }  // Serán modificados así
+)</code></pre>
+                    </div>
+                    <div class="retro-alert retro-alert-warning">
+                        <strong>⚠️ Cuidado:</strong> updateMany() puede afectar múltiples documentos.
+                        Siempre verifica con <code>find()</code> primero.
+                    </div>
+                </div>
+
+                <!-- Ejercicio 3: Buff masivo -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 3: Buff a todos los Guerreros</legend>
+                    <p class="text-sm mb-3">
+                        ¡Evento especial! Todos los <code>class: "Guerrero"</code> reciben <strong>+5 niveles</strong>.
+                        Usa <code>updateMany()</code> con <code>$inc</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex3" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex3')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex3"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex3.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex3.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 4: Buff condicional -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 4: Ayuda a los novatos</legend>
+                    <p class="text-sm mb-3">
+                        Todos los héroes con <code>level</code> menor a 20 reciben <strong>+50 HP</strong>.
+                        Combina <code>updateMany()</code>, filtro con <code>$lt</code>, y <code>$inc</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex4" class="retro-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex4')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex4"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex4.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex4.message }}
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 1" class="retro-btn">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 3" class="retro-btn">
+                        Siguiente: Arrays →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 3: OPERADORES DE ARRAYS -->
+            <div v-if="currentTab === 3" class="space-y-6">
+                <h2 class="text-3xl font-bold mb-4">📦 Manipulando Arrays</h2>
+
+                <!-- $push -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">Operador $push</legend>
+                    <p class="mb-3">
+                        Añade un elemento al <strong>final</strong> de un array. Si el array no existe, lo crea.
+                    </p>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">db.heroes.updateOne(
+  { name: "Gandalf" },
+  { $push: { skills: "Ice Blast" } }
+)</code></pre>
+                    </div>
+                    <div class="retro-alert retro-alert-success">
+                        <strong>Resultado:</strong>
+                        <code>skills: ["Fireball", "Lightning", "Teleport", "Ice Blast"]</code>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 5: $push -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 5: Gandalf aprende Ice Blast</legend>
+                    <p class="text-sm mb-3">
+                        Gandalf descubrió un nuevo hechizo. Añade <strong>"Ice Blast"</strong> a su array
+                        <code>skills</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex5" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex5')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex5"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex5.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex5.message }}
+                    </div>
+                </div>
+
+                <!-- $pull -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">Operador $pull</legend>
+                    <p class="mb-3">
+                        <strong>Elimina</strong> todas las ocurrencias de un valor de un array.
+                    </p>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">db.heroes.updateOne(
+  { name: "Sam" },
+  { $pull: { skills: "Cocinar" } }
+)</code></pre>
+                    </div>
+                    <div class="retro-alert retro-alert-danger">
+                        <strong>Resultado:</strong> "Cocinar" se elimina del array <code>skills</code>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 6: $pull -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 6: Sam olvida Cocinar</legend>
+                    <p class="text-sm mb-3">
+                        Sam se enfoca en el combate. Elimina <strong>"Cocinar"</strong> de su array <code>skills</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex6" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex6')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex6"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex6.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex6.message }}
+                    </div>
+                </div>
+
+                <!-- $addToSet -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">Operador $addToSet</legend>
+                    <p class="mb-3">
+                        Añade un elemento al array <strong>solo si no existe</strong> (evita duplicados).
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div class="retro-alert retro-alert-info">
+                            <strong>$push:</strong> Siempre añade (permite duplicados)
+                            <code>{ $push: { tags: "epic" } }</code>
+                        </div>
+                        <div class="retro-alert retro-alert-success">
+                            <strong>$addToSet:</strong> Solo si es único
+                            <code>{ $addToSet: { tags: "epic" } }</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 2" class="retro-btn">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 4" class="retro-btn">
+                        Siguiente: DELETE →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 4: DELETE -->
+            <div v-if="currentTab === 4" class="space-y-6">
+                <h2 class="text-3xl font-bold mb-4">💀 DELETE: Eliminando Documentos</h2>
+
+                <div class="retro-alert retro-alert-danger">
+                    <h4 class="font-bold mb-2 flex items-center gap-2 text-xl">
+                        <span class="text-3xl blink">⚠️</span> ADVERTENCIA CRÍTICA
+                    </h4>
+                    <ul class="list-disc pl-5 space-y-2 text-sm">
+                        <li>🚫 <strong>DELETE es IRREVERSIBLE</strong> - No hay "deshacer"</li>
+                        <li>✅ <strong>SIEMPRE</strong> ejecuta <code>find()</code> con el mismo filtro primero</li>
+                        <li>💾 Haz backups antes de operaciones masivas</li>
+                        <li>🧪 Prueba en una base de datos de desarrollo primero</li>
+                    </ul>
+                </div>
+
+                <!-- deleteOne -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">deleteOne()</legend>
+                    <p class="mb-3">
+                        Elimina <strong>el primer documento</strong> que coincida con el filtro.
+                    </p>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">// 1. SIEMPRE verificar primero
+db.heroes.find({ name: "Link" })
+
+// 2. Si estás seguro, eliminar
+db.heroes.deleteOne({ name: "Link" })</code></pre>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 7: deleteOne -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 7: Eliminar a Link</legend>
+                    <p class="text-sm mb-3">
+                        Link (nivel 1) no sobrevivió su primera misión. Elimínalo de la base de datos.
+                    </p>
+                    <div class="retro-alert retro-alert-warning mb-3">
+                        <strong>Paso 1:</strong> Verifica primero con <code>find()</code>
+                    </div>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex7" class="retro-editor h-20" spellcheck="false"
+                            placeholder="db.heroes.deleteOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex7')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex7"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex7.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex7.message }}
+                    </div>
+                </div>
+
+                <!-- deleteMany -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">deleteMany()</legend>
+                    <p class="mb-3">
+                        Elimina <strong>TODOS</strong> los documentos que coincidan con el filtro.
+                    </p>
+                    <div class="retro-fieldset" style="background: var(--code-bg); color: var(--code-text);">
+                        <pre class="text-xs"><code class="language-javascript">// 1. VERIFICAR cuántos serán eliminados
+db.heroes.find({ level: { $lt: 15 } }).count()
+
+// 2. Si estás 100% seguro
+db.heroes.deleteMany({ level: { $lt: 15 } })</code></pre>
+                    </div>
+                    <div class="retro-alert retro-alert-danger">
+                        <strong>⚠️ PELIGRO:</strong> <code>deleteMany({})</code> sin filtro elimina TODA la colección.
+                    </div>
+                </div>
+
+                <!-- Ejercicio 8: deleteMany -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">🎯 Ejercicio 8: Limpiar héroes débiles</legend>
+                    <p class="text-sm mb-3">
+                        Elimina TODOS los héroes con <code>level</code> menor a 15.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex8" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex8')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex8"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex8.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex8.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio Desafío -->
+                <div class="retro-fieldset" style="border-width: 4px;">
+                    <legend class="retro-legend">🏆 Desafío Final: Eliminar guerreros débiles</legend>
+                    <p class="text-sm mb-3">
+                        Elimina todos los <code>class: "Guerrero"</code> que tengan <code>hp</code> menor a 300.
+                        Combina filtros con <code>$and</code> implícito.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex9" class="retro-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex9')" class="retro-btn">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex9"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex9.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex9.message }}
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 3" class="retro-btn">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 5" class="retro-btn">
+                        Siguiente: Ejercicios →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 5: EJERCICIOS -->
+            <div v-if="currentTab === 5" class="space-y-6">
+                <h2 class="text-3xl font-bold mb-4">🎯 Ejercicios Prácticos</h2>
+
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">📚 12 Ejercicios de Nivel Básico</legend>
+                    <p class="mb-3">Practica todo lo aprendido con estos 12 ejercicios usando los datos reales de
+                        nuestra base de datos de héroes.</p>
+                    <div class="retro-alert retro-alert-info">
+                        <strong>💡 Tip:</strong> Todos los ejercicios usan los héroes que insertaste: Aragorn, Gimli,
+                        Gandalf, Legolas, etc.
+                    </div>
+                </div>
+
+                <!-- Ejercicio 10: $set básico -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">1/12: Cambiar arma de Aragorn</legend>
+                    <p class="text-sm mb-3">
+                        Aragorn recuperó su espada ancestral. Cambia su <code>weapon</code> de "Espada" a
+                        <strong>"Andúril"</strong> usando <code>$set</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex10" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex10')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex10"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex10.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex10.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 11: $inc básico -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">2/12: Curar a Gimli</legend>
+                    <p class="text-sm mb-3">
+                        Gimli se curó después de una batalla. Incrementa su <code>hp</code> en <strong>+100</strong>
+                        usando <code>$inc</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex11" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex11')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex11"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex11.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex11.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 12: $push básico -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">3/12: Merlin aprende un nuevo hechizo</legend>
+                    <p class="text-sm mb-3">
+                        Merlin descubrió un hechizo antiguo. Añade <strong>"Meteor"</strong> a su array
+                        <code>skills</code> usando <code>$push</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex12" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex12')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex12"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex12.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex12.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 13: $inc con campo específico -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">4/12: Reabastecer flechas de Legolas</legend>
+                    <p class="text-sm mb-3">
+                        Legolas necesita más flechas. Incrementa su campo <code>arrows</code> en <strong>+50</strong>
+                        usando <code>$inc</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex13" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex13')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex13"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex13.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex13.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 14: updateMany básico -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">5/12: Buff de flechas para todos los Arqueros</legend>
+                    <p class="text-sm mb-3">
+                        Evento especial: Todos los <code>class: "Arquero"</code> reciben <strong>+20 flechas</strong>.
+                        Usa <code>updateMany()</code> con <code>$inc</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex14" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex14')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex14"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex14.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex14.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 15: updateMany con mana -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">6/12: Buff masivo de mana</legend>
+                    <p class="text-sm mb-3">
+                        Todos los <code>class: "Mago"</code> reciben un boost de poder. Incrementa su <code>mana</code>
+                        en <strong>+200</strong>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex15" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex15')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex15"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex15.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex15.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 16: $pull -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">7/12: Ezio pierde una habilidad</legend>
+                    <p class="text-sm mb-3">
+                        Ezio fue detectado. Elimina <strong>"Sigilo"</strong> de su array <code>skills</code> usando
+                        <code>$pull</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex16" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex16')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex16"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex16.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex16.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 17: updateMany con filtro -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">8/12: Buff para héroes veteranos</legend>
+                    <p class="text-sm mb-3">
+                        Todos los héroes con <code>level >= 80</code> reciben <strong>+50 HP</strong>. Usa
+                        <code>updateMany()</code> con filtro <code>$gte</code>.
+                    </p>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex17" class="retro-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex17')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex17"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex17.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex17.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 18: deleteOne -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">9/12: Eliminar a Sam</legend>
+                    <p class="text-sm mb-3">
+                        Sam decidió retirarse. Elimínalo de la base de datos usando <code>deleteOne()</code>.
+                    </p>
+                    <div class="retro-alert retro-alert-warning mb-3">
+                        <strong>⚠️ Recuerda:</strong> Siempre verifica primero con
+                        <code>db.heroes.find({name: "Sam"})</code>
+                    </div>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex18" class="retro-editor h-20" spellcheck="false"
+                            placeholder="db.heroes.deleteOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex18')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex18"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex18.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex18.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 19: deleteMany básico -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">10/12: Limpiar héroes novatos</legend>
+                    <p class="text-sm mb-3">
+                        Elimina TODOS los héroes con <code>level < 20</code> usando <code>deleteMany()</code>.
+                    </p>
+                    <div class="retro-alert retro-alert-danger mb-3">
+                        <strong>🚨 IMPORTANTE:</strong> Verifica primero:
+                        <code>db.heroes.find({level: {$lt: 20}})</code>
+                    </div>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex19" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex19')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex19"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex19.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex19.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 20: deleteMany con filtros múltiples -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">11/12: Eliminar Asesinos débiles</legend>
+                    <p class="text-sm mb-3">
+                        Elimina todos los <code>class: "Asesino"</code> que tengan <code>level < 85</code>. Combina dos
+                        filtros.
+                    </p>
+                    <div class="retro-alert retro-alert-warning mb-3">
+                        <strong>Paso 1:</strong> <code>db.heroes.find({class: "Asesino", level: {$lt: 85}})</code>
+                    </div>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex20" class="retro-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex20')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex20"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex20.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex20.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 21: Desafío final -->
+                <div class="retro-fieldset" style="border-width: 4px;">
+                    <legend class="retro-legend">12/12 🏆 DESAFÍO FINAL: Buff para Guerreros élite</legend>
+                    <p class="text-sm mb-3">
+                        Combina todo lo aprendido: Todos los <code>class: "Guerrero"</code> con <code>level >= 80</code>
+                        reciben <strong>+100 HP</strong>.
+                        Usa <code>updateMany()</code> con múltiples filtros y <code>$inc</code>.
+                    </p>
+                    <div class="retro-alert retro-alert-success mb-3">
+                        <strong>💡 Pista:</strong> Necesitas combinar filtro de clase Y filtro de nivel con
+                        <code>$gte</code>
+                    </div>
+                    <div class="mb-3">
+                        <textarea v-model="exercises.ex21" class="retro-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex21')" class="retro-btn">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex21"
+                        :class="['mt-3 p-3 border-2 font-bold', feedback.ex21.success ? 'retro-alert-success' : 'retro-alert-danger']">
+                        {{ feedback.ex21.message }}
+                    </div>
+                </div>
+
+                <div class="retro-alert retro-alert-success">
+                    <h4 class="font-bold mb-3 text-xl">🎉 ¡Felicitaciones!</h4>
+                    <p class="mb-3">
+                        Si completaste los 12 ejercicios, ahora dominas UPDATE y DELETE en MongoDB.
+                        Estás listo para trabajar con datos reales de forma segura y eficiente.
+                    </p>
+                    <div class="retro-fieldset" style="background: white; color: black;">
+                        <strong>✅ Has aprendido:</strong>
+                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                            <li>Actualizar documentos individuales con <code>updateOne()</code></li>
+                            <li>Actualizar múltiples documentos con <code>updateMany()</code></li>
+                            <li>Usar operadores: <code>$set</code>, <code>$inc</code>, <code>$push</code>,
+                                <code>$pull</code>
+                            </li>
+                            <li>Eliminar documentos con <code>deleteOne()</code> y <code>deleteMany()</code></li>
+                            <li>Combinar filtros para operaciones precisas</li>
+                            <li>Aplicar mejores prácticas de seguridad</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 4" class="retro-btn">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 6" class="retro-btn">
+                        Siguiente: Cheat Sheet →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 6: CHEAT SHEET -->
+            <div v-if="currentTab === 6" class="space-y-6">
+                <h2 class="text-3xl font-bold mb-4">📋 Cheat Sheet: Resumen Rápido</h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- UPDATE -->
+                    <div class="retro-fieldset">
+                        <legend class="retro-legend">🔄 UPDATE</legend>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-sm mb-1">updateOne(filter, update)</h4>
+                                <div class="retro-fieldset"
+                                    style="background: var(--code-bg); color: var(--code-text);">
+                                    <pre class="text-xs"><code class="language-javascript">db.coll.updateOne(
+  { _id: 1 },
+  { $set: { status: "active" } }
+)</code></pre>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm mb-1">updateMany(filter, update)</h4>
+                                <div class="retro-fieldset"
+                                    style="background: var(--code-bg); color: var(--code-text);">
+                                    <pre class="text-xs"><code class="language-javascript">db.coll.updateMany(
+  { status: "pending" },
+  { $inc: { retries: 1 } }
+)</code></pre>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm mb-1">Operadores Comunes</h4>
+                                <ul class="text-xs space-y-1 list-disc pl-4">
+                                    <li><code>$set</code>: Modifica/Crea campo</li>
+                                    <li><code>$inc</code>: Incrementa número</li>
+                                    <li><code>$push</code>: Añade a array</li>
+                                    <li><code>$pull</code>: Quita de array</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DELETE -->
+                    <div class="retro-fieldset">
+                        <legend class="retro-legend">💀 DELETE</legend>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-sm mb-1">deleteOne(filter)</h4>
+                                <div class="retro-fieldset"
+                                    style="background: var(--code-bg); color: var(--code-text);">
+                                    <pre
+                                        class="text-xs"><code class="language-javascript">db.coll.deleteOne({ _id: 1 })</code></pre>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm mb-1">deleteMany(filter)</h4>
+                                <div class="retro-fieldset"
+                                    style="background: var(--code-bg); color: var(--code-text);">
+                                    <pre class="text-xs"><code class="language-javascript">db.users.deleteMany({ 
+  lastLogin: { $lt: new Date('2024-01-01') } 
+})</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mejores Prácticas -->
+                <div class="retro-fieldset">
+                    <legend class="retro-legend">✨ Mejores Prácticas</legend>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div class="retro-alert retro-alert-success">
+                            <strong class="text-lg">✅ HACER</strong>
+                            <ul class="list-disc pl-5 mt-2 space-y-1">
+                                <li>Verificar con <code>find()</code> primero</li>
+                                <li>Usar filtros específicos</li>
+                                <li>Hacer backups regulares</li>
+                                <li>Probar en desarrollo</li>
+                                <li>Documentar cambios masivos</li>
+                            </ul>
+                        </div>
+                        <div class="retro-alert retro-alert-danger">
+                            <strong class="text-lg">❌ NO HACER</strong>
+                            <ul class="list-disc pl-5 mt-2 space-y-1">
+                                <li>Ejecutar delete sin verificar</li>
+                                <li>Usar <code>{}</code> vacío en producción</li>
+                                <li>Modificar sin backup</li>
+                                <li>Ignorar los resultados</li>
+                                <li>Asumir que funcionó</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center py-8">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h3 class="text-3xl font-bold mb-3">
+                        ¡Felicitaciones!
+                    </h3>
+                    <p class="text-lg mb-6">
+                        Ahora dominas el CRUD completo de MongoDB:<br>
+                        <strong>Create, Read, Update, Delete</strong>
+                    </p>
+                    <button @click="currentTab = 0" class="retro-btn">
+                        🔄 Volver al Inicio
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="text-center mt-8 opacity-60 text-sm">
+            <p>MongoDB Tutorial • UPDATE & DELETE • DuocUC 2025</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    isDark: false,
+                    currentTab: 0,
+                    tabs: [
+                        { title: '🏠 Inicio' },
+                        { title: '🔄 UPDATE Básico' },
+                        { title: '🔄 UPDATE Múltiple' },
+                        { title: '📦 Arrays' },
+                        { title: '💀 DELETE' },
+                        { title: '🎯 Ejercicios' },
+                        { title: '📋 Cheat Sheet' }
+                    ],
+                    exercises: {
+                        ex1: '', ex2: '', ex3: '', ex4: '', ex5: '', ex6: '',
+                        ex7: '', ex8: '', ex9: '', ex10: '', ex11: '', ex12: '',
+                        ex13: '', ex14: '', ex15: '', ex16: '', ex17: '', ex18: '',
+                        ex19: '', ex20: '', ex21: ''
+                    },
+                    feedback: {},
+                    solutions: {
+                        ex1: 'db.heroes.updateOne({name:"Link"},{$set:{weapon:"Master Sword"}})',
+                        ex2: 'db.heroes.updateOne({name:"Frodo"},{$inc:{level:1}})',
+                        ex3: 'db.heroes.updateMany({class:"Guerrero"},{$inc:{level:5}})',
+                        ex4: 'db.heroes.updateMany({level:{$lt:20}},{$inc:{hp:50}})',
+                        ex5: 'db.heroes.updateOne({name:"Gandalf"},{$push:{skills:"Ice Blast"}})',
+                        ex6: 'db.heroes.updateOne({name:"Sam"},{$pull:{skills:"Cocinar"}})',
+                        ex7: 'db.heroes.deleteOne({name:"Link"})',
+                        ex8: 'db.heroes.deleteMany({level:{$lt:15}})',
+                        ex9: 'db.heroes.deleteMany({class:"Guerrero",hp:{$lt:300}})',
+                        ex10: 'db.heroes.updateOne({name:"Aragorn"},{$set:{weapon:"Andúril"}})',
+                        ex11: 'db.heroes.updateOne({name:"Gimli"},{$inc:{hp:100}})',
+                        ex12: 'db.heroes.updateOne({name:"Merlin"},{$push:{skills:"Meteor"}})',
+                        ex13: 'db.heroes.updateOne({name:"Legolas"},{$inc:{arrows:50}})',
+                        ex14: 'db.heroes.updateMany({class:"Arquero"},{$inc:{arrows:20}})',
+                        ex15: 'db.heroes.updateMany({class:"Mago"},{$inc:{mana:200}})',
+                        ex16: 'db.heroes.updateOne({name:"Ezio"},{$pull:{skills:"Sigilo"}})',
+                        ex17: 'db.heroes.updateMany({level:{$gte:80}},{$inc:{hp:50}})',
+                        ex18: 'db.heroes.deleteOne({name:"Sam"})',
+                        ex19: 'db.heroes.deleteMany({level:{$lt:20}})',
+                        ex20: 'db.heroes.deleteMany({class:"Asesino",level:{$lt:85}})',
+                        ex21: 'db.heroes.updateMany({class:"Guerrero",level:{$gte:80}},{$inc:{hp:100}})'
+                    }
+                }
+            },
+            methods: {
+                toggleTheme() {
+                    this.isDark = !this.isDark;
+                    document.body.classList.toggle('theme-dark');
+                    document.body.classList.toggle('theme-light');
+                },
+                checkExercise(ex) {
+                    const userCode = this.exercises[ex].replace(/\s+/g, '').toLowerCase();
+                    const solution = this.solutions[ex].replace(/\s+/g, '').toLowerCase();
+
+                    // Validaciones flexibles
+                    let isCorrect = false;
+                    let message = '';
+
+                    switch (ex) {
+                        case 'ex1':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"link"') &&
+                                userCode.includes('$set') &&
+                                userCode.includes('weapon:"mastersword"');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Link ahora tiene la Master Sword.' :
+                                '❌ Usa updateOne() con $set para cambiar el weapon de Link.';
+                            break;
+
+                        case 'ex2':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"frodo"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('level:1');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Frodo subió a nivel 13.' :
+                                '❌ Usa updateOne() con $inc para incrementar el level de Frodo en 1.';
+                            break;
+
+                        case 'ex3':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"guerrero"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('level:5');
+                            message = isCorrect ?
+                                '✅ ¡Genial! Todos los guerreros recibieron +5 niveles.' :
+                                '❌ Usa updateMany() para filtrar por class:"Guerrero" e incrementar level en 5.';
+                            break;
+
+                        case 'ex4':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('level:{$lt:20}') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:50');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Los novatos recibieron +50 HP.' :
+                                '❌ Usa updateMany() con filtro level < 20 e incrementa hp en 50.';
+                            break;
+
+                        case 'ex5':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"gandalf"') &&
+                                userCode.includes('$push') &&
+                                userCode.includes('skills:"iceblast"');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Gandalf aprendió Ice Blast.' :
+                                '❌ Usa updateOne() con $push para añadir "Ice Blast" a skills de Gandalf.';
+                            break;
+
+                        case 'ex6':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"sam"') &&
+                                userCode.includes('$pull') &&
+                                userCode.includes('skills:"cocinar"');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Sam olvidó Cocinar.' :
+                                '❌ Usa updateOne() con $pull para remover "Cocinar" de skills de Sam.';
+                            break;
+
+                        case 'ex7':
+                            isCorrect = userCode.includes('deleteone') &&
+                                userCode.includes('name:"link"');
+                            message = isCorrect ?
+                                '✅ Link fue eliminado. RIP.' :
+                                '❌ Usa deleteOne() con el filtro name:"Link".';
+                            break;
+
+                        case 'ex8':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('level:{$lt:15}');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Héroes débiles eliminados.' :
+                                '❌ Usa deleteMany() con filtro level < 15.';
+                            break;
+
+                        case 'ex9':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('class:"guerrero"') &&
+                                userCode.includes('hp:{$lt:300}');
+                            message = isCorrect ?
+                                '✅ ¡DESAFÍO COMPLETADO! Guerreros débiles eliminados.' :
+                                '❌ Usa deleteMany() con dos filtros: class:"Guerrero" Y hp < 300.';
+                            break;
+
+                        case 'ex10':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"aragorn"') &&
+                                userCode.includes('$set') &&
+                                userCode.includes('weapon:"andúril"');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Aragorn ahora porta Andúril.' :
+                                '❌ Usa updateOne() con $set para cambiar el weapon de Aragorn a "Andúril".';
+                            break;
+
+                        case 'ex11':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"gimli"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:100');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Gimli recuperó 100 HP.' :
+                                '❌ Usa updateOne() con $inc para añadir 100 HP a Gimli.';
+                            break;
+
+                        case 'ex12':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"merlin"') &&
+                                userCode.includes('$push') &&
+                                userCode.includes('skills:"meteor"');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Merlin aprendió Meteor.' :
+                                '❌ Usa updateOne() con $push para añadir "Meteor" a skills de Merlin.';
+                            break;
+
+                        case 'ex13':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"legolas"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('arrows:50');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Legolas recibió 50 flechas adicionales.' :
+                                '❌ Usa updateOne() con $inc para añadir 50 arrows a Legolas.';
+                            break;
+
+                        case 'ex14':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"arquero"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('arrows:20');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Todos los arqueros recibieron +20 flechas.' :
+                                '❌ Usa updateMany() para dar +20 arrows a todos los Arqueros.';
+                            break;
+
+                        case 'ex15':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"mago"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('mana:200');
+                            message = isCorrect ?
+                                '✅ ¡Genial! Todos los magos recibieron +200 mana.' :
+                                '❌ Usa updateMany() para dar +200 mana a todos los Magos.';
+                            break;
+
+                        case 'ex16':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"ezio"') &&
+                                userCode.includes('$pull') &&
+                                userCode.includes('skills:"sigilo"');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Ezio perdió la habilidad Sigilo.' :
+                                '❌ Usa updateOne() con $pull para remover "Sigilo" de skills de Ezio.';
+                            break;
+
+                        case 'ex17':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('level:{$gte:80}') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:50');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Héroes veteranos recibieron +50 HP.' :
+                                '❌ Usa updateMany() con filtro level >= 80 e incrementa hp en 50.';
+                            break;
+
+                        case 'ex18':
+                            isCorrect = userCode.includes('deleteone') &&
+                                userCode.includes('name:"sam"');
+                            message = isCorrect ?
+                                '✅ Sam fue eliminado. Adiós, Sam.' :
+                                '❌ Usa deleteOne() con el filtro name:"Sam".';
+                            break;
+
+                        case 'ex19':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('level:{$lt:20}');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Héroes novatos eliminados.' :
+                                '❌ Usa deleteMany() con filtro level < 20.';
+                            break;
+
+                        case 'ex20':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('class:"asesino"') &&
+                                userCode.includes('level:{$lt:85}');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Asesinos débiles eliminados.' :
+                                '❌ Usa deleteMany() con dos filtros: class:"Asesino" Y level < 85.';
+                            break;
+
+                        case 'ex21':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"guerrero"') &&
+                                userCode.includes('level:{$gte:80}') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:100');
+                            message = isCorrect ?
+                                '🏆 ¡DESAFÍO COMPLETADO! Guerreros élite recibieron +100 HP. ¡Felicitaciones!' :
+                                '❌ Usa updateMany() con filtros class:"Guerrero" Y level >= 80, luego incrementa hp en 100.';
+                            break;
+                    }
+
+                    this.feedback[ex] = {
+                        success: isCorrect,
+                        message: message
+                    };
+                }
+            },
+            mounted() {
+                // Detectar preferencia de tema del sistema
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    this.isDark = true;
+                    document.body.classList.add('theme-dark');
+                } else {
+                    document.body.classList.add('theme-light');
+                }
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+
+</html>

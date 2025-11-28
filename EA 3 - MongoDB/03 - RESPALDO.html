@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB: UPDATE & DELETE - Modificando el Mundo</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Verdana&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- WEB 2.0/1.0 HYBRID AESTHETICS --- */
+        :root {
+            --glass-shine: rgba(255, 255, 255, 0.4);
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-deep: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        body {
+            font-family: 'Verdana', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        code,
+        pre,
+        textarea.code-editor {
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+
+        /* Themes */
+        .theme-light {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #333;
+        }
+
+        .theme-dark {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 25%, #24243e 50%, #0f0c29 75%, #302b63 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e2e8f0;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Glossy Card */
+        .glossy-card {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(249, 250, 251, 0.95));
+            border: 2px solid #e5e7eb;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-dark .glossy-card {
+            background: linear-gradient(to bottom, rgba(45, 55, 72, 0.95), rgba(40, 49, 65, 0.95));
+            border: 2px solid #4a5568;
+            box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        /* Glossy Buttons */
+        .btn-glossy {
+            background: linear-gradient(to bottom, #60a5fa, #3b82f6);
+            border: 2px solid #2563eb;
+            color: white;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-glossy:hover {
+            background: linear-gradient(to bottom, #3b82f6, #2563eb);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-glossy:active {
+            transform: translateY(1px);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-glossy-green {
+            background: linear-gradient(to bottom, #4ade80, #22c55e);
+            border: 2px solid #16a34a;
+        }
+
+        .btn-glossy-green:hover {
+            background: linear-gradient(to bottom, #22c55e, #16a34a);
+        }
+
+        .btn-glossy-orange {
+            background: linear-gradient(to bottom, #fb923c, #f97316);
+            border: 2px solid #ea580c;
+        }
+
+        .btn-glossy-orange:hover {
+            background: linear-gradient(to bottom, #f97316, #ea580c);
+        }
+
+        .btn-glossy-red {
+            background: linear-gradient(to bottom, #f87171, #ef4444);
+            border: 2px solid #dc2626;
+        }
+
+        .btn-glossy-red:hover {
+            background: linear-gradient(to bottom, #ef4444, #dc2626);
+        }
+
+        .btn-glossy-purple {
+            background: linear-gradient(to bottom, #c084fc, #a855f7);
+            border: 2px solid #9333ea;
+        }
+
+        .btn-glossy-purple:hover {
+            background: linear-gradient(to bottom, #a855f7, #9333ea);
+        }
+
+        /* Tabs */
+        .tab-active {
+            background: white;
+            border-bottom: 4px solid #3b82f6;
+            color: #2563eb;
+            font-weight: bold;
+            box-shadow: 0 -2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .theme-dark .tab-active {
+            background: #2d3748;
+            border-bottom: 4px solid #60a5fa;
+            color: #60a5fa;
+        }
+
+        /* Code Window */
+        .code-window {
+            background: #272822;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            border: 2px solid #444;
+            position: relative;
+        }
+
+        .code-window::before {
+            content: "● ● ●";
+            color: #555;
+            font-size: 10px;
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            letter-spacing: 2px;
+        }
+
+        .code-editor {
+            width: 100%;
+            background: transparent;
+            color: #f8f8f2;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 14px;
+            line-height: 1.5;
+            padding-top: 15px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #94a3b8, #64748b);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.4s ease-out;
+        }
+
+        /* Warning Box */
+        .warning-box {
+            border-left: 4px solid #f59e0b;
+            background: linear-gradient(to right, rgba(251, 146, 60, 0.1), transparent);
+        }
+
+        .theme-dark .warning-box {
+            background: linear-gradient(to right, rgba(251, 146, 60, 0.2), transparent);
+        }
+
+        /* Success Box */
+        .success-box {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.1), transparent);
+        }
+
+        .theme-dark .success-box {
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.2), transparent);
+        }
+
+        /* Danger Box */
+        .danger-box {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.1), transparent);
+        }
+
+        .theme-dark .danger-box {
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.2), transparent);
+        }
+    </style>
+</head>
+
+<body class="theme-light min-h-screen p-4 md:p-8">
+
+    <div id="app" class="max-w-6xl mx-auto">
+
+        <!-- HEADER -->
+        <header class="glossy-card p-6 mb-8 flex justify-between items-center relative overflow-hidden">
+            <div class="z-10">
+                <h1
+                    class="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-red-500 to-purple-600 pb-2">
+                    UPDATE & DELETE
+                </h1>
+                <p class="opacity-70 text-sm md:text-base">Modificando el Mundo • Tutorial Interactivo</p>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button @click="toggleTheme"
+                class="z-10 p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:scale-110 transition-transform shadow-lg border-2 border-gray-300">
+                <span v-if="isDark" class="text-2xl">☀️</span>
+                <span v-else class="text-2xl">🌙</span>
+            </button>
+
+            <!-- Decorative background blob -->
+            <div
+                class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-orange-200 to-purple-200 dark:from-orange-900 dark:to-purple-900 rounded-full blur-3xl opacity-40 -mr-32 -mt-32">
+            </div>
+        </header>
+
+        <!-- NAVIGATION -->
+        <nav class="flex space-x-2 mb-6 overflow-x-auto pb-2">
+            <button v-for="(tab, index) in tabs" :key="index" @click="currentTab = index"
+                :class="['px-6 py-3 rounded-t-xl transition-all whitespace-nowrap', currentTab === index ? 'tab-active transform -translate-y-1' : 'opacity-60 hover:opacity-100 bg-white/50 dark:bg-gray-800/50']">
+                {{ tab.title }}
+            </button>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <main class="glossy-card p-6 md:p-8 min-h-[600px]">
+
+            <!-- TAB 0: INTRODUCCIÓN -->
+            <div v-if="currentTab === 0" class="animate-fade-in space-y-8">
+                <div class="text-center py-8">
+                    <div class="text-8xl mb-4">⚔️</div>
+                    <h2
+                        class="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-purple-600">
+                        Bienvenido al Campo de Batalla
+                    </h2>
+                    <p class="text-lg opacity-80 mb-6">
+                        Ya sabes cómo <strong>crear</strong> y <strong>buscar</strong> héroes.<br>
+                        Ahora aprenderás a <strong class="text-orange-600">modificarlos</strong> y <strong
+                            class="text-red-600">eliminarlos</strong>.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- UPDATE Card -->
+                    <div class="glossy-card p-6 border-l-4 border-orange-500">
+                        <div class="text-5xl mb-3">🔄</div>
+                        <h3 class="text-2xl font-bold mb-3 text-orange-600">UPDATE</h3>
+                        <p class="mb-4 opacity-90">
+                            Modifica documentos existentes. Cambia niveles, actualiza equipamiento, añade habilidades.
+                        </p>
+                        <ul class="space-y-2 text-sm">
+                            <li>✅ <code class="bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded">updateOne()</code> -
+                                Actualiza un documento</li>
+                            <li>✅ <code class="bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded">updateMany()</code> -
+                                Actualiza múltiples</li>
+                            <li>✅ <code
+                                    class="bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded">$set, $inc, $push, $pull</code>
+                                - Operadores</li>
+                        </ul>
+                    </div>
+
+                    <!-- DELETE Card -->
+                    <div class="glossy-card p-6 border-l-4 border-red-500">
+                        <div class="text-5xl mb-3">💀</div>
+                        <h3 class="text-2xl font-bold mb-3 text-red-600">DELETE</h3>
+                        <p class="mb-4 opacity-90">
+                            Elimina documentos de la base de datos. ⚠️ Operación irreversible.
+                        </p>
+                        <ul class="space-y-2 text-sm">
+                            <li>✅ <code class="bg-red-100 dark:bg-red-900 px-2 py-1 rounded">deleteOne()</code> -
+                                Elimina un documento</li>
+                            <li>✅ <code class="bg-red-100 dark:bg-red-900 px-2 py-1 rounded">deleteMany()</code> -
+                                Elimina múltiples</li>
+                            <li>⚠️ Siempre hacer <code>find()</code> antes de <code>delete()</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="danger-box p-4 rounded-lg">
+                    <h4 class="font-bold text-red-600 mb-2 flex items-center gap-2">
+                        <span class="text-2xl">⚠️</span> Regla de Oro
+                    </h4>
+                    <p class="text-sm">
+                        Antes de ejecutar <code>updateMany()</code> o <code>deleteMany()</code>,
+                        <strong>SIEMPRE</strong> ejecuta primero un <code>find()</code> con el mismo filtro
+                        para verificar qué documentos serán afectados.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <button @click="currentTab = 1" class="btn-glossy-green px-8 py-4 rounded-full text-lg shadow-xl">
+                        ¡Comenzar Tutorial! 🚀
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: UPDATE BÁSICO -->
+            <div v-if="currentTab === 1" class="animate-fade-in space-y-6">
+                <h2 class="text-3xl font-bold mb-4 text-orange-600">🔄 UPDATE Básico: updateOne()</h2>
+
+                <!-- Documentación $set -->
+                <div class="glossy-card p-6 border-l-4 border-orange-500">
+                    <h3 class="text-xl font-bold mb-3 text-orange-600">📖 Operador $set</h3>
+                    <p class="mb-3">
+                        El operador <code class="bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded">$set</code>
+                        establece el valor de un campo. Si el campo no existe, lo crea.
+                    </p>
+                    <div class="code-window mb-3">
+                        <pre class="text-xs"><code class="language-javascript">db.collection.updateOne(
+  { filtro },           // ¿Qué documento actualizar?
+  { $set: { campo: nuevoValor } }  // ¿Qué cambiar?
+)</code></pre>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded text-sm">
+                        <strong>Ejemplo:</strong> Cambiar el arma de Link
+                        <div class="code-window mt-2">
+                            <pre class="text-xs"><code class="language-javascript">db.heroes.updateOne(
+  { name: "Link" },
+  { $set: { weapon: "Master Sword" } }
+)</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 1: $set -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 1: Cambiar el arma de Link</h4>
+                    <p class="text-sm mb-3">
+                        Link acaba de encontrar la <strong>Master Sword</strong>.
+                        Actualiza su campo <code>weapon</code> de "Espada de Madera" a "Master Sword".
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex1" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex1')" class="btn-glossy-orange px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex1"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex1.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex1.message }}
+                    </div>
+                </div>
+
+                <!-- Documentación $inc -->
+                <div class="glossy-card p-6 border-l-4 border-purple-500">
+                    <h3 class="text-xl font-bold mb-3 text-purple-600">📖 Operador $inc</h3>
+                    <p class="mb-3">
+                        El operador <code class="bg-purple-100 dark:bg-purple-900 px-2 py-1 rounded">$inc</code>
+                        <strong>incrementa</strong> (o decrementa) un valor numérico.
+                    </p>
+                    <div class="code-window mb-3">
+                        <pre class="text-xs"><code class="language-javascript">db.collection.updateOne(
+  { filtro },
+  { $inc: { campo: cantidad } }  // Positivo suma, negativo resta
+)</code></pre>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded">
+                            <strong>Incrementar:</strong>
+                            <div class="code-window mt-2">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{ $inc: { level: 1 } }  // +1 nivel</code></pre>
+                            </div>
+                        </div>
+                        <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded">
+                            <strong>Decrementar:</strong>
+                            <div class="code-window mt-2">
+                                <pre
+                                    class="text-xs"><code class="language-javascript">{ $inc: { hp: -50 } }  // -50 HP</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 2: $inc -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 2: Frodo sube de nivel</h4>
+                    <p class="text-sm mb-3">
+                        Frodo completó una misión. Incrementa su <code>level</code> en <strong>1</strong> usando
+                        <code>$inc</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex2" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex2')" class="btn-glossy-purple px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex2"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex2.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex2.message }}
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button @click="currentTab = 2" class="btn-glossy px-6 py-3 rounded-lg">
+                        Siguiente: updateMany() →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: UPDATE MÚLTIPLE -->
+            <div v-if="currentTab === 2" class="animate-fade-in space-y-6">
+                <h2 class="text-3xl font-bold mb-4 text-orange-600">🔄 UPDATE Múltiple: updateMany()</h2>
+
+                <div class="glossy-card p-6 border-l-4 border-orange-500">
+                    <h3 class="text-xl font-bold mb-3 text-orange-600">📖 updateMany()</h3>
+                    <p class="mb-3">
+                        Actualiza <strong>TODOS</strong> los documentos que coincidan con el filtro.
+                    </p>
+                    <div class="code-window mb-3">
+                        <pre class="text-xs"><code class="language-javascript">db.collection.updateMany(
+  { filtro },           // Todos los que cumplan esto
+  { $operador: { ... } }  // Serán modificados así
+)</code></pre>
+                    </div>
+                    <div class="warning-box p-3 rounded text-sm">
+                        <strong>⚠️ Cuidado:</strong> updateMany() puede afectar múltiples documentos.
+                        Siempre verifica con <code>find()</code> primero.
+                    </div>
+                </div>
+
+                <!-- Ejercicio 3: Buff masivo -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 3: Buff a todos los Guerreros</h4>
+                    <p class="text-sm mb-3">
+                        ¡Evento especial! Todos los <code>class: "Guerrero"</code> reciben <strong>+5 niveles</strong>.
+                        Usa <code>updateMany()</code> con <code>$inc</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex3" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex3')" class="btn-glossy px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex3"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex3.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex3.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 4: Buff condicional -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 4: Ayuda a los novatos</h4>
+                    <p class="text-sm mb-3">
+                        Todos los héroes con <code>level</code> menor a 20 reciben <strong>+50 HP</strong>.
+                        Combina <code>updateMany()</code>, filtro con <code>$lt</code>, y <code>$inc</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex4" class="code-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex4')" class="btn-glossy-green px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex4"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex4.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex4.message }}
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 1" class="btn-glossy px-6 py-3 rounded-lg opacity-70">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 3" class="btn-glossy px-6 py-3 rounded-lg">
+                        Siguiente: Arrays →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 3: OPERADORES DE ARRAYS -->
+            <div v-if="currentTab === 3" class="animate-fade-in space-y-6">
+                <h2 class="text-3xl font-bold mb-4 text-purple-600">📦 Manipulando Arrays</h2>
+
+                <!-- $push -->
+                <div class="glossy-card p-6 border-l-4 border-green-500">
+                    <h3 class="text-xl font-bold mb-3 text-green-600">📖 Operador $push</h3>
+                    <p class="mb-3">
+                        Añade un elemento al <strong>final</strong> de un array. Si el array no existe, lo crea.
+                    </p>
+                    <div class="code-window mb-3">
+                        <pre class="text-xs"><code class="language-javascript">db.heroes.updateOne(
+  { name: "Gandalf" },
+  { $push: { skills: "Ice Blast" } }
+)</code></pre>
+                    </div>
+                    <div class="success-box p-3 rounded text-sm">
+                        <strong>Resultado:</strong>
+                        <code>skills: ["Fireball", "Lightning", "Teleport", "Ice Blast"]</code>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 5: $push -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 5: Gandalf aprende Ice Blast</h4>
+                    <p class="text-sm mb-3">
+                        Gandalf descubrió un nuevo hechizo. Añade <strong>"Ice Blast"</strong> a su array
+                        <code>skills</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex5" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex5')" class="btn-glossy-green px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex5"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex5.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex5.message }}
+                    </div>
+                </div>
+
+                <!-- $pull -->
+                <div class="glossy-card p-6 border-l-4 border-red-500">
+                    <h3 class="text-xl font-bold mb-3 text-red-600">📖 Operador $pull</h3>
+                    <p class="mb-3">
+                        <strong>Elimina</strong> todas las ocurrencias de un valor de un array.
+                    </p>
+                    <div class="code-window mb-3">
+                        <pre class="text-xs"><code class="language-javascript">db.heroes.updateOne(
+  { name: "Sam" },
+  { $pull: { skills: "Cocinar" } }
+)</code></pre>
+                    </div>
+                    <div class="danger-box p-3 rounded text-sm">
+                        <strong>Resultado:</strong> "Cocinar" se elimina del array <code>skills</code>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 6: $pull -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 6: Sam olvida Cocinar</h4>
+                    <p class="text-sm mb-3">
+                        Sam se enfoca en el combate. Elimina <strong>"Cocinar"</strong> de su array <code>skills</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex6" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex6')" class="btn-glossy-red px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex6"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex6.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex6.message }}
+                    </div>
+                </div>
+
+                <!-- $addToSet -->
+                <div class="glossy-card p-6 border-l-4 border-blue-500">
+                    <h3 class="text-xl font-bold mb-3 text-blue-600">📖 Operador $addToSet</h3>
+                    <p class="mb-3">
+                        Añade un elemento al array <strong>solo si no existe</strong> (evita duplicados).
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <strong>$push:</strong> Siempre añade (permite duplicados)
+                            <div class="code-window mt-2">
+                                <pre class="text-xs"><code class="language-javascript">{ $push: { tags: "epic" } }
+// ["epic", "epic"] ✅ Permite</code></pre>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>$addToSet:</strong> Solo si es único
+                            <div class="code-window mt-2">
+                                <pre class="text-xs"><code class="language-javascript">{ $addToSet: { tags: "epic" } }
+// ["epic"] ✅ No duplica</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 2" class="btn-glossy px-6 py-3 rounded-lg opacity-70">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 4" class="btn-glossy px-6 py-3 rounded-lg">
+                        Siguiente: DELETE →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 4: DELETE -->
+            <div v-if="currentTab === 4" class="animate-fade-in space-y-6">
+                <h2 class="text-3xl font-bold mb-4 text-red-600">💀 DELETE: Eliminando Documentos</h2>
+
+                <div class="danger-box p-4 rounded-lg">
+                    <h4 class="font-bold text-red-600 mb-2 flex items-center gap-2 text-xl">
+                        <span class="text-3xl">⚠️</span> ADVERTENCIA CRÍTICA
+                    </h4>
+                    <ul class="space-y-2 text-sm">
+                        <li>🚫 <strong>DELETE es IRREVERSIBLE</strong> - No hay "deshacer"</li>
+                        <li>✅ <strong>SIEMPRE</strong> ejecuta <code>find()</code> con el mismo filtro primero</li>
+                        <li>💾 Haz backups antes de operaciones masivas</li>
+                        <li>🧪 Prueba en una base de datos de desarrollo primero</li>
+                    </ul>
+                </div>
+
+                <!-- deleteOne -->
+                <div class="glossy-card p-6 border-l-4 border-red-500">
+                    <h3 class="text-xl font-bold mb-3 text-red-600">📖 deleteOne()</h3>
+                    <p class="mb-3">
+                        Elimina <strong>el primer documento</strong> que coincida con el filtro.
+                    </p>
+                    <div class="code-window mb-3">
+                        <pre class="text-xs"><code class="language-javascript">// 1. SIEMPRE verificar primero
+db.heroes.find({ name: "Link" })
+
+// 2. Si estás seguro, eliminar
+db.heroes.deleteOne({ name: "Link" })</code></pre>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 7: deleteOne -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 7: Eliminar a Link</h4>
+                    <p class="text-sm mb-3">
+                        Link (nivel 1) no sobrevivió su primera misión. Elimínalo de la base de datos.
+                    </p>
+                    <div class="warning-box p-3 rounded text-sm mb-3">
+                        <strong>Paso 1:</strong> Verifica primero con <code>find()</code>
+                    </div>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex7" class="code-editor h-20" spellcheck="false"
+                            placeholder="db.heroes.deleteOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex7')" class="btn-glossy-red px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex7"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex7.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex7.message }}
+                    </div>
+                </div>
+
+                <!-- deleteMany -->
+                <div class="glossy-card p-6 border-l-4 border-red-700">
+                    <h3 class="text-xl font-bold mb-3 text-red-700">📖 deleteMany()</h3>
+                    <p class="mb-3">
+                        Elimina <strong>TODOS</strong> los documentos que coincidan con el filtro.
+                    </p>
+                    <div class="code-window mb-3">
+                        <pre class="text-xs"><code class="language-javascript">// 1. VERIFICAR cuántos serán eliminados
+db.heroes.find({ level: { $lt: 15 } }).count()
+
+// 2. Si estás 100% seguro
+db.heroes.deleteMany({ level: { $lt: 15 } })</code></pre>
+                    </div>
+                    <div class="danger-box p-3 rounded text-sm">
+                        <strong>⚠️ PELIGRO:</strong> <code>deleteMany({})</code> sin filtro elimina TODA la colección.
+                    </div>
+                </div>
+
+                <!-- Ejercicio 8: deleteMany -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20">
+                    <h4 class="font-bold text-lg mb-3">🎯 Ejercicio 8: Limpiar héroes débiles</h4>
+                    <p class="text-sm mb-3">
+                        Elimina TODOS los héroes con <code>level</code> menor a 15.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex8" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex8')" class="btn-glossy-red px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex8"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex8.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex8.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio Desafío -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-purple-50 to-red-50 dark:from-purple-900/20 dark:to-red-900/20 border-2 border-purple-500">
+                    <h4 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        <span class="text-2xl">🏆</span> Desafío Final: Eliminar guerreros débiles
+                    </h4>
+                    <p class="text-sm mb-3">
+                        Elimina todos los <code>class: "Guerrero"</code> que tengan <code>hp</code> menor a 300.
+                        Combina filtros con <code>$and</code> implícito.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex9" class="code-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex9')" class="btn-glossy-purple px-4 py-2 rounded">
+                        Ejecutar 🚀
+                    </button>
+                    <div v-if="feedback.ex9"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex9.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex9.message }}
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 3" class="btn-glossy px-6 py-3 rounded-lg opacity-70">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 5" class="btn-glossy px-6 py-3 rounded-lg">
+                        Siguiente: Ejercicios →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 5: EJERCICIOS -->
+            <div v-if="currentTab === 5" class="animate-fade-in space-y-6">
+                <h2 class="text-3xl font-bold mb-4 text-indigo-600">🎯 Ejercicios Prácticos</h2>
+
+                <div
+                    class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-xl border-2 border-indigo-300">
+                    <h3 class="text-xl font-bold mb-3">📚 12 Ejercicios de Nivel Básico</h3>
+                    <p class="mb-3">Practica todo lo aprendido con estos 12 ejercicios usando los datos reales de
+                        nuestra base de datos de héroes.</p>
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded text-sm">
+                        <strong>💡 Tip:</strong> Todos los ejercicios usan los héroes que insertaste: Aragorn, Gimli,
+                        Gandalf, Legolas, etc.
+                    </div>
+                </div>
+
+                <!-- Ejercicio 10: $set básico -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold">1/12</span>
+                        <h4 class="font-bold text-lg">Cambiar arma de Aragorn</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Aragorn recuperó su espada ancestral. Cambia su <code>weapon</code> de "Espada" a
+                        <strong>"Andúril"</strong> usando <code>$set</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex10" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex10')" class="btn-glossy px-4 py-2 rounded">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex10"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex10.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex10.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 11: $inc básico -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">2/12</span>
+                        <h4 class="font-bold text-lg">Curar a Gimli</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Gimli se curó después de una batalla. Incrementa su <code>hp</code> en <strong>+100</strong>
+                        usando <code>$inc</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex11" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex11')" class="btn-glossy-green px-4 py-2 rounded">Ejecutar
+                        🚀</button>
+                    <div v-if="feedback.ex11"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex11.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex11.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 12: $push básico -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">3/12</span>
+                        <h4 class="font-bold text-lg">Merlin aprende un nuevo hechizo</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Merlin descubrió un hechizo antiguo. Añade <strong>"Meteor"</strong> a su array
+                        <code>skills</code> usando <code>$push</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex12" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex12')" class="btn-glossy-purple px-4 py-2 rounded">Ejecutar
+                        🚀</button>
+                    <div v-if="feedback.ex12"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex12.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex12.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 13: $inc con campo específico -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-bold">4/12</span>
+                        <h4 class="font-bold text-lg">Reabastecer flechas de Legolas</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Legolas necesita más flechas. Incrementa su campo <code>arrows</code> en <strong>+50</strong>
+                        usando <code>$inc</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex13" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex13')" class="btn-glossy-orange px-4 py-2 rounded">Ejecutar
+                        🚀</button>
+                    <div v-if="feedback.ex13"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex13.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex13.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 14: updateMany básico -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-cyan-500 text-white px-3 py-1 rounded-full text-sm font-bold">5/12</span>
+                        <h4 class="font-bold text-lg">Buff de flechas para todos los Arqueros</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Evento especial: Todos los <code>class: "Arquero"</code> reciben <strong>+20 flechas</strong>.
+                        Usa <code>updateMany()</code> con <code>$inc</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex14" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex14')" class="btn-glossy px-4 py-2 rounded">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex14"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex14.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex14.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 15: updateMany con mana -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-bold">6/12</span>
+                        <h4 class="font-bold text-lg">Buff masivo de mana</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Todos los <code>class: "Mago"</code> reciben un boost de poder. Incrementa su <code>mana</code>
+                        en <strong>+200</strong>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex15" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex15')" class="btn-glossy-purple px-4 py-2 rounded">Ejecutar
+                        🚀</button>
+                    <div v-if="feedback.ex15"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex15.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex15.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 16: $pull -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">7/12</span>
+                        <h4 class="font-bold text-lg">Ezio pierde una habilidad</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Ezio fue detectado. Elimina <strong>"Sigilo"</strong> de su array <code>skills</code> usando
+                        <code>$pull</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex16" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.updateOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex16')" class="btn-glossy-red px-4 py-2 rounded">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex16"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex16.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex16.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 17: updateMany con filtro -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-teal-50 to-green-50 dark:from-teal-900/20 dark:to-green-900/20">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-teal-500 text-white px-3 py-1 rounded-full text-sm font-bold">8/12</span>
+                        <h4 class="font-bold text-lg">Buff para héroes veteranos</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Todos los héroes con <code>level >= 80</code> reciben <strong>+50 HP</strong>. Usa
+                        <code>updateMany()</code> con filtro <code>$gte</code>.
+                    </p>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex17" class="code-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex17')" class="btn-glossy-green px-4 py-2 rounded">Ejecutar
+                        🚀</button>
+                    <div v-if="feedback.ex17"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex17.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex17.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 18: deleteOne -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-pink-50 to-red-50 dark:from-pink-900/20 dark:to-red-900/20 border-2 border-red-300">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-pink-500 text-white px-3 py-1 rounded-full text-sm font-bold">9/12</span>
+                        <h4 class="font-bold text-lg">Eliminar a Sam</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Sam decidió retirarse. Elimínalo de la base de datos usando <code>deleteOne()</code>.
+                    </p>
+                    <div class="warning-box p-3 rounded text-sm mb-3">
+                        <strong>⚠️ Recuerda:</strong> Siempre verifica primero con
+                        <code>db.heroes.find({name: "Sam"})</code>
+                    </div>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex18" class="code-editor h-20" spellcheck="false"
+                            placeholder="db.heroes.deleteOne(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex18')" class="btn-glossy-red px-4 py-2 rounded">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex18"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex18.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex18.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 19: deleteMany básico -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-2 border-orange-400">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">10/12</span>
+                        <h4 class="font-bold text-lg">Limpiar héroes novatos</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Elimina TODOS los héroes con <code>level < 20</code> usando <code>deleteMany()</code>.
+                    </p>
+                    <div class="danger-box p-3 rounded text-sm mb-3">
+                        <strong>🚨 IMPORTANTE:</strong> Verifica primero:
+                        <code>db.heroes.find({level: {$lt: 20}})</code>
+                    </div>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex19" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex19')" class="btn-glossy-red px-4 py-2 rounded">Ejecutar 🚀</button>
+                    <div v-if="feedback.ex19"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex19.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex19.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 20: deleteMany con filtros múltiples -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-purple-50 to-red-50 dark:from-purple-900/20 dark:to-red-900/20 border-2 border-purple-500">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">11/12</span>
+                        <h4 class="font-bold text-lg">Eliminar Asesinos débiles</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Elimina todos los <code>class: "Asesino"</code> que tengan <code>level < 85</code>. Combina dos
+                        filtros.
+                    </p>
+                    <div class="warning-box p-3 rounded text-sm mb-3">
+                        <strong>Paso 1:</strong> <code>db.heroes.find({class: "Asesino", level: {$lt: 85}})</code>
+                    </div>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex20" class="code-editor h-24" spellcheck="false"
+                            placeholder="db.heroes.deleteMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex20')" class="btn-glossy-purple px-4 py-2 rounded">Ejecutar
+                        🚀</button>
+                    <div v-if="feedback.ex20"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex20.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex20.message }}
+                    </div>
+                </div>
+
+                <!-- Ejercicio 21: Desafío final -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-4 border-yellow-500">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span
+                            class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">12/12
+                            🏆</span>
+                        <h4 class="font-bold text-lg">DESAFÍO FINAL: Buff para Guerreros élite</h4>
+                    </div>
+                    <p class="text-sm mb-3">
+                        Combina todo lo aprendido: Todos los <code>class: "Guerrero"</code> con <code>level >= 80</code>
+                        reciben <strong>+100 HP</strong>.
+                        Usa <code>updateMany()</code> con múltiples filtros y <code>$inc</code>.
+                    </p>
+                    <div class="success-box p-3 rounded text-sm mb-3">
+                        <strong>💡 Pista:</strong> Necesitas combinar filtro de clase Y filtro de nivel con
+                        <code>$gte</code>
+                    </div>
+                    <div class="code-window mb-3">
+                        <textarea v-model="exercises.ex21" class="code-editor h-32" spellcheck="false"
+                            placeholder="db.heroes.updateMany(...)"></textarea>
+                    </div>
+                    <button @click="checkExercise('ex21')" class="btn-glossy-orange px-4 py-2 rounded">Ejecutar
+                        🚀</button>
+                    <div v-if="feedback.ex21"
+                        :class="['mt-3 p-3 rounded font-bold animate-pop-in', feedback.ex21.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                        {{ feedback.ex21.message }}
+                    </div>
+                </div>
+
+                <div class="success-box p-6 rounded-lg border-2 border-green-500">
+                    <h4 class="font-bold text-green-600 mb-3 text-xl">🎉 ¡Felicitaciones!</h4>
+                    <p class="mb-3">
+                        Si completaste los 12 ejercicios, ahora dominas UPDATE y DELETE en MongoDB.
+                        Estás listo para trabajar con datos reales de forma segura y eficiente.
+                    </p>
+                    <div class="bg-white dark:bg-gray-800 p-3 rounded text-sm">
+                        <strong>✅ Has aprendido:</strong>
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li>Actualizar documentos individuales con <code>updateOne()</code></li>
+                            <li>Actualizar múltiples documentos con <code>updateMany()</code></li>
+                            <li>Usar operadores: <code>$set</code>, <code>$inc</code>, <code>$push</code>,
+                                <code>$pull</code>
+                            </li>
+                            <li>Eliminar documentos con <code>deleteOne()</code> y <code>deleteMany()</code></li>
+                            <li>Combinar filtros para operaciones precisas</li>
+                            <li>Aplicar mejores prácticas de seguridad</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button @click="currentTab = 4" class="btn-glossy px-6 py-3 rounded-lg opacity-70">
+                        ← Anterior
+                    </button>
+                    <button @click="currentTab = 6" class="btn-glossy px-6 py-3 rounded-lg">
+                        Siguiente: Cheat Sheet →
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 6: CHEAT SHEET -->
+            <div v-if="currentTab === 6" class="animate-fade-in space-y-6">
+                <h2 class="text-3xl font-bold mb-4 text-blue-600">📋 Cheat Sheet: Referencia Rápida</h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- UPDATE -->
+                    <div class="glossy-card p-6 border-l-4 border-orange-500">
+                        <h3 class="text-xl font-bold mb-4 text-orange-600">🔄 UPDATE</h3>
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <strong>updateOne()</strong>
+                                <div class="code-window mt-1">
+                                    <pre class="text-xs"><code class="language-javascript">db.col.updateOne(
+  { filtro },
+  { $set: { campo: valor } }
+)</code></pre>
+                                </div>
+                            </div>
+                            <div>
+                                <strong>updateMany()</strong>
+                                <div class="code-window mt-1">
+                                    <pre class="text-xs"><code class="language-javascript">db.col.updateMany(
+  { filtro },
+  { $inc: { numero: 5 } }
+)</code></pre>
+                                </div>
+                            </div>
+                            <div>
+                                <strong>Operadores:</strong>
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li><code>$set</code> - Establecer valor</li>
+                                    <li><code>$inc</code> - Incrementar/decrementar</li>
+                                    <li><code>$push</code> - Añadir a array</li>
+                                    <li><code>$pull</code> - Remover de array</li>
+                                    <li><code>$addToSet</code> - Añadir sin duplicar</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DELETE -->
+                    <div class="glossy-card p-6 border-l-4 border-red-500">
+                        <h3 class="text-xl font-bold mb-4 text-red-600">💀 DELETE</h3>
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <strong>deleteOne()</strong>
+                                <div class="code-window mt-1">
+                                    <pre class="text-xs"><code class="language-javascript">db.col.deleteOne(
+  { filtro }
+)</code></pre>
+                                </div>
+                            </div>
+                            <div>
+                                <strong>deleteMany()</strong>
+                                <div class="code-window mt-1">
+                                    <pre class="text-xs"><code class="language-javascript">db.col.deleteMany(
+  { filtro }
+)</code></pre>
+                                </div>
+                            </div>
+                            <div class="danger-box p-3 rounded">
+                                <strong>⚠️ Reglas de Seguridad:</strong>
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li>Siempre <code>find()</code> primero</li>
+                                    <li>Hacer backups</li>
+                                    <li>Probar en desarrollo</li>
+                                    <li>Nunca <code>{}</code> vacío en producción</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ejemplos Completos -->
+                <div class="glossy-card p-6">
+                    <h3 class="text-xl font-bold mb-4">🎯 Ejemplos Completos del Mundo Real</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-bold text-purple-600 mb-2">Sistema de Experiencia</h4>
+                            <div class="code-window">
+                                <pre class="text-xs"><code class="language-javascript">// 1. Todos ganan +10 XP
+db.heroes.updateMany({}, { $inc: { xp: 10 } })
+
+// 2. Los que lleguen a 100 XP suben de nivel
+db.heroes.updateMany(
+  { xp: { $gte: 100 } },
+  { $inc: { level: 1 }, $set: { xp: 0 } }
+)
+
+// 3. Eliminar héroes muertos
+db.heroes.deleteMany({ hp: { $lte: 0 } })</code></pre>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-green-600 mb-2">Actualización Masiva de Inventario</h4>
+                            <div class="code-window">
+                                <pre class="text-xs"><code class="language-javascript">// Dar 100 de oro a todos los nivel 50+
+db.heroes.updateMany(
+  { level: { $gte: 50 } },
+  { $inc: { gold: 100 } }
+)
+
+// Añadir poción a todos los magos
+db.heroes.updateMany(
+  { class: "Mago" },
+  { $push: { inventory: "Mana Potion" } }
+)</code></pre>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-orange-600 mb-2">Limpieza de Base de Datos</h4>
+                            <div class="code-window">
+                                <pre class="text-xs"><code class="language-javascript">// 1. Verificar inactivos
+db.users.find({ 
+  lastLogin: { $lt: new Date('2024-01-01') } 
+}).count()
+
+// 2. Eliminar cuentas inactivas
+db.users.deleteMany({ 
+  lastLogin: { $lt: new Date('2024-01-01') } 
+})</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mejores Prácticas -->
+                <div
+                    class="glossy-card p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+                    <h3 class="text-xl font-bold mb-4">✨ Mejores Prácticas</h3>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div class="success-box p-3 rounded">
+                            <strong class="text-green-600">✅ HACER</strong>
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>Verificar con <code>find()</code> primero</li>
+                                <li>Usar filtros específicos</li>
+                                <li>Hacer backups regulares</li>
+                                <li>Probar en desarrollo</li>
+                                <li>Documentar cambios masivos</li>
+                            </ul>
+                        </div>
+                        <div class="danger-box p-3 rounded">
+                            <strong class="text-red-600">❌ NO HACER</strong>
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>Ejecutar delete sin verificar</li>
+                                <li>Usar <code>{}</code> vacío en producción</li>
+                                <li>Modificar sin backup</li>
+                                <li>Ignorar los resultados</li>
+                                <li>Asumir que funcionó</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center py-8">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h3
+                        class="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-blue-600">
+                        ¡Felicitaciones!
+                    </h3>
+                    <p class="text-lg mb-6">
+                        Ahora dominas el CRUD completo de MongoDB:<br>
+                        <strong>Create, Read, Update, Delete</strong>
+                    </p>
+                    <button @click="currentTab = 0" class="btn-glossy-green px-8 py-4 rounded-full text-lg shadow-xl">
+                        🔄 Volver al Inicio
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="text-center mt-8 opacity-60 text-sm">
+            <p>MongoDB Tutorial • UPDATE & DELETE • DuocUC 2025</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    isDark: false,
+                    currentTab: 0,
+                    tabs: [
+                        { title: '🏠 Inicio' },
+                        { title: '🔄 UPDATE Básico' },
+                        { title: '🔄 UPDATE Múltiple' },
+                        { title: '📦 Arrays' },
+                        { title: '💀 DELETE' },
+                        { title: '🎯 Ejercicios' },
+                        { title: '📋 Cheat Sheet' }
+                    ],
+                    exercises: {
+                        ex1: '', ex2: '', ex3: '', ex4: '', ex5: '', ex6: '',
+                        ex7: '', ex8: '', ex9: '', ex10: '', ex11: '', ex12: '',
+                        ex13: '', ex14: '', ex15: '', ex16: '', ex17: '', ex18: '',
+                        ex19: '', ex20: '', ex21: ''
+                    },
+                    feedback: {},
+                    solutions: {
+                        ex1: 'db.heroes.updateOne({name:"Link"},{$set:{weapon:"Master Sword"}})',
+                        ex2: 'db.heroes.updateOne({name:"Frodo"},{$inc:{level:1}})',
+                        ex3: 'db.heroes.updateMany({class:"Guerrero"},{$inc:{level:5}})',
+                        ex4: 'db.heroes.updateMany({level:{$lt:20}},{$inc:{hp:50}})',
+                        ex5: 'db.heroes.updateOne({name:"Gandalf"},{$push:{skills:"Ice Blast"}})',
+                        ex6: 'db.heroes.updateOne({name:"Sam"},{$pull:{skills:"Cocinar"}})',
+                        ex7: 'db.heroes.deleteOne({name:"Link"})',
+                        ex8: 'db.heroes.deleteMany({level:{$lt:15}})',
+                        ex9: 'db.heroes.deleteMany({class:"Guerrero",hp:{$lt:300}})',
+                        ex10: 'db.heroes.updateOne({name:"Aragorn"},{$set:{weapon:"Andúril"}})',
+                        ex11: 'db.heroes.updateOne({name:"Gimli"},{$inc:{hp:100}})',
+                        ex12: 'db.heroes.updateOne({name:"Merlin"},{$push:{skills:"Meteor"}})',
+                        ex13: 'db.heroes.updateOne({name:"Legolas"},{$inc:{arrows:50}})',
+                        ex14: 'db.heroes.updateMany({class:"Arquero"},{$inc:{arrows:20}})',
+                        ex15: 'db.heroes.updateMany({class:"Mago"},{$inc:{mana:200}})',
+                        ex16: 'db.heroes.updateOne({name:"Ezio"},{$pull:{skills:"Sigilo"}})',
+                        ex17: 'db.heroes.updateMany({level:{$gte:80}},{$inc:{hp:50}})',
+                        ex18: 'db.heroes.deleteOne({name:"Sam"})',
+                        ex19: 'db.heroes.deleteMany({level:{$lt:20}})',
+                        ex20: 'db.heroes.deleteMany({class:"Asesino",level:{$lt:85}})',
+                        ex21: 'db.heroes.updateMany({class:"Guerrero",level:{$gte:80}},{$inc:{hp:100}})'
+                    }
+                }
+            },
+            methods: {
+                toggleTheme() {
+                    this.isDark = !this.isDark;
+                    document.body.classList.toggle('theme-dark');
+                    document.body.classList.toggle('theme-light');
+                },
+                checkExercise(ex) {
+                    const userCode = this.exercises[ex].replace(/\s+/g, '').toLowerCase();
+                    const solution = this.solutions[ex].replace(/\s+/g, '').toLowerCase();
+
+                    // Validaciones flexibles
+                    let isCorrect = false;
+                    let message = '';
+
+                    switch (ex) {
+                        case 'ex1':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"link"') &&
+                                userCode.includes('$set') &&
+                                userCode.includes('weapon:"mastersword"');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Link ahora tiene la Master Sword.' :
+                                '❌ Usa updateOne() con $set para cambiar el weapon de Link.';
+                            break;
+
+                        case 'ex2':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"frodo"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('level:1');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Frodo subió a nivel 13.' :
+                                '❌ Usa updateOne() con $inc para incrementar el level de Frodo en 1.';
+                            break;
+
+                        case 'ex3':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"guerrero"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('level:5');
+                            message = isCorrect ?
+                                '✅ ¡Genial! Todos los guerreros recibieron +5 niveles.' :
+                                '❌ Usa updateMany() para filtrar por class:"Guerrero" e incrementar level en 5.';
+                            break;
+
+                        case 'ex4':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('level:{$lt:20}') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:50');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Los novatos recibieron +50 HP.' :
+                                '❌ Usa updateMany() con filtro level < 20 e incrementa hp en 50.';
+                            break;
+
+                        case 'ex5':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"gandalf"') &&
+                                userCode.includes('$push') &&
+                                userCode.includes('skills:"iceblast"');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Gandalf aprendió Ice Blast.' :
+                                '❌ Usa updateOne() con $push para añadir "Ice Blast" a skills de Gandalf.';
+                            break;
+
+                        case 'ex6':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"sam"') &&
+                                userCode.includes('$pull') &&
+                                userCode.includes('skills:"cocinar"');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Sam olvidó Cocinar.' :
+                                '❌ Usa updateOne() con $pull para remover "Cocinar" de skills de Sam.';
+                            break;
+
+                        case 'ex7':
+                            isCorrect = userCode.includes('deleteone') &&
+                                userCode.includes('name:"link"');
+                            message = isCorrect ?
+                                '✅ Link fue eliminado. RIP.' :
+                                '❌ Usa deleteOne() con el filtro name:"Link".';
+                            break;
+
+                        case 'ex8':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('level:{$lt:15}');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Héroes débiles eliminados.' :
+                                '❌ Usa deleteMany() con filtro level < 15.';
+                            break;
+
+                        case 'ex9':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('class:"guerrero"') &&
+                                userCode.includes('hp:{$lt:300}');
+                            message = isCorrect ?
+                                '✅ ¡DESAFÍO COMPLETADO! Guerreros débiles eliminados.' :
+                                '❌ Usa deleteMany() con dos filtros: class:"Guerrero" Y hp < 300.';
+                            break;
+
+                        case 'ex10':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"aragorn"') &&
+                                userCode.includes('$set') &&
+                                userCode.includes('weapon:"andúril"');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Aragorn ahora porta Andúril.' :
+                                '❌ Usa updateOne() con $set para cambiar el weapon de Aragorn a "Andúril".';
+                            break;
+
+                        case 'ex11':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"gimli"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:100');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Gimli recuperó 100 HP.' :
+                                '❌ Usa updateOne() con $inc para añadir 100 HP a Gimli.';
+                            break;
+
+                        case 'ex12':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"merlin"') &&
+                                userCode.includes('$push') &&
+                                userCode.includes('skills:"meteor"');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Merlin aprendió Meteor.' :
+                                '❌ Usa updateOne() con $push para añadir "Meteor" a skills de Merlin.';
+                            break;
+
+                        case 'ex13':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"legolas"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('arrows:50');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Legolas recibió 50 flechas adicionales.' :
+                                '❌ Usa updateOne() con $inc para añadir 50 arrows a Legolas.';
+                            break;
+
+                        case 'ex14':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"arquero"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('arrows:20');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Todos los arqueros recibieron +20 flechas.' :
+                                '❌ Usa updateMany() para dar +20 arrows a todos los Arqueros.';
+                            break;
+
+                        case 'ex15':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"mago"') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('mana:200');
+                            message = isCorrect ?
+                                '✅ ¡Genial! Todos los magos recibieron +200 mana.' :
+                                '❌ Usa updateMany() para dar +200 mana a todos los Magos.';
+                            break;
+
+                        case 'ex16':
+                            isCorrect = userCode.includes('updateone') &&
+                                userCode.includes('name:"ezio"') &&
+                                userCode.includes('$pull') &&
+                                userCode.includes('skills:"sigilo"');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Ezio perdió la habilidad Sigilo.' :
+                                '❌ Usa updateOne() con $pull para remover "Sigilo" de skills de Ezio.';
+                            break;
+
+                        case 'ex17':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('level:{$gte:80}') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:50');
+                            message = isCorrect ?
+                                '✅ ¡Perfecto! Héroes veteranos recibieron +50 HP.' :
+                                '❌ Usa updateMany() con filtro level >= 80 e incrementa hp en 50.';
+                            break;
+
+                        case 'ex18':
+                            isCorrect = userCode.includes('deleteone') &&
+                                userCode.includes('name:"sam"');
+                            message = isCorrect ?
+                                '✅ Sam fue eliminado. Adiós, Sam.' :
+                                '❌ Usa deleteOne() con el filtro name:"Sam".';
+                            break;
+
+                        case 'ex19':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('level:{$lt:20}');
+                            message = isCorrect ?
+                                '✅ ¡Correcto! Héroes novatos eliminados.' :
+                                '❌ Usa deleteMany() con filtro level < 20.';
+                            break;
+
+                        case 'ex20':
+                            isCorrect = userCode.includes('deletemany') &&
+                                userCode.includes('class:"asesino"') &&
+                                userCode.includes('level:{$lt:85}');
+                            message = isCorrect ?
+                                '✅ ¡Excelente! Asesinos débiles eliminados.' :
+                                '❌ Usa deleteMany() con dos filtros: class:"Asesino" Y level < 85.';
+                            break;
+
+                        case 'ex21':
+                            isCorrect = userCode.includes('updatemany') &&
+                                userCode.includes('class:"guerrero"') &&
+                                userCode.includes('level:{$gte:80}') &&
+                                userCode.includes('$inc') &&
+                                userCode.includes('hp:100');
+                            message = isCorrect ?
+                                '🏆 ¡DESAFÍO COMPLETADO! Guerreros élite recibieron +100 HP. ¡Felicitaciones!' :
+                                '❌ Usa updateMany() con filtros class:"Guerrero" Y level >= 80, luego incrementa hp en 100.';
+                            break;
+                    }
+
+                    this.feedback[ex] = {
+                        success: isCorrect,
+                        message: message
+                    };
+                }
+            },
+            mounted() {
+                // Detectar preferencia de tema del sistema
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    this.isDark = true;
+                    document.body.classList.add('theme-dark');
+                } else {
+                    document.body.classList.add('theme-light');
+                }
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+
+</html>
