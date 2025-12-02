@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guía práctica: Proyecto MongoDB — Clase & Defensa</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons (FontAwesome via CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Syntax Highlighting (Prism.js via CDN) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <!-- Tooltips (Tippy.js via CDN) -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css" />
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            /* Blue 600 */
+            --primary-hover: #1d4ed8;
+            /* Blue 700 */
+            --bg-body: #f8fafc;
+            /* Slate 50 */
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            /* Slate 900 */
+            --text-muted: #64748b;
+            /* Slate 500 */
+            --border: #e2e8f0;
+            /* Slate 200 */
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --radius: 16px;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem 1rem;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Accessibility Controls */
+        .a11y-controls {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 100;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .a11y-btn {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .a11y-btn:hover,
+        .a11y-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* High Contrast Mode */
+        body.high-contrast {
+            --bg-body: #000000;
+            --bg-card: #000000;
+            --text-main: #ffffff;
+            --text-muted: #ffff00;
+            --primary: #ffff00;
+            --primary-hover: #ffcc00;
+            --border: #ffffff;
+            --code-bg: #1a1a1a;
+            --shadow: none;
+        }
+
+        body.high-contrast .card {
+            border: 2px solid #ffffff;
+        }
+
+        body.high-contrast .checklist-item:hover {
+            background: #333;
+        }
+
+        body.high-contrast .example,
+        body.high-contrast .note {
+            background: #111;
+            border-left-width: 6px;
+            color: #fff;
+        }
+
+        /* Print Styles */
+        @media print {
+
+            .a11y-controls,
+            .btn,
+            .copy-btn,
+            aside {
+                display: none !important;
+            }
+
+            .grid {
+                display: block;
+            }
+
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                break-inside: avoid;
+            }
+
+            a[href]::after {
+                content: " (" attr(href) ")";
+            }
+        }
+
+        .wrap {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 1rem;
+            /* Add padding to prevent edge touching on small screens */
+        }
+
+        /* Ensure pre tags don't cause overflow */
+        pre {
+            white-space: pre-wrap;
+            /* Since CSS 2.1 */
+            white-space: -moz-pre-wrap;
+            /* Mozilla, since 1999 */
+            white-space: -pre-wrap;
+            /* Opera 4-6 */
+            white-space: -o-pre-wrap;
+            /* Opera 7 */
+            word-wrap: break-word;
+            /* Internet Explorer 5.5+ */
+            overflow-x: auto;
+            /* Scroll if needed */
+            max-width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Prevent horizontal scroll on body */
+        html,
+        body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            border-color: #cbd5e1;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Interactive Elements */
+        .term {
+            border-bottom: 2px dotted var(--primary);
+            cursor: help;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            background: #f1f5f9;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            margin-top: 0.2rem;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .checklist-item.completed {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+
+        /* Code Blocks */
+        pre {
+            border-radius: var(--radius) !important;
+            margin: 1rem 0 !important;
+            border: 1px solid var(--border);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        pre:hover .copy-btn {
+            opacity: 1;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background-color: white;
+        }
+
+        /* Mermaid Diagram Container */
+        .diagram-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.5rem;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+            gap: 0.5rem;
+        }
+
+        /* Zoom Modal */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .zoom-modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90vh;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .zoom-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .zoom-modal-close:hover,
+        .zoom-modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .diagram-container.zoomable {
+            cursor: zoom-in;
+            position: relative;
+        }
+
+        .diagram-container.zoomable::after {
+            content: '\f00e';
+            /* fa-search-plus */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: var(--text-muted);
+            opacity: 0.5;
+            font-size: 1.2rem;
+        }
+
+        .diagram-container.zoomable:hover::after {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        .note {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            background-color: #f8fafc;
+            padding: 1rem 1.25rem;
+            border-left: 4px solid var(--border);
+            border-radius: 0 8px 8px 0;
+            margin-top: 1.5rem;
+        }
+
+        .example {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+            color: #1e3a8a;
+        }
+
+        footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+            padding-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Accessibility Controls -->
+    <div class="a11y-controls">
+        <button class="a11y-btn" onclick="document.body.classList.toggle('high-contrast')" title="Alto contraste"
+            aria-label="Alternar alto contraste">
+            <i class="fas fa-adjust"></i>
+        </button>
+    </div>
+
+    <div class="wrap">
+        <header>
+            <h1>EV N°3: Proyecto MongoDB</h1>
+        </header>
+
+        <div class="grid">
+            <main>
+                <section class="card">
+                    <h2><i class="fas fa-bullseye"></i> 1. Objetivo de la sesión</h2>
+                    <p>Que cada grupo avance en su <strong>proyecto de BD en <span class="term"
+                                data-tippy-content="Servicio de base de datos en la nube totalmente gestionado">MongoDB
+                                Atlas</span></strong>. Pueden modelar una sola colección para comenzar, pero deben
+                        justificar si necesitan más.</p>
+
+                    <div class="example">
+                        <strong><i class="fas fa-lightbulb"></i> Meta de hoy:</strong> Crear la BD, poblarla con
+                        documentos y realizar los ejercicios CRUD propuestos.
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-list-check"></i> 2. Prerrequisitos</h2>
+                    <ul class="fa-ul">
+                        <li><span class="fa-li"><i class="fas fa-check-circle text-primary"></i></span>Cuenta en
+                            <strong>MongoDB Atlas</strong> (free tier).
+                        </li>
+                        <li><span class="fa-li"><i class="fas fa-check-circle text-primary"></i></span><strong>VS
+                                Code</strong> instalado y acceso a <span class="term"
+                                data-tippy-content="La shell interactiva de MongoDB para ejecutar comandos">mongosh</span>.
+                        </li>
+                        <li><span class="fa-li"><i class="fas fa-check-circle text-primary"></i></span>Archivos JSON de
+                            ejemplo (disponibles en esta página).</li>
+                    </ul>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-project-diagram"></i> 3. Flujo de Trabajo Visual</h2>
+                    <p>Sigue este proceso para completar la actividad de hoy:</p>
+                    <div class="diagram-container zoomable" title="Haz clic para ampliar">
+                        <div class="mermaid">
+                            graph LR
+                            A[MongoDB Atlas] -->|Crear| B(Database: bd_proyecto)
+                            B -->|Crear| C(Colección: heroes)
+                            C -->|Insertar| D{Datos JSON}
+                            D -->|Ejecutar| E[Consultas CRUD]
+                            E -->|Grabar| F[Defensa Video]
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-database"></i> 4. Datos de ejemplo</h2>
+                    <p>Copia este bloque de código para insertar tus primeros datos. Puedes modificar los valores si tu
+                        proyecto es diferente.</p>
+                    <div style="position: relative;">
+                        <pre><code class="language-javascript">// Copiar todo este array dentro de db.heroes.insertMany([...])
+[
+  { "_id": 1, "nombre": "Aldo", "clase": "guerrero", "nivel": 7, "vida": 120, "arma": "espada corta", "activo": true },
+  { "_id": 2, "nombre": "Brisa", "clase": "mago", "nivel": 12, "vida": 70, "arma": "varita", "activo": true },
+  { "_id": 3, "nombre": "Ciro", "clase": "arquero", "nivel": 5, "vida": 90, "arma": "arco largo", "activo": false },
+  { "_id": 4, "nombre": "Dalia", "clase": "guerrero", "nivel": 3, "vida": 100, "arma": "hacha", "activo": true },
+  { "_id": 5, "nombre": "Ema", "clase": "mago", "nivel": 8, "vida": 80, "arma": "cetro", "activo": true },
+  { "_id": 6, "nombre": "Fausto", "clase": "sanador", "nivel": 10, "vida": 60, "arma": "báculo", "activo": true },
+  { "_id": 7, "nombre": "Gala", "clase": "guerrero", "nivel": 14, "vida": 150, "arma": "espada larga", "activo": false },
+  { "_id": 8, "nombre": "Hector", "clase": "arquero", "nivel": 2, "vida": 50, "arma": "daga", "activo": true }
+]</code></pre>
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copiar</button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-terminal"></i> 5. Comandos básicos</h2>
+                    <p>Referencia rápida de comandos <span class="term"
+                            data-tippy-content="Create, Read, Update, Delete">CRUD</span>.</p>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Operación</th>
+                                    <th>Comando (mongosh)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Insertar</td>
+                                    <td><code class="language-javascript">db.heroes.insertMany([...])</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Buscar (Read)</td>
+                                    <td><code class="language-javascript">db.heroes.find().pretty()</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Filtro</td>
+                                    <td><code class="language-javascript">db.heroes.find({clase: 'guerrero'})</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Actualizar (Update)</td>
+                                    <td><code
+                                            class="language-javascript">db.heroes.updateOne({nombre:'Dalia'}, {$set:{nivel:4}})</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Eliminar (Delete)</td>
+                                    <td><code class="language-javascript">db.heroes.deleteOne({nombre:'Ciro'})</code>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-tasks"></i> 6. Ejercicios Interactivos</h2>
+                    <p>Marca las casillas a medida que completes los ejercicios. ¡Asegúrate de documentar cada uno!</p>
+                    <div id="checklist">
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>Filtro:</strong> Buscar guerreros con nivel &lt; 10.</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>Proyección:</strong> Mostrar solo nombre y nivel de los magos.</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>Sort/Limit:</strong> Top 3 personajes por nivel.</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>Insert:</strong> Agregar 2 documentos nuevos.</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>UpdateOne:</strong> Subir nivel de un héroe (+1).</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>UpdateMany:</strong> Subir nivel de todos los magos (+1).</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>DeleteOne:</strong> Eliminar un documento por nombre.</span>
+                        </label>
+                        <label class="checklist-item">
+                            <input type="checkbox">
+                            <span><strong>Count:</strong> Contar total de guerreros.</span>
+                        </label>
+                    </div>
+                </section>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-video"></i> 8. Guion para Defensa</h2>
+                    <p>Estructura temporal sugerida para tu video de 10 minutos:</p>
+                    <div class="diagram-container zoomable" title="Haz clic para ampliar">
+                        <div class="mermaid">
+                            gantt
+                            title Cronograma del Video
+                            dateFormat mm:ss
+                            axisFormat %M:%S
+                            section Intro
+                            Presentación : 00:00, 30s
+                            section Desarrollo
+                            Problema y Modelo : 00:30, 90s
+                            Demo Atlas : 02:00, 3m 30s
+                            section Ejercicios
+                            CRUD y Consultas : 05:30, 2m 30s
+                            section Cierre
+                            Conclusiones : 08:00, 2m
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-clipboard-check"></i> 9. Checklist de Entrega</h2>
+                    <ul class="fa-ul">
+                        <li><span class="fa-li"><i class="fas fa-file-video"></i></span>Video ≤ 10 minutos (mp4/mov).
+                        </li>
+                        <li><span class="fa-li"><i class="fas fa-desktop"></i></span>Mostrar consola/Atlas claramente.
+                        </li>
+                        <li><span class="fa-li"><i class="fas fa-microphone"></i></span>Audio claro (sin ruido de
+                            fondo).</li>
+                        <li><span class="fa-li"><i class="fas fa-file-archive"></i></span>ZIP con:
+                            <code>datos.json</code>, <code>consultas.txt</code>, <code>README.md</code>.
+                        </li>
+                    </ul>
+                </section>
+
+            </main>
+
+            <aside>
+                <div class="card">
+                    <h3><i class="fas fa-bolt"></i> Resumen rápido</h3>
+                    <p><strong>Tu misión de hoy:</strong></p>
+                    <ol class="fa-ul" style="margin-left: 0; padding-left: 0;">
+                        <li><span class="fa-li"><i class="fas fa-database text-primary"></i></span>Crear BD
+                            <code>bd_proyecto</code> y colección.
+                        </li>
+                        <li><span class="fa-li"><i class="fas fa-file-import text-primary"></i></span>Insertar datos de
+                            prueba (json).</li>
+                        <li><span class="fa-li"><i class="fas fa-code text-primary"></i></span>Ejecutar consultas CRUD
+                            (ver checklist).</li>
+                        <li><span class="fa-li"><i class="fas fa-video text-primary"></i></span>Grabar defensa (max 10
+                            min).</li>
+                    </ol>
+                    <hr style="border: 0; border-top: 1px solid var(--border); margin: 1rem 0;">
+                    <button class="btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                        <i class="fas fa-arrow-up"></i> Volver al inicio
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-chalkboard-teacher"></i> Notas para el Docente</h3>
+                    <div class="note" style="margin-top:0; border:none; background:none; padding:0;">
+                        <p><strong><i class="fas fa-star text-warning"></i> Claves del éxito hoy:</strong></p>
+                        <ul class="fa-ul" style="font-size: 0.9em; margin-bottom: 1rem;">
+                            <li><span class="fa-li"><i class="fas fa-check"></i></span><strong>Foco en el
+                                    proceso:</strong> Valora más que logren conectar y ejecutar comandos que la
+                                complejidad del modelo.</li>
+                            <li><span class="fa-li"><i class="fas fa-check"></i></span><strong>Errores comunes:</strong>
+                                <ul style="padding-left: 1rem; margin-top: 0.5rem;">
+                                    <li>Olvidar <code>use bd_proyecto</code> antes de insertar.</li>
+                                    <li>Confundir objetos <code>{}</code> con arrays <code>[]</code>.</li>
+                                    <li>Intentar usar SQL mentalmente (JOINs) en lugar de documentos embebidos.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p><strong><i class="fas fa-universal-access"></i> Tip DUA:</strong></p>
+                        <p style="font-size: 0.9em;">Permite que los estudiantes entreguen el video grabado en partes o
+                            con voz en off si les reduce la ansiedad. Lo importante es la evidencia de aprendizaje.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <footer>
+            <small>Exito muchachos.</small>
+        </footer>
+    </div>
+
+    <!-- Zoom Modal -->
+    <div id="zoomModal" class="zoom-modal" onclick="closeZoomModal()">
+        <span class="zoom-modal-close">&times;</span>
+        <div class="zoom-modal-content" id="zoomModalContent"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    </script>
+
+    <script>
+        // Zoom Modal Logic
+        const modal = document.getElementById("zoomModal");
+        const modalContent = document.getElementById("zoomModalContent");
+
+        document.querySelectorAll('.diagram-container.zoomable').forEach(container => {
+            container.addEventListener('click', () => {
+                const svg = container.querySelector('svg');
+                if (svg) {
+                    modalContent.innerHTML = '';
+                    const clone = svg.cloneNode(true);
+                    clone.style.width = '100%';
+                    clone.style.height = 'auto';
+                    clone.style.maxWidth = '100%';
+                    modalContent.appendChild(clone);
+                    modal.style.display = "flex";
+                }
+            });
+        });
+
+        function closeZoomModal() {
+            modal.style.display = "none";
+        }
+
+        // Tooltips Initialization
+        tippy('[data-tippy-content]', {
+            animation: 'scale',
+            theme: 'light',
+        });
+
+        // Copy to Clipboard
+        function copyToClipboard(button) {
+            const pre = button.previousElementSibling;
+            const code = pre.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerText;
+                button.innerText = '¡Copiado!';
+                button.style.background = 'var(--success)';
+                setTimeout(() => {
+                    button.innerText = originalText;
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+        window.copyToClipboard = copyToClipboard; // Make global
+
+        // Checklist Logic
+        document.querySelectorAll('.checklist-item input').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const item = this.closest('.checklist-item');
+                if (this.checked) {
+                    item.classList.add('completed');
+                } else {
+                    item.classList.remove('completed');
+                }
+            });
+        });
+
+        // Text to Speech (Simple Implementation)
+        const ttsBtn = document.getElementById('btn-tts');
+        let speaking = false;
+
+        ttsBtn.addEventListener('click', () => {
+            if (speaking) {
+                window.speechSynthesis.cancel();
+                speaking = false;
+                ttsBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                return;
+            }
+
+            const text = document.querySelector('main').innerText;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.1;
+
+            utterance.onend = () => {
+                speaking = false;
+                ttsBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            };
+
+            window.speechSynthesis.speak(utterance);
+            speaking = true;
+            ttsBtn.innerHTML = '<i class="fas fa-stop"></i>';
+        });
+    </script>
+</body>
+
+</html>
